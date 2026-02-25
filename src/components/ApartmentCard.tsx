@@ -1,26 +1,38 @@
+'use client';
+
 import { Apartment } from '@/types';
 
 interface ApartmentCardProps {
   apartment: Apartment & { articleCount?: number };
 }
 
-function getNaverUrl(apartment: Apartment & { articleCount?: number }): string {
-  if (apartment.naverComplexId) {
-    return `https://new.land.naver.com/complexes/${apartment.naverComplexId}?markerId=${apartment.naverComplexId}&a=APT&e=RETAIL`;
-  }
-  return `https://new.land.naver.com/search?query=${encodeURIComponent(apartment.name)}`;
-}
-
 export default function ApartmentCard({ apartment }: ApartmentCardProps) {
   const price = apartment.currentPrice ?? apartment.basePrice;
   const change = apartment.priceChange;
-  const naverUrl = getNaverUrl(apartment);
+
+  const desktopUrl = apartment.naverComplexId
+    ? `https://new.land.naver.com/complexes/${apartment.naverComplexId}?markerId=${apartment.naverComplexId}&a=APT&e=RETAIL`
+    : `https://new.land.naver.com/search?query=${encodeURIComponent(apartment.name)}`;
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!apartment.naverComplexId) return;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      e.preventDefault();
+      window.open(
+        `https://m.land.naver.com/complex/article/${apartment.naverComplexId}?a=APT&e=RETAIL`,
+        '_blank',
+        'noopener,noreferrer'
+      );
+    }
+  };
 
   return (
     <a
-      href={naverUrl}
+      href={desktopUrl}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={handleClick}
       className="group flex items-center justify-between px-2.5 py-2 rounded-md hover:bg-[#f7f7f5] transition-colors cursor-pointer no-underline"
     >
       <div className="flex items-center gap-2 min-w-0">
