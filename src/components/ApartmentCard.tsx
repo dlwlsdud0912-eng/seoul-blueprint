@@ -4,12 +4,25 @@ interface ApartmentCardProps {
   apartment: Apartment & { articleCount?: number };
 }
 
+function getNaverUrl(apartment: Apartment & { articleCount?: number }): string {
+  if (apartment.naverComplexId) {
+    return `https://new.land.naver.com/complexes/${apartment.naverComplexId}`;
+  }
+  return `https://new.land.naver.com/search?query=${encodeURIComponent(apartment.name)}`;
+}
+
 export default function ApartmentCard({ apartment }: ApartmentCardProps) {
   const price = apartment.currentPrice ?? apartment.basePrice;
   const change = apartment.priceChange;
+  const naverUrl = getNaverUrl(apartment);
 
   return (
-    <div className="group flex items-center justify-between px-2.5 py-2 rounded-md hover:bg-[#f7f7f5] transition-colors cursor-pointer">
+    <a
+      href={naverUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group flex items-center justify-between px-2.5 py-2 rounded-md hover:bg-[#f7f7f5] transition-colors cursor-pointer no-underline"
+    >
       <div className="flex items-center gap-2 min-w-0">
         <span className="text-[13px] text-[#37352f] truncate">{apartment.name}</span>
         <span className="shrink-0 text-[11px] text-[#b4b4b0] bg-[#f1f1ef] px-1.5 py-0.5 rounded">
@@ -17,17 +30,9 @@ export default function ApartmentCard({ apartment }: ApartmentCardProps) {
         </span>
       </div>
       <div className="flex items-center gap-1.5 shrink-0 ml-2">
-        {apartment.naverComplexId && (
-          <a
-            href={`https://new.land.naver.com/complexes/${apartment.naverComplexId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[10px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100"
-            title="네이버 부동산"
-          >
-            N
-          </a>
-        )}
+        <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[10px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100" title="네이버 부동산">
+          N
+        </span>
         {apartment.articleCount !== undefined && apartment.articleCount > 0 && (
           <span className="text-[10px] text-[#b4b4b0]">
             {apartment.articleCount}건
@@ -50,6 +55,6 @@ export default function ApartmentCard({ apartment }: ApartmentCardProps) {
           </span>
         )}
       </div>
-    </div>
+    </a>
   );
 }

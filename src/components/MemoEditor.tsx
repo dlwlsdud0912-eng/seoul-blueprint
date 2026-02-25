@@ -88,65 +88,73 @@ export default function MemoEditor({
   // Editing mode
   if (isEditing) {
     return (
-      <div className="ml-2 mt-0.5">
-        <textarea
-          ref={textareaRef}
-          value={draft}
-          onChange={(e) => {
-            setDraft(e.target.value);
-            autoResize();
-          }}
-          onKeyDown={handleKeyDown}
-          onBlur={handleSave}
-          placeholder="메모를 입력하세요..."
-          rows={1}
-          className="w-full resize-none border-none bg-transparent text-[12px] text-[#37352f] leading-relaxed outline-none ring-1 ring-[#a8d4f5] rounded px-1.5 py-1 placeholder:text-[#b4b4b0] placeholder:text-[11px]"
-        />
-        <div className="flex items-center gap-2 mt-0.5 text-[10px] text-[#b4b4b0]">
-          <span>Enter 저장</span>
-          <span>·</span>
-          <span>Esc 취소</span>
-          <span>·</span>
-          <span>Shift+Enter 줄바꿈</span>
+      <div className="mt-1.5">
+        <div className="bg-[#fbf3db] border border-[#f1e5bc] rounded-md px-2.5 py-2">
+          <div className="flex gap-2">
+            <span className="shrink-0 text-[11px]">✏️</span>
+            <textarea
+              ref={textareaRef}
+              value={draft}
+              onChange={(e) => {
+                setDraft(e.target.value);
+                autoResize();
+              }}
+              onKeyDown={handleKeyDown}
+              onBlur={handleSave}
+              placeholder="메모를 입력하세요..."
+              rows={1}
+              className="w-full resize-none border-none bg-transparent text-[11px] text-[#8b6914] leading-relaxed outline-none placeholder:text-[#c4a03a]"
+            />
+          </div>
+          <div className="flex items-center gap-2 mt-1 ml-6 text-[10px] text-[#c4a03a]">
+            <span>Enter 저장</span>
+            <span>·</span>
+            <span>Esc 취소</span>
+            <span>·</span>
+            <span>Shift+Enter 줄바꿈</span>
+          </div>
         </div>
       </div>
     );
   }
 
-  // Has memo - display mode
+  // Has memo - display mode (NoteCard style)
   if (initialMemo) {
     return (
       <div
-        className="ml-2 mt-0.5 group/memo flex items-start gap-1 cursor-pointer rounded px-1.5 py-0.5 hover:bg-[#f7f7f5] transition-colors"
-        onClick={() => setIsEditing(true)}
+        className="mt-1.5 group/memo cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <span className="text-[11px] text-[#787774] italic leading-relaxed whitespace-pre-wrap flex-1 min-w-0">
-          {initialMemo}
-        </span>
-        {isHovered && (
-          <button
-            onClick={handleDelete}
-            className="shrink-0 mt-0.5 text-[#b4b4b0] hover:text-[#eb5757] transition-colors"
-            title="메모 삭제"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+        <div
+          className="flex gap-2 bg-[#fbf3db] border border-[#f1e5bc] rounded-md px-2.5 py-2 text-[11px] text-[#8b6914] leading-relaxed transition-shadow hover:shadow-sm"
+          onClick={() => setIsEditing(true)}
+        >
+          <span className="shrink-0">✏️</span>
+          <span className="whitespace-pre-line flex-1 min-w-0">{initialMemo}</span>
+          {isHovered && (
+            <button
+              onClick={handleDelete}
+              className="shrink-0 self-start text-[#c4a03a] hover:text-[#eb5757] transition-colors"
+              title="메모 삭제"
             >
-              <path
-                d="M3 3L9 9M9 3L3 9"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
-        )}
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M3 3L9 9M9 3L3 9"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
     );
   }
@@ -154,33 +162,20 @@ export default function MemoEditor({
   // No memo - show placeholder on hover
   return (
     <div
-      className="ml-2 mt-0.5"
+      className="mt-1"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {isHovered ? (
         <button
           onClick={() => setIsEditing(true)}
-          className="flex items-center gap-1 text-[11px] text-[#b4b4b0] hover:text-[#787774] transition-colors px-1.5 py-0.5 rounded hover:bg-[#f7f7f5]"
+          className="flex items-center gap-1.5 text-[11px] text-[#c4a03a] hover:text-[#8b6914] transition-colors px-2.5 py-1.5 rounded-md border border-dashed border-[#f1e5bc] hover:bg-[#fbf3db]/50 w-full"
         >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 2.5V9.5M2.5 6H9.5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <span>✏️</span>
           <span>메모 추가...</span>
         </button>
       ) : (
-        <div className="h-[20px]" />
+        <div className="h-[8px]" />
       )}
     </div>
   );
