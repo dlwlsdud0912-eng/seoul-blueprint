@@ -11,6 +11,7 @@ export function getMemos(): Record<string, string> {
 }
 
 export function saveMemo(apartmentId: string, content: string) {
+  if (typeof window === 'undefined') return;
   const memos = getMemos();
   if (content.trim()) {
     memos[apartmentId] = content.trim();
@@ -21,6 +22,7 @@ export function saveMemo(apartmentId: string, content: string) {
 }
 
 export function deleteMemo(apartmentId: string) {
+  if (typeof window === 'undefined') return;
   const memos = getMemos();
   delete memos[apartmentId];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(memos));

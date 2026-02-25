@@ -6,7 +6,7 @@ interface ApartmentCardProps {
 
 function getNaverUrl(apartment: Apartment & { articleCount?: number }): string {
   if (apartment.naverComplexId) {
-    return `https://new.land.naver.com/complexes/${apartment.naverComplexId}`;
+    return `https://new.land.naver.com/complexes/${apartment.naverComplexId}?markerId=${apartment.naverComplexId}&a=APT&e=RETAIL`;
   }
   return `https://new.land.naver.com/search?query=${encodeURIComponent(apartment.name)}`;
 }

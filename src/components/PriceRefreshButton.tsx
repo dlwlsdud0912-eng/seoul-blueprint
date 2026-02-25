@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Apartment, PriceMap } from '@/types';
 
 interface PriceRefreshButtonProps {
@@ -14,10 +14,24 @@ export default function PriceRefreshButton({
 }: PriceRefreshButtonProps) {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
+  const [error, setError] = useState<string | null>(null);
+  const [resultSummary, setResultSummary] = useState<string | null>(null);
+
+  // 결과 요약 3초 후 자동 리셋
+  useEffect(() => {
+    if (!resultSummary) return;
+    const timer = setTimeout(() => {
+      setResultSummary(null);
+      setError(null);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [resultSummary]);
 
   const handleRefresh = async () => {
     if (loading) return;
     setLoading(true);
+    setError(null);
+    setResultSummary(null);
 
     const total = apartments.length;
     setProgress({ done: 0, total });
@@ -25,6 +39,8 @@ export default function PriceRefreshButton({
     // 10개씩 배치로 나눠서 요청 (한 번에 너무 많으면 타임아웃)
     const BATCH_SIZE = 10;
     const allPrices: PriceMap = {};
+    let successCount = 0;
+    let failCount = 0;
 
     for (let i = 0; i < apartments.length; i += BATCH_SIZE) {
       const batch = apartments.slice(i, i + BATCH_SIZE);
@@ -51,11 +67,17 @@ export default function PriceRefreshButton({
                 articleCount: result.articleCount,
                 areaName: result.areaName,
               };
+              successCount++;
+            } else {
+              failCount++;
             }
           }
+        } else {
+          failCount += batch.length;
         }
       } catch {
         // 배치 실패해도 다음 배치 계속 진행
+        failCount += batch.length;
       }
 
       setProgress({ done: Math.min(i + BATCH_SIZE, total), total });
@@ -63,6 +85,14 @@ export default function PriceRefreshButton({
 
     onPriceUpdate(allPrices);
     setLoading(false);
+
+    // 결과 요약 표시
+    if (failCount > 0) {
+      setError(`${failCount}건 실패`);
+      setResultSummary(`${successCount}/${total} 성공`);
+    } else {
+      setResultSummary(`${successCount}건 완료`);
+    }
   };
 
   return (
@@ -72,7 +102,11 @@ export default function PriceRefreshButton({
       className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors ${
         loading
           ? 'text-[#b4b4b0] bg-[#f1f1ef] cursor-not-allowed'
-          : 'text-[#2383e2] hover:bg-[#2383e2]/10 cursor-pointer'
+          : error
+            ? 'text-[#eb5757] hover:bg-[#eb5757]/10 cursor-pointer'
+            : resultSummary
+              ? 'text-[#0f7b6c] hover:bg-[#0f7b6c]/10 cursor-pointer'
+              : 'text-[#2383e2] hover:bg-[#2383e2]/10 cursor-pointer'
       }`}
     >
       {loading ? (
@@ -99,6 +133,19 @@ export default function PriceRefreshButton({
           <span>
             {progress.done}/{progress.total}
           </span>
+        </>
+      ) : resultSummary ? (
+        <>
+          {error ? (
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          ) : (
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+          <span>{resultSummary}</span>
         </>
       ) : (
         <>

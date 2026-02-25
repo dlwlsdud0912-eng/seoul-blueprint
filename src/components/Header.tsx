@@ -1,4 +1,10 @@
-export default function Header() {
+'use client';
+
+interface HeaderProps {
+  lastUpdated?: string | null;
+}
+
+export default function Header({ lastUpdated }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#e8e5e0]">
       <div className="mx-auto max-w-7xl px-6 py-3">
@@ -17,7 +23,7 @@ export default function Header() {
           </div>
           <div className="text-[11px] text-[#b4b4b0] flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-[#0f7b6c] rounded-full" />
-            마지막 갱신: 2026.02.25 09:00
+            {lastUpdated ? `마지막 갱신: ${lastUpdated}` : '갱신 전'}
           </div>
         </div>
       </div>

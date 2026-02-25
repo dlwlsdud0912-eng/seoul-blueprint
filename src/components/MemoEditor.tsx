@@ -19,6 +19,7 @@ export default function MemoEditor({
   const [draft, setDraft] = useState(initialMemo ?? '');
   const [isHovered, setIsHovered] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isDeleting = useRef(false);
 
   // Sync when initialMemo changes externally
   useEffect(() => {
@@ -78,6 +79,7 @@ export default function MemoEditor({
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
+      isDeleting.current = true;
       onDelete(apartmentId);
       setDraft('');
       setIsEditing(false);
@@ -100,7 +102,13 @@ export default function MemoEditor({
                 autoResize();
               }}
               onKeyDown={handleKeyDown}
-              onBlur={handleSave}
+              onBlur={() => {
+                if (isDeleting.current) {
+                  isDeleting.current = false;
+                  return;
+                }
+                handleSave();
+              }}
               placeholder="메모를 입력하세요..."
               rows={1}
               className="w-full resize-none border-none bg-transparent text-[11px] text-[#8b6914] leading-relaxed outline-none placeholder:text-[#c4a03a]"

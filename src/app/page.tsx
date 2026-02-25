@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { TierKey, PriceMap, MemoMap } from '@/types';
 import { getMemos, saveMemo, deleteMemo } from '@/lib/memo-storage';
+import { savePriceCache, loadPriceCache } from '@/lib/price-cache';
 import { APARTMENTS } from '@/data/apartments';
 import { NOTES } from '@/data/notes';
 import Header from '@/components/Header';
@@ -15,10 +16,20 @@ export default function Home() {
   const [activeTier, setActiveTier] = useState<TierKey>('12');
   const [prices, setPrices] = useState<PriceMap>({});
   const [memos, setMemos] = useState<MemoMap>({});
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
-  // Load memos from localStorage on mount
+  // Load memos and cached prices on mount
   useEffect(() => {
     setMemos(getMemos());
+    // 캐시된 가격 로드
+    const cached = loadPriceCache();
+    if (cached) {
+      setPrices(cached.prices);
+      setLastUpdated(new Date(cached.updatedAt).toLocaleString('ko-KR', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      }));
+    }
   }, []);
 
   const handleSaveMemo = useCallback((apartmentId: string, content: string) => {
@@ -52,12 +63,20 @@ export default function Home() {
   );
 
   const handlePriceUpdate = (newPrices: PriceMap) => {
-    setPrices((prev) => ({ ...prev, ...newPrices }));
+    setPrices((prev) => {
+      const merged = { ...prev, ...newPrices };
+      savePriceCache(merged);
+      return merged;
+    });
+    setLastUpdated(new Date().toLocaleString('ko-KR', {
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    }));
   };
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      <Header lastUpdated={lastUpdated} />
       <main className="mx-auto max-w-6xl px-6 py-6">
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
