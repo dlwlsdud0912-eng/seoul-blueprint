@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-02-25T07:51:19.180Z",
-  "updatedAtKR": "2026. 02. 25. 16:51",
+  "updatedAt": "2026-02-25T15:14:51.600Z",
+  "updatedAtKR": "2026. 02. 26. 00:14",
   "totalCount": 276,
-  "successCount": 272,
-  "failCount": 4,
+  "successCount": 275,
+  "failCount": 1,
   "prices": {
     "seongbuk-jangwi-ipk": {
       "price": 12,
@@ -12,7 +12,7 @@
     },
     "seongbuk-raemian-jangwi": {
       "price": 12.5,
-      "articleCount": 8,
+      "articleCount": 7,
       "areaName": "59㎡"
     },
     "seongbuk-raemian-areum": {
@@ -22,7 +22,7 @@
     },
     "seongbuk-gileum2-prugio": {
       "price": 11,
-      "articleCount": 7,
+      "articleCount": 9,
       "areaName": "114㎡"
     },
     "seongbuk-gileum-raemian8-back": {
@@ -42,7 +42,7 @@
     },
     "dongdaemun-jeonnong-sk": {
       "price": 12.5,
-      "articleCount": 18,
+      "articleCount": 19,
       "areaName": "114㎡"
     },
     "dongdaemun-imun-raemian2": {
@@ -67,7 +67,7 @@
     },
     "dongdaemun-jeonnong-donga": {
       "price": 9.9,
-      "articleCount": 2,
+      "articleCount": 3,
       "areaName": "57㎡"
     },
     "gangseo-gayang2": {
@@ -167,17 +167,17 @@
     },
     "gwanak-hyundai": {
       "price": 11.1,
-      "articleCount": 1,
+      "articleCount": 2,
       "areaName": "68㎡"
     },
     "gwanak-woosung": {
       "price": 10,
-      "articleCount": 1,
+      "articleCount": 3,
       "areaName": "59㎡"
     },
     "gwanak-prugio": {
       "price": 11,
-      "articleCount": 11,
+      "articleCount": 10,
       "areaName": "59㎡"
     },
     "gwanak-boramae-samsung": {
@@ -197,7 +197,7 @@
     },
     "yongsan-hangangtown": {
       "price": 13.5,
-      "articleCount": 9,
+      "articleCount": 11,
       "areaName": "84㎡"
     },
     "seongdong-seongsu-woobang2": {
@@ -211,9 +211,9 @@
       "areaName": "84㎡"
     },
     "yeongdeungpo-prugio": {
-      "price": 15,
-      "articleCount": 1,
-      "areaName": "59㎡"
+      "price": 15.9,
+      "articleCount": 10,
+      "areaName": "73㎡"
     },
     "seongbuk-gileum-raemian8-front": {
       "price": 13,
@@ -222,7 +222,7 @@
     },
     "seongbuk-gileum-centerpiece": {
       "price": 14.8,
-      "articleCount": 8,
+      "articleCount": 6,
       "areaName": "59㎡"
     },
     "seongbuk-gileum-raemian1": {
@@ -254,6 +254,11 @@
       "price": 12.7,
       "articleCount": 15,
       "areaName": "52㎡"
+    },
+    "mapo-coolong": {
+      "price": 2.8,
+      "articleCount": 16,
+      "areaName": "84㎡"
     },
     "mapo-singongdeok-samsung2": {
       "price": 18,
@@ -302,7 +307,7 @@
     },
     "gangdong-seonsa-hyundai": {
       "price": 15,
-      "articleCount": 5,
+      "articleCount": 3,
       "areaName": "58㎡"
     },
     "dongdaemun-dapsimni-parkzai-59": {
@@ -312,7 +317,7 @@
     },
     "dongdaemun-raemian-weave": {
       "price": 15.4,
-      "articleCount": 12,
+      "articleCount": 11,
       "areaName": "59㎡"
     },
     "dongdaemun-dapsimni-parkzai": {
@@ -322,22 +327,22 @@
     },
     "dongdaemun-raemian-crecity": {
       "price": 15.3,
-      "articleCount": 4,
+      "articleCount": 3,
       "areaName": "59㎡"
     },
     "dongdaemun-hwegyeong-zai": {
       "price": 9,
-      "articleCount": 6,
+      "articleCount": 7,
       "areaName": "39㎡"
     },
     "dongdaemun-imun-ipk-zai": {
-      "price": 16,
+      "price": 15.5,
       "articleCount": 1,
       "areaName": "59㎡"
     },
     "seongbuk-gileum-lotte-clasia": {
       "price": 15.3,
-      "articleCount": 10,
+      "articleCount": 11,
       "areaName": "59㎡"
     },
     "mapo-dangsan-jinro": {
@@ -347,7 +352,7 @@
     },
     "mapo-sangam-worldcup4": {
       "price": 16,
-      "articleCount": 6,
+      "articleCount": 5,
       "areaName": "84㎡"
     },
     "dongjak-sangdo-prugio": {
@@ -377,7 +382,7 @@
     },
     "yeongdeungpo-dangsan-samsung2": {
       "price": 13,
-      "articleCount": 2,
+      "articleCount": 1,
       "areaName": "59㎡"
     },
     "yeongdeungpo-art-zai": {
@@ -392,17 +397,17 @@
     },
     "dongdaemun-cheongnyangni-l65": {
       "price": 18.8,
-      "articleCount": 12,
+      "articleCount": 13,
       "areaName": "84㎡"
     },
     "seongdong-wangsimni-zai": {
       "price": 17.5,
-      "articleCount": 6,
+      "articleCount": 5,
       "areaName": "59㎡"
     },
     "gangseo-epyeon-yeomchang": {
       "price": 17.8,
-      "articleCount": 7,
+      "articleCount": 8,
       "areaName": "84㎡"
     },
     "gangseo-magok14": {
@@ -422,7 +427,7 @@
     },
     "yeongdeungpo-munrae-zai": {
       "price": 18.5,
-      "articleCount": 17,
+      "articleCount": 18,
       "areaName": "84㎡"
     },
     "yeongdeungpo-prior-palace": {
@@ -441,8 +446,8 @@
       "areaName": "59㎡"
     },
     "gangdong-raemian-solvenu": {
-      "price": 17.5,
-      "articleCount": 2,
+      "price": 19,
+      "articleCount": 1,
       "areaName": "59㎡"
     },
     "gangdong-godeok-raemian-hs": {
@@ -452,12 +457,12 @@
     },
     "gwanak-hillstate-centciel": {
       "price": 15.9,
-      "articleCount": 9,
+      "articleCount": 10,
       "areaName": "84㎡"
     },
     "mapo-sangam-worldcup4-20": {
       "price": 16,
-      "articleCount": 6,
+      "articleCount": 5,
       "areaName": "84㎡"
     },
     "mapo-sungsan-siyoung": {
@@ -491,18 +496,18 @@
       "areaName": "114㎡"
     },
     "dongjak-hillstate-sangdo-pres": {
-      "price": 18,
-      "articleCount": 1,
+      "price": 17.8,
+      "articleCount": 2,
       "areaName": "84㎡"
     },
     "songpa-garak-kumho": {
       "price": 18.5,
-      "articleCount": 5,
+      "articleCount": 6,
       "areaName": "59㎡"
     },
     "songpa-signature-lotte": {
       "price": 18,
-      "articleCount": 3,
+      "articleCount": 4,
       "areaName": "59㎡"
     },
     "seongdong-seoulforest-hs": {
@@ -521,7 +526,7 @@
       "areaName": "59㎡"
     },
     "seongdong-singumho-parkzai": {
-      "price": 21,
+      "price": 20.5,
       "articleCount": 1,
       "areaName": "59㎡"
     },
@@ -537,7 +542,7 @@
     },
     "gangseo-magok7": {
       "price": 22,
-      "articleCount": 4,
+      "articleCount": 3,
       "areaName": "84㎡"
     },
     "yeongdeungpo-dangsan-central-ipk": {
@@ -567,7 +572,7 @@
     },
     "yongsan-ichon-daelim": {
       "price": 28,
-      "articleCount": 7,
+      "articleCount": 6,
       "areaName": "84㎡"
     },
     "yongsan-sanho": {
@@ -577,17 +582,17 @@
     },
     "mapo-raemian-bamsem2": {
       "price": 20.5,
-      "articleCount": 5,
+      "articleCount": 4,
       "areaName": "84㎡"
     },
     "mapo-grand-zai": {
       "price": 27,
-      "articleCount": 20,
+      "articleCount": 19,
       "areaName": "84㎡"
     },
     "mapo-raemian-prugio": {
-      "price": 23,
-      "articleCount": 2,
+      "price": 24,
+      "articleCount": 1,
       "areaName": "59㎡"
     },
     "mapo-prestige-zai": {
@@ -597,7 +602,7 @@
     },
     "dongjak-epyeon-sangdo": {
       "price": 23.5,
-      "articleCount": 14,
+      "articleCount": 15,
       "areaName": "84㎡"
     },
     "dongjak-raemian-roipark": {
@@ -617,7 +622,7 @@
     },
     "songpa-raemian-estium": {
       "price": 19.5,
-      "articleCount": 9,
+      "articleCount": 8,
       "areaName": "84㎡"
     },
     "songpa-raemian-parkpalace": {
@@ -637,17 +642,17 @@
     },
     "songpa-arteon": {
       "price": 19.5,
-      "articleCount": 1,
+      "articleCount": 2,
       "areaName": "59㎡"
     },
     "songpa-centras": {
       "price": 20,
-      "articleCount": 5,
+      "articleCount": 8,
       "areaName": "59㎡"
     },
     "songpa-hanyang1": {
       "price": 26.8,
-      "articleCount": 7,
+      "articleCount": 8,
       "areaName": "137㎡"
     },
     "seodaemun-dmc-hanyang": {
@@ -691,13 +696,13 @@
       "areaName": "59㎡"
     },
     "guro-sindorim-lotte": {
-      "price": 9.8,
-      "articleCount": 4,
+      "price": 10,
+      "articleCount": 3,
       "areaName": "59㎡"
     },
     "guro-gaebong-hyundai1": {
       "price": 9,
-      "articleCount": 15,
+      "articleCount": 8,
       "areaName": "84㎡"
     },
     "guro-gaebong-prugio": {
@@ -707,12 +712,12 @@
     },
     "guro-gaebong-hanmaeul": {
       "price": 9.3,
-      "articleCount": 4,
+      "articleCount": 5,
       "areaName": "84㎡"
     },
     "eunpyeong-bulgwang-misung": {
-      "price": 8.3,
-      "articleCount": 12,
+      "price": 7.35,
+      "articleCount": 14,
       "areaName": "66㎡"
     },
     "eunpyeong-bulgwang-lotte": {
@@ -727,7 +732,7 @@
     },
     "eunpyeong-nokbeon-daelim": {
       "price": 7.6,
-      "articleCount": 5,
+      "articleCount": 6,
       "areaName": "84㎡"
     },
     "eunpyeong-hongeun-byuksan": {
@@ -751,9 +756,9 @@
       "areaName": "84㎡"
     },
     "eunpyeong-susaek-epyeon": {
-      "price": 7.8,
-      "articleCount": 13,
-      "areaName": "84㎡"
+      "price": 7.6,
+      "articleCount": 1,
+      "areaName": "59㎡"
     },
     "eunpyeong-dmc-lotte": {
       "price": 6.5,
@@ -772,12 +777,12 @@
     },
     "mapo-sangam-worldcup12": {
       "price": 11.9,
-      "articleCount": 14,
+      "articleCount": 15,
       "areaName": "114㎡"
     },
     "nowon-mimisam": {
       "price": 7.3,
-      "articleCount": 19,
+      "articleCount": 20,
       "areaName": "33㎡"
     },
     "nowon-wolgye-central-ipk": {
@@ -811,9 +816,9 @@
       "areaName": "37㎡"
     },
     "gangseo-hwagok-prugio": {
-      "price": 11.7,
+      "price": 11.5,
       "articleCount": 19,
-      "areaName": "104㎡"
+      "areaName": "84㎡"
     },
     "yangcheon-mokdong-lotte-maestro": {
       "price": 12.7,
@@ -832,17 +837,17 @@
     },
     "guro-sindorim-taeyoung": {
       "price": 13,
-      "articleCount": 4,
+      "articleCount": 3,
       "areaName": "84㎡"
     },
     "guro-sindorim-daelim": {
-      "price": 14.5,
-      "articleCount": 6,
+      "price": 14.8,
+      "articleCount": 4,
       "areaName": "84㎡"
     },
     "guro-sindorim-donga": {
-      "price": 15.5,
-      "articleCount": 4,
+      "price": 14.5,
+      "articleCount": 5,
       "areaName": "84㎡"
     },
     "dongjak-boramae-epyeon": {
@@ -851,18 +856,18 @@
       "areaName": "84㎡"
     },
     "gangdong-godeok-central-prugio": {
-      "price": 15.4,
-      "articleCount": 19,
+      "price": 16,
+      "articleCount": 20,
       "areaName": "59㎡"
     },
     "gangdong-godeok-lotte-bene": {
       "price": 18.5,
-      "articleCount": 18,
+      "articleCount": 19,
       "areaName": "84㎡"
     },
     "yeongdeungpo-epyeon-adelfore": {
-      "price": 15.4,
-      "articleCount": 6,
+      "price": 16,
+      "articleCount": 5,
       "areaName": "84㎡"
     },
     "gangseo-yeomchang-donga3": {
@@ -907,12 +912,12 @@
     },
     "songpa-garak-woosung1": {
       "price": 14,
-      "articleCount": 13,
+      "articleCount": 14,
       "areaName": "43㎡"
     },
     "dongdaemun-cheongnyangni-hanyang": {
       "price": 16.7,
-      "articleCount": 10,
+      "articleCount": 11,
       "areaName": "84㎡"
     },
     "dongdaemun-lotte-noblesse": {
@@ -927,7 +932,7 @@
     },
     "dongdaemun-epyeon-cheonggye": {
       "price": 16.7,
-      "articleCount": 7,
+      "articleCount": 8,
       "areaName": "59㎡"
     },
     "dongdaemun-raemian-artrich": {
@@ -956,8 +961,8 @@
       "areaName": "59㎡"
     },
     "seongdong-raemian-midcounty": {
-      "price": 15.4,
-      "articleCount": 1,
+      "price": 14.8,
+      "articleCount": 2,
       "areaName": "59㎡"
     },
     "seongdong-kumho-daewoo": {
@@ -966,18 +971,18 @@
       "areaName": "59㎡"
     },
     "seongdong-haengdang-hanjin": {
-      "price": 16,
-      "articleCount": 8,
+      "price": 17.2,
+      "articleCount": 7,
       "areaName": "59㎡"
     },
     "seongdong-seoulforest-hanshin": {
-      "price": 17.25,
+      "price": 17.2,
       "articleCount": 5,
       "areaName": "59㎡"
     },
     "seongdong-hyundai-prime": {
       "price": 16.5,
-      "articleCount": 11,
+      "articleCount": 8,
       "areaName": "59㎡"
     },
     "seocho-hills": {
@@ -1006,8 +1011,8 @@
       "areaName": "59㎡"
     },
     "gangnam-suseo-kkachi": {
-      "price": 20.3,
-      "articleCount": 1,
+      "price": 20.2,
+      "articleCount": 2,
       "areaName": "49㎡"
     },
     "gangnam-suseo-sindonga": {
@@ -1032,7 +1037,7 @@
     },
     "yeongdeungpo-singil-newtown": {
       "price": 16.4,
-      "articleCount": 11,
+      "articleCount": 13,
       "areaName": "84㎡"
     },
     "yeongdeungpo-munrae-hs": {
@@ -1042,7 +1047,7 @@
     },
     "yeongdeungpo-gangbyun-raemian": {
       "price": 16.1,
-      "articleCount": 18,
+      "articleCount": 17,
       "areaName": "55㎡"
     },
     "yeongdeungpo-dangsan-hyundai5": {
@@ -1086,8 +1091,8 @@
       "areaName": "134㎡"
     },
     "songpa-garak-ssangyong1": {
-      "price": 19.3,
-      "articleCount": 2,
+      "price": 20,
+      "articleCount": 1,
       "areaName": "59㎡"
     },
     "songpa-pine": {
@@ -1102,7 +1107,7 @@
     },
     "gangdong-godeok-central-ipk": {
       "price": 17.5,
-      "articleCount": 7,
+      "articleCount": 6,
       "areaName": "59㎡"
     },
     "gangdong-samik-green2": {
@@ -1112,7 +1117,7 @@
     },
     "gangdong-godeok-jugong9": {
       "price": 18.4,
-      "articleCount": 16,
+      "articleCount": 17,
       "areaName": "83㎡"
     },
     "gangdong-lotte-first": {
@@ -1137,22 +1142,22 @@
     },
     "gangdong-godeok-arteon": {
       "price": 19.5,
-      "articleCount": 1,
+      "articleCount": 2,
       "areaName": "59㎡"
     },
     "gangdong-seonsa-hyundai-31": {
       "price": 15,
-      "articleCount": 9,
+      "articleCount": 8,
       "areaName": "58㎡"
     },
     "yongsan-riverhill-samsung": {
       "price": 17.8,
-      "articleCount": 9,
+      "articleCount": 8,
       "areaName": "84㎡"
     },
     "mapo-dowon-samsung": {
       "price": 19,
-      "articleCount": 4,
+      "articleCount": 5,
       "areaName": "84㎡"
     },
     "seocho-imgwang3": {
@@ -1162,17 +1167,17 @@
     },
     "dongjak-sadang-daelim": {
       "price": 15.3,
-      "articleCount": 16,
+      "articleCount": 15,
       "areaName": "59㎡"
     },
     "songpa-parkhabio-prugio": {
-      "price": 19.3,
-      "articleCount": 13,
+      "price": 20,
+      "articleCount": 15,
       "areaName": "84㎡"
     },
     "songpa-samsung-raemian": {
       "price": 22,
-      "articleCount": 13,
+      "articleCount": 14,
       "areaName": "87㎡"
     },
     "gangdong-myungil-sindonga": {
@@ -1187,7 +1192,7 @@
     },
     "yangcheon-mokdong4": {
       "price": 20,
-      "articleCount": 12,
+      "articleCount": 13,
       "areaName": "47㎡"
     },
     "yangcheon-mokdong8": {
@@ -1220,6 +1225,11 @@
       "articleCount": 9,
       "areaName": "84㎡"
     },
+    "gangnam-purunmaeul": {
+      "price": 2.44,
+      "articleCount": 4,
+      "areaName": "59㎡"
+    },
     "gangnam-suseo-samsung": {
       "price": 26.9,
       "articleCount": 7,
@@ -1227,17 +1237,17 @@
     },
     "gangnam-raemian-blestij": {
       "price": 32,
-      "articleCount": 14,
+      "articleCount": 13,
       "areaName": "59㎡"
     },
     "gangnam-cheongdam-zai": {
-      "price": 51,
-      "articleCount": 6,
-      "areaName": "90㎡"
+      "price": 58,
+      "articleCount": 5,
+      "areaName": "89㎡"
     },
     "songpa-lake-palace": {
       "price": 27,
-      "articleCount": 3,
+      "articleCount": 1,
       "areaName": "59㎡"
     },
     "songpa-jamsil-woosung4": {
@@ -1246,7 +1256,7 @@
       "areaName": "95㎡"
     },
     "songpa-helio-city": {
-      "price": 29.7,
+      "price": 28.7,
       "articleCount": 11,
       "areaName": "84㎡"
     },
@@ -1261,8 +1271,8 @@
       "areaName": "59㎡"
     },
     "yongsan-gangchon": {
-      "price": 26,
-      "articleCount": 1,
+      "price": 25,
+      "articleCount": 2,
       "areaName": "59㎡"
     },
     "yongsan-ichon-coolong": {
@@ -1272,23 +1282,23 @@
     },
     "yongsan-hangaram": {
       "price": 24.5,
-      "articleCount": 16,
+      "articleCount": 14,
       "areaName": "59㎡"
     },
     "yongsan-hyundai-hangang": {
       "price": 27,
-      "articleCount": 6,
+      "articleCount": 7,
       "areaName": "84㎡"
     },
     "mapo-zai-2nd": {
       "price": 27.5,
-      "articleCount": 11,
+      "articleCount": 10,
       "areaName": "84㎡"
     },
     "jongno-gyeonghuigung-zai": {
-      "price": 26.5,
-      "articleCount": 13,
-      "areaName": "84㎡"
+      "price": 24.5,
+      "articleCount": 1,
+      "areaName": "59㎡"
     },
     "seongdong-epyeon-oksu": {
       "price": 24,
@@ -1306,13 +1316,13 @@
       "areaName": "59㎡"
     },
     "songpa-els": {
-      "price": 29,
-      "articleCount": 3,
+      "price": 29.3,
+      "articleCount": 2,
       "areaName": "59㎡"
     },
     "songpa-trizium": {
       "price": 27.5,
-      "articleCount": 7,
+      "articleCount": 8,
       "areaName": "59㎡"
     },
     "songpa-olympic-family": {
@@ -1327,12 +1337,12 @@
     },
     "gangnam-gaepo-raemian-forest": {
       "price": 29.5,
-      "articleCount": 8,
+      "articleCount": 6,
       "areaName": "59㎡"
     },
     "gangnam-daechi-samsung1": {
       "price": 28,
-      "articleCount": 1,
+      "articleCount": 2,
       "areaName": "59㎡"
     },
     "gangnam-yeoksam-raemian": {
@@ -1342,7 +1352,7 @@
     },
     "yongsan-hangang-daewoo": {
       "price": 28.5,
-      "articleCount": 14,
+      "articleCount": 15,
       "areaName": "84㎡"
     },
     "mapo-epyeon-riverpark": {
@@ -1355,10 +1365,15 @@
       "articleCount": 18,
       "areaName": "89㎡"
     },
-    "yeongdeungpo-yeouido-misung": {
-      "price": 29.5,
+    "gangnam-sangnoksu": {
+      "price": 2.05,
       "articleCount": 17,
-      "areaName": "91㎡"
+      "areaName": "43㎡"
+    },
+    "yeongdeungpo-yeouido-misung": {
+      "price": 32.5,
+      "articleCount": 16,
+      "areaName": "101㎡"
     },
     "yeongdeungpo-yeouido-sibum": {
       "price": 25.5,
