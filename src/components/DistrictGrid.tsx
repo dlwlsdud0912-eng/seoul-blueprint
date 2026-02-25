@@ -1,17 +1,24 @@
-import { Apartment, DistrictNote, District, MemoMap } from '@/types';
+import { Apartment, DistrictNote, District, MemoMap, FolderMap } from '@/types';
 import ApartmentCard from './ApartmentCard';
 import NoteCard from './NoteCard';
 import MemoEditor from './MemoEditor';
+import FolderDropdown from './FolderDropdown';
 
 interface DistrictGridProps {
   apartments: Apartment[];
   notes: DistrictNote[];
   memos: MemoMap;
+  folders: FolderMap;
   onSaveMemo: (apartmentId: string, content: string) => void;
   onDeleteMemo: (apartmentId: string) => void;
+  onAddToFolder: (folderId: string, apartmentId: string) => void;
+  onRemoveFromFolder: (folderId: string, apartmentId: string) => void;
 }
 
-export default function DistrictGrid({ apartments, notes, memos, onSaveMemo, onDeleteMemo }: DistrictGridProps) {
+export default function DistrictGrid({
+  apartments, notes, memos, folders,
+  onSaveMemo, onDeleteMemo, onAddToFolder, onRemoveFromFolder,
+}: DistrictGridProps) {
   const grouped = apartments.reduce<Record<string, Apartment[]>>((acc, apt) => {
     if (!acc[apt.district]) acc[apt.district] = [];
     acc[apt.district].push(apt);
@@ -27,6 +34,8 @@ export default function DistrictGrid({ apartments, notes, memos, onSaveMemo, onD
       </div>
     );
   }
+
+  const hasFolders = Object.keys(folders).length > 0;
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -57,7 +66,17 @@ export default function DistrictGrid({ apartments, notes, memos, onSaveMemo, onD
                 const aptNote = aptNotes.find((n) => n.apartmentId === apt.id);
                 return (
                   <div key={apt.id}>
-                    <ApartmentCard apartment={apt} />
+                    <ApartmentCard
+                      apartment={apt}
+                      folderSlot={hasFolders ? (
+                        <FolderDropdown
+                          apartmentId={apt.id}
+                          folders={folders}
+                          onAddToFolder={onAddToFolder}
+                          onRemoveFromFolder={onRemoveFromFolder}
+                        />
+                      ) : undefined}
+                    />
                     {aptNote && (
                       <div className="mt-1 ml-2">
                         <NoteCard content={aptNote.content} />

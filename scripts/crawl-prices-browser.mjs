@@ -96,18 +96,22 @@ async function fetchPriceByNavigation(page, apt) {
   // tradeType: A1=매매 필터 적용
   const url = `https://new.land.naver.com/complexes/${complexId}?ms=37.5,127,16&a=APT&e=RETAIL&tradeType=A1`;
 
-  // 인터셉션 결과 저장
-  let articlesData = null;
+  // 인터셉션 결과: 모든 API 응답의 매물을 누적 수집
+  const allArticles = [];
+  let gotResponse = false;
 
-  // 응답 리스너 등록 (매매=A1 응답만 캡처)
+  // 응답 리스너 등록 (매매=A1 응답 누적 캡처)
   const responseHandler = async (res) => {
     const resUrl = res.url();
     if (resUrl.includes('/api/articles/complex/') && res.status() === 200) {
-      // tradeType=A1 (매매) 응답 우선, 없으면 아무거나 캡처
-      const isA1 = resUrl.includes('tradeType=A1') || resUrl.includes('tradeType%3DA1');
-      if (isA1 || !articlesData) {
-        try { articlesData = await res.json(); } catch {}
-      }
+      try {
+        const data = await res.json();
+        const list = data?.articleList || [];
+        if (list.length > 0) {
+          allArticles.push(...list);
+          gotResponse = true;
+        }
+      } catch {}
     }
   };
   page.on('response', responseHandler);
@@ -116,12 +120,26 @@ async function fetchPriceByNavigation(page, apt) {
     // 페이지 접속
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 25000 });
     // API 응답 대기 (최대 5초 추가)
-    for (let i = 0; i < 10 && !articlesData; i++) {
+    for (let i = 0; i < 10 && !gotResponse; i++) {
       await delay(500);
     }
+
+    // 가격순 정렬 클릭 → 최저가 매물이 1페이지에 오도록
+    // puppeteer는 :has-text 미지원 → page.evaluate로 버튼 찾기
+    try {
+      const clicked = await page.evaluate(() => {
+        const buttons = [...document.querySelectorAll('button, a, span')];
+        const btn = buttons.find(b => b.textContent && b.textContent.trim().includes('가격순'));
+        if (btn) { btn.click(); return true; }
+        return false;
+      });
+      if (clicked) {
+        await delay(2000); // 가격순 재정렬 API 호출 대기
+      }
+    } catch {}
   } catch (e) {
-    // timeout이어도 이미 articlesData가 잡혔을 수 있음
-    if (!articlesData) {
+    // timeout이어도 이미 응답이 잡혔을 수 있음
+    if (!gotResponse) {
       page.off('response', responseHandler);
       return { error: e.message };
     }
@@ -130,12 +148,18 @@ async function fetchPriceByNavigation(page, apt) {
   page.off('response', responseHandler);
 
   // 인터셉션 실패 시 폴백 없음
-  if (!articlesData) {
+  if (allArticles.length === 0) {
     return { price: null, articleCount: 0, areaName: apt.size };
   }
 
-  // 매물 리스트에서 필터링 + 최저가 추출
-  const articles = articlesData?.articleList || [];
+  // 중복 제거 (articleNo 기준)
+  const seen = new Set();
+  const articles = allArticles.filter(a => {
+    const key = a.articleNo || a.atclNo || JSON.stringify(a);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
   if (articles.length === 0) {
     return { price: null, articleCount: 0, areaName: apt.size };
   }

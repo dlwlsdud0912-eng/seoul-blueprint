@@ -63,3 +63,13 @@ export interface PriceMap {
 }
 
 export type MemoMap = Record<string, string>;
+
+// 즐겨찾기 폴더
+export interface Folder {
+  id: string;
+  name: string;
+  apartmentIds: string[];
+  createdAt: number;
+}
+
+export type FolderMap = Record<string, Folder>;
