@@ -69,16 +69,14 @@ export default function ApartmentCard({
 
   return (
     <div className="group flex items-center gap-1">
-      {/* Bookmark star button */}
-      {folderList.length > 0 && (
+      {/* Bookmark star button - only interactive for single folder (quick toggle) */}
+      {folderList.length > 0 && hasSingleFolder && (
         <button
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (hasSingleFolder) {
-              const folder = folderList[0];
-              onQuickToggleFolder?.(folder.id, apartment.id, !isBookmarked);
-            }
+            const folder = folderList[0];
+            onQuickToggleFolder?.(folder.id, apartment.id, !isBookmarked);
           }}
           className={`shrink-0 transition-colors ${
             isBookmarked
