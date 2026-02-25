@@ -21,15 +21,34 @@ export default function Home() {
   // Load memos and cached prices on mount
   useEffect(() => {
     setMemos(getMemos());
-    // 캐시된 가격 로드
-    const cached = loadPriceCache();
-    if (cached) {
-      setPrices(cached.prices);
-      setLastUpdated(new Date(cached.updatedAt).toLocaleString('ko-KR', {
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit'
-      }));
-    }
+
+    // 1순위: prices.json (크롤링 데이터)
+    fetch('/prices.json')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.prices) {
+          const priceMap: PriceMap = {};
+          for (const [id, info] of Object.entries(data.prices)) {
+            const p = info as { price: number; articleCount: number; areaName?: string };
+            priceMap[id] = { price: p.price, articleCount: p.articleCount, areaName: p.areaName };
+          }
+          setPrices(priceMap);
+          setLastUpdated(data.updatedAtKR || null);
+          // 캐시에도 저장
+          savePriceCache(priceMap);
+        }
+      })
+      .catch(() => {
+        // 2순위: localStorage 캐시
+        const cached = loadPriceCache();
+        if (cached) {
+          setPrices(cached.prices);
+          setLastUpdated(new Date(cached.updatedAt).toLocaleString('ko-KR', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit'
+          }));
+        }
+      });
   }, []);
 
   const handleSaveMemo = useCallback((apartmentId: string, content: string) => {

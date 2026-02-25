@@ -23,7 +23,7 @@ export default function Header({ lastUpdated }: HeaderProps) {
           </div>
           <div className="text-[11px] text-[#b4b4b0] flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-[#0f7b6c] rounded-full" />
-            {lastUpdated ? `마지막 갱신: ${lastUpdated}` : '갱신 전'}
+            {lastUpdated ? `마지막 크롤링: ${lastUpdated}` : '갱신 전'}
           </div>
         </div>
       </div>
