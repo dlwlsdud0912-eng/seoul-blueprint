@@ -7,10 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "crawl": "npx tsx scripts/crawl-prices.ts"
+    "crawl": "npx tsx scripts/crawl-prices.ts",
+    "crawl:browser": "node scripts/crawl-prices-browser.mjs"
   },
   "dependencies": {
     "next": "16.1.6",
+    "puppeteer": "^24.37.5",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
