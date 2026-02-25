@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서울 아파트 체계도</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #1a1f3a;
+    color: #e8e8e8;
+    min-height: 100vh;
+    overflow-x: auto;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(135deg, #1a1f3a 0%, #2a2f5a 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 16px 24px;
+    backdrop-filter: blur(20px);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .header h1 .icon { font-size: 24px; }
+  .header .subtitle {
+    font-size: 12px;
+    color: #8b8fa3;
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  .last-updated {
+    font-size: 11px;
+    color: #6b7280;
+    background: rgba(255,255,255,0.05);
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .last-updated .dot {
+    width: 6px; height: 6px;
+    background: #34d399;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ===== TIER TABS ===== */
+  .tier-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 12px 24px;
+    max-width: 1800px;
+    margin: 0 auto;
+    overflow-x: auto;
+  }
+  .tier-tab {
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.03);
+    color: #9ca3af;
+  }
+  .tier-tab:hover { background: rgba(255,255,255,0.08); color: #e5e7eb; }
+  .tier-tab.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 2px 12px rgba(59,130,246,0.3);
+  }
+  .tier-tab .price-badge {
+    display: inline-block;
+    font-size: 11px;
+    background: rgba(255,255,255,0.15);
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-left: 4px;
+  }
+
+  /* ===== MIND MAP GRID ===== */
+  .map-container {
+    padding: 20px 24px 40px;
+    max-width: 1800px;
+    margin: 0 auto;
+    overflow-x: auto;
+  }
+  .district-grid {
+    display: grid;
+    gap: 12px;
+    min-width: 1200px;
+  }
+
+  /* ===== DISTRICT COLUMN ===== */
+  .district-col {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  .district-col:hover {
+    border-color: rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+  }
+  .district-header {
+    padding: 14px 16px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .district-header .count {
+    font-size: 11px;
+    font-weight: 400;
+    color: #6b7280;
+    background: rgba(255,255,255,0.05);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .district-items {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* ===== APARTMENT CARD ===== */
+  .apt-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .apt-card:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(59,130,246,0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .apt-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #e5e7eb;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .apt-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .apt-size {
+    font-size: 11px;
+    color: #9ca3af;
+    background: rgba(255,255,255,0.05);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .apt-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: #60a5fa;
+  }
+  .apt-price.up { color: #f87171; }
+  .apt-price.down { color: #34d399; }
+  .price-change {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-left: 4px;
+  }
+  .price-change.up { background: rgba(248,113,113,0.15); color: #f87171; }
+  .price-change.down { background: rgba(52,211,153,0.15); color: #34d399; }
+
+  /* ===== NOTE CARD ===== */
+  .note-card {
+    background: rgba(253,224,71,0.08);
+    border: 1px solid rgba(253,224,71,0.2);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: #fde047;
+    line-height: 1.5;
+    margin-top: 2px;
+  }
+
+  /* ===== NAVER LINK ===== */
+  .naver-link {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 18px; height: 18px;
+    background: rgba(0,200,80,0.15);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #34d399;
+    opacity: 0;
+    transition: opacity 0.2s;
+    text-decoration: none;
+  }
+  .apt-card:hover .naver-link { opacity: 1; }
+
+  /* ===== LIVE INDICATOR ===== */
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #34d399;
+    font-weight: 500;
+    padding: 2px 8px;
+    background: rgba(52,211,153,0.1);
+    border-radius: 10px;
+  }
+  .live-badge::before {
+    content: '';
+    width: 5px; height: 5px;
+    background: #34d399;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  /* ===== MOCKUP BANNER ===== */
+  .mockup-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #000;
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 999;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ===== STATS BAR ===== */
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    padding: 0 24px 8px;
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+  .stat-item .value {
+    color: #e5e7eb;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>
+        <span class="icon">🏢</span>
+        서울 아파트 체계도
+        <span class="live-badge">LIVE</span>
+      </h1>
+      <div class="subtitle">이소장의 서울아파트 가격 체계도 — 네이버 부동산 실시간 최저가 연동</div>
+    </div>
+    <div class="last-updated">
+      <span class="dot"></span>
+      마지막 갱신: 2026.02.25 09:00 (매일 자동)
+    </div>
+  </div>
+</div>
+
+<!-- TIER TABS -->
+<div class="tier-tabs">
+  <div class="tier-tab" onclick="showTier('12')">
+    가용 6억+대출6 <span class="price-badge">12억 이하</span>
+  </div>
+  <div class="tier-tab" onclick="showTier('14')">
+    가용 8억+대출6 <span class="price-badge">14억 이하</span>
+  </div>
+  <div class="tier-tab" onclick="showTier('16')">
+    가용 12억+대출4 <span class="price-badge">16억 이하</span>
+  </div>
+  <div class="tier-tab active" onclick="showTier('20')">
+    가용 16억+대출4 <span class="price-badge">20억 이하</span>
+  </div>
+  <div class="tier-tab" onclick="showTier('24')">
+    가용 20억+대출4 <span class="price-badge">24억 이하</span>
+  </div>
+  <div class="tier-tab" onclick="showTier('28')">
+    가용 26억+대출2 <span class="price-badge">28억 이하</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item">총 단지 <span class="value">32개</span></div>
+  <div class="stat-item">|</div>
+  <div class="stat-item">최저가 <span class="value" style="color:#60a5fa">15.5억</span></div>
+  <div class="stat-item">|</div>
+  <div class="stat-item">최고가 <span class="value" style="color:#f87171">19억</span></div>
+  <div class="stat-item">|</div>
+  <div class="stat-item">지난주 대비 <span class="value" style="color:#f87171">▲ 8개 상승</span> <span class="value" style="color:#34d399">▼ 3개 하락</span></div>
+</div>
+
+<!-- MIND MAP -->
+<div class="map-container">
+  <div class="district-grid" style="grid-template-columns: repeat(9, minmax(180px, 1fr));">
+
+    <!-- 동대문구 -->
+    <div class="district-col">
+      <div class="district-header">
+        동대문구
+        <span class="count">1개</span>
+      </div>
+      <div class="district-items">
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">청량리 L65</div>
+          <div class="apt-meta">
+            <span class="apt-size">34평</span>
+            <span class="apt-price">18억~</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 성동구 -->
+    <div class="district-col">
+      <div class="district-header">
+        성동구
+        <span class="count">1개</span>
+      </div>
+      <div class="district-items">
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">왕십리자이</div>
+          <div class="apt-meta">
+            <span class="apt-size">24평</span>
+            <span class="apt-price">17.6억~</span>
+            <span class="price-change up">▲0.3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 강서구 -->
+    <div class="district-col">
+      <div class="district-header">
+        강서구
+        <span class="count">1개</span>
+      </div>
+      <div class="district-items">
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">e편한세상 염창</div>
+          <div class="apt-meta">
+            <span class="apt-size">34평</span>
+            <span class="apt-price">17억~</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 영등포구 -->
+    <div class="district-col">
+      <div class="district-header">
+        영등포구
+        <span class="count">4개</span>
+      </div>
+      <div class="district-items">
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">동부센트레빌</div>
+          <div class="apt-meta">
+            <span class="apt-size">40평대</span>
+            <span class="apt-price">17억~</span>
+          </div>
+        </div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">래미안프레비뉴</div>
+          <div class="apt-meta">
+            <span class="apt-size">24평</span>
+            <span class="apt-price">16.3억~</span>
+            <span class="price-change down">▼0.2</span>
+          </div>
+        </div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">문래자이</div>
+          <div class="apt-meta">
+            <span class="apt-size">34평</span>
+            <span class="apt-price">16.5억~</span>
+          </div>
+        </div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">프라이어팰리스</div>
+          <div class="apt-meta">
+            <span class="apt-size">24평</span>
+            <span class="apt-price">16.5억~</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 강동구 -->
+    <div class="district-col">
+      <div class="district-header">
+        강동구
+        <span class="count">3개</span>
+      </div>
+      <div class="district-items">
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">래미안강동팰리스</div>
+          <div class="apt-meta">
+            <span class="apt-size">24평</span>
+            <span class="apt-price up">15.5억~</span>
+            <span class="price-change up">▲0.5</span>
+          </div>
+        </div>
+        <div class="note-card">강래팰은 주복이라도 잘 오름 (토허제x 갭투도가능)</div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">래미안솔베뉴</div>
+          <div class="apt-meta">
+            <span class="apt-size">24평</span>
+            <span class="apt-price">18.5억~</span>
+          </div>
+        </div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">고덕래미안힐스테이트</div>
+          <div class="apt-meta">
+            <span class="apt-size">24평</span>
+            <span class="apt-price">17.9억~</span>
+            <span class="price-change up">▲0.4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 관악구 -->
+    <div class="district-col">
+      <div class="district-header">
+        관악구
+        <span class="count">1개</span>
+      </div>
+      <div class="district-items">
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">힐스테이트관악센트씨엘</div>
+          <div class="apt-meta">
+            <span class="apt-size">34평</span>
+            <span class="apt-price">18억~</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 마포구 -->
+    <div class="district-col">
+      <div class="district-header">
+        마포구
+        <span class="count">4개</span>
+      </div>
+      <div class="district-items">
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">상암월드컵4단지</div>
+          <div class="apt-meta">
+            <span class="apt-size">34평</span>
+            <span class="apt-price">16억~</span>
+          </div>
+        </div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">성산시영</div>
+          <div class="apt-meta">
+            <span class="apt-size">23평</span>
+            <span class="apt-price">17억~</span>
+          </div>
+        </div>
+        <div class="note-card">성산시영은 23평을 가장선호함</div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">마포한강푸르지오</div>
+          <div class="apt-meta">
+            <span class="apt-size">34평</span>
+            <span class="apt-price">19억~</span>
+            <span class="price-change up">▲1.0</span>
+          </div>
+        </div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">마포 삼성</div>
+          <div class="apt-meta">
+            <span class="apt-size">27평</span>
+            <span class="apt-price">19억~</span>
+          </div>
+        </div>
+        <div class="note-card">주복이라도 잘오름</div>
+      </div>
+    </div>
+
+    <!-- 동작구 -->
+    <div class="district-col">
+      <div class="district-header">
+        동작구
+        <span class="count">4개</span>
+      </div>
+      <div class="district-items">
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">사당롯데캐슬골든포레</div>
+          <div class="apt-meta">
+            <span class="apt-size">24평</span>
+            <span class="apt-price">16.5억~</span>
+          </div>
+        </div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">힐스테이트상도센트럴파크</div>
+          <div class="apt-meta">
+            <span class="apt-size">34평</span>
+            <span class="apt-price">18.5억~</span>
+          </div>
+        </div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">래미안상도3차</div>
+          <div class="apt-meta">
+            <span class="apt-size">42평</span>
+            <span class="apt-price">18.3억~</span>
+          </div>
+        </div>
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">힐스테이트상도프레스티지</div>
+          <div class="apt-meta">
+            <span class="apt-size">34평</span>
+            <span class="apt-price">17억~</span>
+            <span class="price-change down">▼0.5</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 송파구 -->
+    <div class="district-col">
+      <div class="district-header">
+        송파구
+        <span class="count">1개</span>
+      </div>
+      <div class="district-items">
+        <div class="apt-card">
+          <a class="naver-link" title="네이버 부동산">N</a>
+          <div class="apt-name">신길파크자이</div>
+          <div class="apt-meta">
+            <span class="apt-size">24평</span>
+            <span class="apt-price">17억~</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MOCKUP BANNER -->
+<div class="mockup-banner">
+  🎨 목업 — 실제 네이버 부동산 연동 시 가격이 자동 갱신됩니다
+</div>
+
+<script>
+  // Tier tab switching
+  function showTier(tier) {
+    document.querySelectorAll('.tier-tab').forEach(t => t.classList.remove('active'));
+    event.target.closest('.tier-tab').classList.add('active');
+    // TODO: 실제 구현 시 tier별 데이터 로드
+  }
+
+  // Card hover effect for price highlight
+  document.querySelectorAll('.apt-card').forEach(card => {
+    card.addEventListener('click', () => {
+      // TODO: 실제 구현 시 네이버 부동산 해당 단지 페이지 열기
+      alert('네이버 부동산 해당 단지 페이지로 이동합니다');
+    });
+  });
+</script>
+
+</body>
+</html>

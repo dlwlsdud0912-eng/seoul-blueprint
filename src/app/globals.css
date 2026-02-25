@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f7f7f5;
+  --bg-hover: #f1f1ef;
+  --text-primary: #37352f;
+  --text-secondary: #787774;
+  --text-muted: #b4b4b0;
+  --border: #e8e5e0;
+  --accent-blue: #2383e2;
+  --price-blue: #2383e2;
+  --price-up: #eb5757;
+  --price-down: #0f7b6c;
+  --note-bg: #fbf3db;
+  --note-border: #f1e5bc;
+  --note-text: #8b6914;
+  --tag-bg: #f1f1ef;
+}
+
+body {
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Notion-style scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d3d1cb; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #aeaca7; }
