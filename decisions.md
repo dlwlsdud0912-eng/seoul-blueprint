@@ -46,3 +46,49 @@
   - 아파트 카드 아래 "메모 추가..." 호버 표시
   - MemoMap 타입 추가, page.tsx에서 상태 관리
 - **근거**: 사용자가 단지별 자유 메모 기능 요청
+
+### [2026-02-25 11:30] 매물 클릭 네이버 링크 + 메모 노트카드 디자인
+- **유형**: 태스크완료
+- **내용**:
+  - ApartmentCard: 전체 카드를 `<a>` 태그로 변경, 클릭 시 네이버부동산 검색/단지 페이지 이동
+  - MemoEditor: 노란 배경(#fbf3db) + ✏️ 아이콘 노트카드 스타일로 변경
+  - 추가 버튼도 점선 테두리 스타일 통일
+- **근거**: 사용자가 매물 클릭→네이버 이동 + 메모 디자인 요청
+
+### [2026-02-25 11:30] GitHub + Vercel 배포
+- **유형**: 태스크완료
+- **내용**:
+  - GitHub: https://github.com/dlwlsdud0912-eng/seoul-blueprint
+  - Vercel: https://seoul-blueprint.vercel.app
+- **근거**: 사용자 배포 요청
+
+### [2026-02-25 12:00] 5인 에이전트 종합 리뷰
+- **유형**: 기술결정
+- **내용**: Designer, Quality, Security, Performance, PM 5개 에이전트 병렬 코드 리뷰 완료
+- **MVP 완성도**: 7.2/10
+- **즉시 수정 필요**:
+  1. memo-storage SSR guard (CRITICAL)
+  2. Header 갱신시각 하드코딩 (HIGH)
+  3. MemoEditor onBlur 충돌 (HIGH)
+- **최우선 기능 추가**:
+  1. 가격 캐싱 (localStorage) — Quick Win
+  2. naverComplexId 130개 매핑 — 성능 2배
+  3. 관심 단지 즐겨찾기 — 일일 루틴
+- **근거**: 5인 전문 리뷰 종합 결과
+
+### [2026-02-25 13:30] naverComplexId 매핑 + 가격 캐싱 + 버그 수정 대규모 업데이트
+- **유형**: 태스크완료
+- **내용**:
+  - **naverComplexId 매핑 (127/130)**: 네이버 검색 API로 130개 아파트 중 127개 complexId 매핑 완료
+    - 실패 3건: 당산동 한강, 길음 센터피스, 청량리 L65 (검색명 불일치)
+    - scripts/map-complex-ids.mjs 매핑 스크립트 생성
+  - **가격 캐싱**: price-cache.ts 신규 — localStorage에 가격+타임스탬프 저장 (1시간 유효)
+    - 페이지 로드 시 캐시 자동 로드, 새로고침해도 가격 유지
+    - complexId 캐시도 별도 저장
+  - **Header 동적 시각**: 하드코딩 제거 → lastUpdated prop으로 실시간 갱신 시각 표시
+  - **PriceRefreshButton 개선**: 성공/실패 카운트 표시, 에러 피드백, 3초 후 리셋
+  - **ApartmentCard 링크 개선**: /complexes/{id}?markerId={id}&a=APT&e=RETAIL → 매물 목록 직접 이동
+  - **MemoEditor onBlur 수정**: isDeleting ref로 삭제 버튼 클릭 시 blur 충돌 해결
+  - **memo-storage SSR guard**: saveMemo/deleteMemo에 typeof window 가드 추가
+- **에이전트**: W-05 (매핑), W-05b (적용), W-06 (캐싱), W-07 (버그)
+- **근거**: 사용자가 가격 미갱신 + 네이버 링크 지도화면 이동 문제 제기
