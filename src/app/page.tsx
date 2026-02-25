@@ -10,7 +10,6 @@ import Header from '@/components/Header';
 import TierTabs from '@/components/TierTabs';
 import StatsBar from '@/components/StatsBar';
 import DistrictGrid from '@/components/DistrictGrid';
-import PriceRefreshButton from '@/components/PriceRefreshButton';
 
 export default function Home() {
   const [activeTier, setActiveTier] = useState<TierKey>('12');
@@ -81,30 +80,13 @@ export default function Home() {
     [filteredApartments, prices]
   );
 
-  const handlePriceUpdate = (newPrices: PriceMap) => {
-    setPrices((prev) => {
-      const merged = { ...prev, ...newPrices };
-      savePriceCache(merged);
-      return merged;
-    });
-    setLastUpdated(new Date().toLocaleString('ko-KR', {
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit'
-    }));
-  };
 
   return (
     <div className="min-h-screen bg-white">
       <Header lastUpdated={lastUpdated} />
       <main className="mx-auto max-w-6xl px-6 py-6">
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <TierTabs activeTier={activeTier} onTierChange={setActiveTier} />
-            <PriceRefreshButton
-              apartments={filteredApartments}
-              onPriceUpdate={handlePriceUpdate}
-            />
-          </div>
+          <TierTabs activeTier={activeTier} onTierChange={setActiveTier} />
           <StatsBar apartments={apartmentsWithPrices} />
           <DistrictGrid
             apartments={apartmentsWithPrices}

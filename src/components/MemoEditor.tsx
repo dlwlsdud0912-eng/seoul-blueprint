@@ -17,7 +17,6 @@ export default function MemoEditor({
 }: MemoEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(initialMemo ?? '');
-  const [isHovered, setIsHovered] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isDeleting = useRef(false);
 
@@ -129,62 +128,48 @@ export default function MemoEditor({
   // Has memo - display mode (NoteCard style)
   if (initialMemo) {
     return (
-      <div
-        className="mt-1.5 group/memo cursor-pointer"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
+      <div className="mt-1.5 group/memo cursor-pointer">
         <div
           className="flex gap-2 bg-[#fbf3db] border border-[#f1e5bc] rounded-md px-2.5 py-2 text-[11px] text-[#8b6914] leading-relaxed transition-shadow hover:shadow-sm"
           onClick={() => setIsEditing(true)}
         >
           <span className="shrink-0">✏️</span>
           <span className="whitespace-pre-line flex-1 min-w-0">{initialMemo}</span>
-          {isHovered && (
-            <button
-              onClick={handleDelete}
-              className="shrink-0 self-start text-[#c4a03a] hover:text-[#eb5757] transition-colors"
-              title="메모 삭제"
+          <button
+            onClick={handleDelete}
+            className="shrink-0 self-start text-[#c4a03a] hover:text-[#eb5757] transition-colors opacity-40 group-hover/memo:opacity-100"
+            title="메모 삭제"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M3 3L9 9M9 3L3 9"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
-          )}
+              <path
+                d="M3 3L9 9M9 3L3 9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     );
   }
 
-  // No memo - show placeholder on hover
+  // No memo - always show add button (hover-only was invisible on mobile)
   return (
-    <div
-      className="mt-1"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {isHovered ? (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="flex items-center gap-1.5 text-[11px] text-[#c4a03a] hover:text-[#8b6914] transition-colors px-2.5 py-1.5 rounded-md border border-dashed border-[#f1e5bc] hover:bg-[#fbf3db]/50 w-full"
-        >
-          <span>✏️</span>
-          <span>메모 추가...</span>
-        </button>
-      ) : (
-        <div className="h-[8px]" />
-      )}
+    <div className="mt-1">
+      <button
+        onClick={() => setIsEditing(true)}
+        className="flex items-center gap-1.5 text-[11px] text-[#c4a03a] hover:text-[#8b6914] transition-colors px-2.5 py-1.5 rounded-md border border-dashed border-[#f1e5bc] hover:bg-[#fbf3db]/50 w-full opacity-50 hover:opacity-100"
+      >
+        <span>✏️</span>
+        <span>메모 추가...</span>
+      </button>
     </div>
   );
 }
