@@ -20,7 +20,7 @@ export default function ApartmentCard({ apartment }: ApartmentCardProps) {
     if (isMobile) {
       e.preventDefault();
       window.open(
-        `https://m.land.naver.com/complex/article/${apartment.naverComplexId}?a=APT&e=RETAIL`,
+        `https://fin.land.naver.com/complexes/${apartment.naverComplexId}?tab=article`,
         '_blank',
         'noopener,noreferrer'
       );
