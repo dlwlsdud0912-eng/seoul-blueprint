@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { TierKey, PriceMap, MemoMap, FolderMap } from '@/types';
+import { Apartment, TierKey, PriceMap, MemoMap, FolderMap } from '@/types';
 import { getMemos, saveMemo, deleteMemo } from '@/lib/memo-storage';
 import { savePriceCache, loadPriceCache } from '@/lib/price-cache';
 import {
@@ -12,13 +12,16 @@ import {
   addToFolder as addToFolderStorage,
   removeFromFolder as removeFromFolderStorage,
 } from '@/lib/folder-storage';
+import { getOverlay, ApartmentOverlay } from '@/lib/apartment-overlay';
 import { APARTMENTS } from '@/data/apartments';
 import { NOTES } from '@/data/notes';
 import Header from '@/components/Header';
 import TierTabs from '@/components/TierTabs';
+import SearchBar from '@/components/SearchBar';
 import StatsBar from '@/components/StatsBar';
 import DistrictGrid from '@/components/DistrictGrid';
 import FolderManager from '@/components/FolderManager';
+import ApartmentManager from '@/components/ApartmentManager';
 
 export default function Home() {
   const [activeTier, setActiveTier] = useState<TierKey>('12');
@@ -27,11 +30,14 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [folders, setFolders] = useState<FolderMap>({});
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
+  const [isManageMode, setIsManageMode] = useState(false);
+  const [overlay, setOverlay] = useState<ApartmentOverlay>({ tierChanges: {}, additions: [] });
 
-  // Load memos, folders, and cached prices on mount
+  // Load memos, folders, overlay, and cached prices on mount
   useEffect(() => {
     setMemos(getMemos());
     setFolders(getFolders());
+    setOverlay(getOverlay());
 
     // 1순위: prices.json (크롤링 데이터)
     fetch('/prices.json')
@@ -40,8 +46,8 @@ export default function Home() {
         if (data?.prices) {
           const priceMap: PriceMap = {};
           for (const [id, info] of Object.entries(data.prices)) {
-            const p = info as { price: number; articleCount: number; areaName?: string };
-            priceMap[id] = { price: p.price, articleCount: p.articleCount, areaName: p.areaName };
+            const p = info as { price: number; articleCount: number; areaName?: string; sizes?: Record<string, { price: number; count: number }> };
+            priceMap[id] = { price: p.price, articleCount: p.articleCount, areaName: p.areaName, sizes: p.sizes };
           }
           setPrices(priceMap);
           setLastUpdated(data.updatedAtKR || null);
@@ -98,17 +104,58 @@ export default function Home() {
     setFolders(getFolders());
   }, []);
 
+  // 오버레이 변경 핸들러
+  const handleOverlayChange = useCallback(() => {
+    setOverlay(getOverlay());
+  }, []);
+
+  // 기본 데이터 + 오버레이 병합
+  const mergedApartments = useMemo((): Apartment[] => {
+    // 1. 기존 아파트에 티어 변경 적용
+    const base = APARTMENTS.map((apt) => {
+      const newTier = overlay.tierChanges[apt.id];
+      if (newTier) {
+        return { ...apt, tier: newTier };
+      }
+      return apt;
+    });
+    // 2. 추가 아파트 병합 (tier 변경도 적용)
+    const additions: Apartment[] = overlay.additions.map((add) => {
+      const newTier = overlay.tierChanges[add.id];
+      return {
+        id: add.id,
+        name: add.name,
+        district: add.district,
+        size: add.size,
+        basePrice: add.basePrice,
+        tier: newTier || add.tier,
+        naverComplexId: add.naverComplexId,
+      };
+    });
+    return [...base, ...additions];
+  }, [overlay]);
+
+  // 오버레이 변경/추가 ID 세트 (DistrictGrid에 전달)
+  const overlayChangedIds = useMemo(
+    () => new Set(Object.keys(overlay.tierChanges)),
+    [overlay]
+  );
+  const customAddedIds = useMemo(
+    () => new Set(overlay.additions.map(a => a.id)),
+    [overlay]
+  );
+
   // 폴더 뷰 모드: 특정 폴더 선택 시 해당 폴더의 아파트만 표시
   const isFolderView = activeFolderId !== null;
   const activeFolder = activeFolderId ? folders[activeFolderId] : null;
 
-  // 아파트 필터링: 티어 또는 폴더
+  // 아파트 필터링: 티어 또는 폴더 (merged 사용)
   const filteredApartments = useMemo(() => {
     if (isFolderView && activeFolder) {
-      return APARTMENTS.filter(a => activeFolder.apartmentIds.includes(a.id));
+      return mergedApartments.filter(a => activeFolder.apartmentIds.includes(a.id));
     }
-    return APARTMENTS.filter(a => a.tier === activeTier);
-  }, [isFolderView, activeFolder, activeTier]);
+    return mergedApartments.filter(a => a.tier === activeTier);
+  }, [isFolderView, activeFolder, activeTier, mergedApartments]);
 
   const filteredNotes = useMemo(() => {
     if (isFolderView) return []; // 폴더 뷰에서는 노트 미표시
@@ -127,10 +174,33 @@ export default function Home() {
           priceChange:
             Math.round((livePrice.price - apt.basePrice) * 10) / 10,
           articleCount: livePrice.articleCount,
+          sizes: livePrice.sizes,
         };
       }),
     [filteredApartments, prices]
   );
+
+  // 검색용: 전체 아파트(merged)에 실시간 가격 반영
+  const allApartmentsWithPrices = useMemo(
+    () =>
+      mergedApartments.map((apt) => {
+        const livePrice = prices[apt.id];
+        if (!livePrice) return apt;
+        return {
+          ...apt,
+          currentPrice: livePrice.price,
+          priceChange:
+            Math.round((livePrice.price - apt.basePrice) * 10) / 10,
+        };
+      }),
+    [mergedApartments, prices]
+  );
+
+  // 검색 결과 선택 시 해당 티어로 이동
+  const handleSelectApartment = useCallback((apartment: { tier: TierKey }) => {
+    setActiveFolderId(null); // 폴더 뷰 해제
+    setActiveTier(apartment.tier);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -145,6 +215,19 @@ export default function Home() {
             onCreateFolder={handleCreateFolder}
             onDeleteFolder={handleDeleteFolder}
             onRenameFolder={handleRenameFolder}
+          />
+
+          {/* 관리 패널 */}
+          <ApartmentManager
+            isManageMode={isManageMode}
+            onToggleManageMode={() => setIsManageMode(m => !m)}
+            onOverlayChange={handleOverlayChange}
+          />
+
+          {/* 아파트 검색 */}
+          <SearchBar
+            apartments={allApartmentsWithPrices}
+            onSelectApartment={handleSelectApartment}
           />
 
           {/* 티어 탭: 폴더 뷰가 아닐 때만 표시 */}
@@ -173,6 +256,10 @@ export default function Home() {
             onDeleteMemo={handleDeleteMemo}
             onAddToFolder={handleAddToFolder}
             onRemoveFromFolder={handleRemoveFromFolder}
+            isManageMode={isManageMode}
+            overlayChangedIds={overlayChangedIds}
+            customAddedIds={customAddedIds}
+            onOverlayChange={handleOverlayChange}
           />
         </div>
       </main>

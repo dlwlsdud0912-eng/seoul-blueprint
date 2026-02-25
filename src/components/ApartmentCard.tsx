@@ -1,13 +1,27 @@
 'use client';
 
-import { Apartment } from '@/types';
+import { useState } from 'react';
+import { Apartment, TierKey } from '@/types';
+import { saveTierChange, removeTierChange, removeAddition } from '@/lib/apartment-overlay';
+
+const TIERS: TierKey[] = ['12','14','16','20','24','28','32','50'];
 
 interface ApartmentCardProps {
-  apartment: Apartment & { articleCount?: number };
+  apartment: Apartment & {
+    articleCount?: number;
+    sizes?: Record<string, { price: number; count: number }>;
+  };
   folderSlot?: React.ReactNode;
+  isManageMode?: boolean;
+  isOverlayChanged?: boolean;
+  isCustomAdded?: boolean;
+  onOverlayChange?: () => void;
 }
 
-export default function ApartmentCard({ apartment, folderSlot }: ApartmentCardProps) {
+export default function ApartmentCard({
+  apartment, folderSlot, isManageMode, isOverlayChanged, isCustomAdded, onOverlayChange,
+}: ApartmentCardProps) {
+  const [showTierSelect, setShowTierSelect] = useState(false);
   const price = apartment.currentPrice ?? apartment.basePrice;
   const change = apartment.priceChange;
 
@@ -28,48 +42,142 @@ export default function ApartmentCard({ apartment, folderSlot }: ApartmentCardPr
     }
   };
 
+  const handleTierChange = (newTier: TierKey) => {
+    saveTierChange(apartment.id, newTier);
+    setShowTierSelect(false);
+    onOverlayChange?.();
+  };
+
+  const handleRevertTier = () => {
+    removeTierChange(apartment.id);
+    onOverlayChange?.();
+  };
+
+  const handleRemoveCustom = () => {
+    removeAddition(apartment.id);
+    onOverlayChange?.();
+  };
+
   return (
     <div className="group flex items-center gap-1">
       {folderSlot}
+      {/* 관리모드 버튼들 */}
+      {isManageMode && (
+        <div className="flex items-center gap-0.5 shrink-0">
+          <button
+            onClick={() => setShowTierSelect(!showTierSelect)}
+            className="text-[10px] px-1.5 py-1 rounded border border-[#ffcc80] bg-[#fff3e0] text-[#e65100] hover:bg-[#ffe0b2] transition-colors"
+            title="티어 이동"
+          >
+            이동
+          </button>
+          {isOverlayChanged && (
+            <button
+              onClick={handleRevertTier}
+              className="text-[10px] px-1 py-1 rounded border border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5] transition-colors"
+              title="티어 변경 되돌리기"
+            >
+              복원
+            </button>
+          )}
+          {isCustomAdded && (
+            <button
+              onClick={handleRemoveCustom}
+              className="text-[10px] px-1 py-1 rounded border border-[#e8e5e0] bg-white text-[#eb5757] hover:bg-[#fbe4e4] transition-colors"
+              title="추가 아파트 삭제"
+            >
+              삭제
+            </button>
+          )}
+        </div>
+      )}
+      {/* 티어 선택 드롭다운 */}
+      {showTierSelect && isManageMode && (
+        <div className="flex items-center gap-0.5 shrink-0">
+          {TIERS.map((t) => (
+            <button
+              key={t}
+              onClick={() => handleTierChange(t)}
+              className={`text-[10px] px-1.5 py-0.5 rounded transition-colors ${
+                t === apartment.tier
+                  ? 'bg-[#2383e2] text-white'
+                  : 'bg-[#f1f1ef] text-[#787774] hover:bg-[#e8e5e0]'
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
       <a
         href={desktopUrl}
         target="_blank"
         rel="noopener noreferrer"
         onClick={handleClick}
-        className="flex-1 flex items-center justify-between px-2.5 py-2 rounded-md hover:bg-[#f7f7f5] transition-colors cursor-pointer no-underline min-w-0"
+        className="flex-1 flex flex-col px-2.5 py-2 rounded-md hover:bg-[#f7f7f5] transition-colors cursor-pointer no-underline min-w-0"
       >
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-[13px] text-[#37352f] truncate">{apartment.name}</span>
-          <span className="shrink-0 text-[11px] text-[#b4b4b0] bg-[#f1f1ef] px-1.5 py-0.5 rounded">
-            {apartment.size}
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0 ml-2">
-          <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[10px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100" title="네이버 부동산">
-            N
-          </span>
-          {apartment.articleCount !== undefined && apartment.articleCount > 0 && (
-            <span className="text-[10px] text-[#b4b4b0]">
-              {apartment.articleCount}건
+        <div className="flex items-center justify-between min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[13px] text-[#37352f] truncate">{apartment.name}</span>
+            <span className="shrink-0 text-[11px] text-[#b4b4b0] bg-[#f1f1ef] px-1.5 py-0.5 rounded">
+              {apartment.size}
             </span>
-          )}
-          <span className={`text-[13px] font-semibold ${
-            change && change > 0 ? 'text-[#eb5757]' :
-            change && change < 0 ? 'text-[#0f7b6c]' :
-            'text-[#2383e2]'
-          }`}>
-            {price}억~
-          </span>
-          {change !== undefined && change !== 0 && (
-            <span className={`text-[10px] font-medium px-1 py-0.5 rounded ${
-              change > 0
-                ? 'text-[#eb5757] bg-[#fbe4e4]'
-                : 'text-[#0f7b6c] bg-[#dbeddb]'
+            {isOverlayChanged && (
+              <span className="shrink-0 text-[9px] font-medium text-[#e65100] bg-[#fff3e0] border border-[#ffcc80] px-1 py-0.5 rounded">
+                변경됨
+              </span>
+            )}
+            {isCustomAdded && (
+              <span className="shrink-0 text-[9px] font-medium text-[#2383e2] bg-[#e8f4fd] border border-[#90caf9] px-1 py-0.5 rounded">
+                추가됨
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0 ml-2">
+            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[10px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100" title="네이버 부동산">
+              N
+            </span>
+            {apartment.articleCount !== undefined && apartment.articleCount > 0 && (
+              <span className="text-[10px] text-[#b4b4b0]">
+                {apartment.articleCount}건
+              </span>
+            )}
+            <span className={`text-[13px] font-semibold ${
+              change && change > 0 ? 'text-[#eb5757]' :
+              change && change < 0 ? 'text-[#0f7b6c]' :
+              'text-[#2383e2]'
             }`}>
-              {change > 0 ? '▲' : '▼'}{Math.abs(change)}
+              {price}억~
             </span>
-          )}
+            {change !== undefined && change !== 0 && (
+              <span className={`text-[10px] font-medium px-1 py-0.5 rounded ${
+                change > 0
+                  ? 'text-[#eb5757] bg-[#fbe4e4]'
+                  : 'text-[#0f7b6c] bg-[#dbeddb]'
+              }`}>
+                {change > 0 ? '▲' : '▼'}{Math.abs(change)}
+              </span>
+            )}
+          </div>
         </div>
+        {apartment.sizes && Object.keys(apartment.sizes).length > 0 && (
+          <div className="flex gap-3 mt-1 ml-0">
+            {(['59', '84', '114'] as const).map((sizeKey) => {
+              const sizeData = apartment.sizes?.[sizeKey];
+              if (sizeData === undefined) return null;
+              return (
+                <span key={sizeKey} className="text-[10px]">
+                  <span className="text-[#b4b4b0]">{sizeKey}&#13217; </span>
+                  {sizeData === null ? (
+                    <span className="text-[#b4b4b0]">매물없음</span>
+                  ) : (
+                    <span className="text-[#2383e2] font-medium">{sizeData.price}억</span>
+                  )}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </a>
     </div>
   );

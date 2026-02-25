@@ -13,11 +13,16 @@ interface DistrictGridProps {
   onDeleteMemo: (apartmentId: string) => void;
   onAddToFolder: (folderId: string, apartmentId: string) => void;
   onRemoveFromFolder: (folderId: string, apartmentId: string) => void;
+  isManageMode?: boolean;
+  overlayChangedIds?: Set<string>;
+  customAddedIds?: Set<string>;
+  onOverlayChange?: () => void;
 }
 
 export default function DistrictGrid({
   apartments, notes, memos, folders,
   onSaveMemo, onDeleteMemo, onAddToFolder, onRemoveFromFolder,
+  isManageMode, overlayChangedIds, customAddedIds, onOverlayChange,
 }: DistrictGridProps) {
   const grouped = apartments.reduce<Record<string, Apartment[]>>((acc, apt) => {
     if (!acc[apt.district]) acc[apt.district] = [];
@@ -76,6 +81,10 @@ export default function DistrictGrid({
                           onRemoveFromFolder={onRemoveFromFolder}
                         />
                       ) : undefined}
+                      isManageMode={isManageMode}
+                      isOverlayChanged={overlayChangedIds?.has(apt.id)}
+                      isCustomAdded={customAddedIds?.has(apt.id)}
+                      onOverlayChange={onOverlayChange}
                     />
                     {aptNote && (
                       <div className="mt-1 ml-2">

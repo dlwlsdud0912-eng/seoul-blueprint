@@ -52,10 +52,16 @@ export interface DistrictNote {
   content: string;
 }
 
+export interface SizePrice {
+  price: number;
+  count: number;
+}
+
 export interface PriceResult {
   price: number;
   articleCount: number;
   areaName?: string;
+  sizes?: Record<string, SizePrice>;
 }
 
 export interface PriceMap {

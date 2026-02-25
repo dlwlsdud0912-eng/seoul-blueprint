@@ -24,6 +24,13 @@ const PYEONG_TO_M2 = {
 };
 const PYEONGDAE_RANGES = { 40: [40, 42, 43, 44, 48] };
 
+// ─── 표준 면적 버킷 (59㎡, 84㎡, 114㎡) ───
+const SIZE_BUCKETS = [
+  { key: '59', center: 59, tolerance: 5 },   // 54~64㎡
+  { key: '84', center: 84, tolerance: 5 },   // 79~89㎡
+  { key: '114', center: 114, tolerance: 10 }, // 104~124㎡
+];
+
 // ─── apartments.ts 파싱 ───
 function parseApartmentsFile() {
   const filePath = path.join(__dirname, '..', 'src', 'data', 'apartments.ts');
@@ -176,35 +183,69 @@ async function fetchPriceByNavigation(page, apt) {
     return { price: null, articleCount: 0, areaName: apt.size };
   }
 
-  const targetM2s = getTargetM2List(apt.size);
-  let filteredArticles = saleOnly;
+  // ─── 멀티버킷 수집: 59㎡, 84㎡, 114㎡ 각각의 최저가 ───
+  const sizes = {};
 
-  // 1) 타겟 면적 필터링 (매매 매물 안에서만)
-  if (targetM2s.length > 0) {
-    const areaFiltered = saleOnly.filter(a => {
+  for (const bucket of SIZE_BUCKETS) {
+    // 버킷 범위에 해당하는 매물 필터
+    const bucketArticles = saleOnly.filter(a => {
       const exArea = parseFloat(a.exclusiveArea || a.area2 || 0);
-      return targetM2s.some(m2 => Math.abs(exArea - m2) <= 5);
+      return Math.abs(exArea - bucket.center) <= bucket.tolerance;
     });
-    if (areaFiltered.length > 0) {
-      filteredArticles = areaFiltered;
+
+    if (bucketArticles.length === 0) continue;
+
+    // 집주인 매물 우선
+    const ownerInBucket = bucketArticles.filter(a => {
+      const tags = a.tagList || [];
+      const cpName = (a.cpName || '').toLowerCase();
+      return tags.includes('집주인') || cpName.includes('집주인');
+    });
+    const candidates = ownerInBucket.length > 0 ? ownerInBucket : bucketArticles;
+
+    // 최저가 찾기
+    let bucketBest = null;
+    for (const article of candidates) {
+      const dealPrice = article.dealPrc || article.dealOrWarrantPrc;
+      if (dealPrice) {
+        const parsed = parsePrice(dealPrice);
+        if (parsed !== null && (bucketBest === null || parsed < bucketBest)) {
+          bucketBest = parsed;
+        }
+      }
+    }
+
+    if (bucketBest !== null) {
+      sizes[bucket.key] = {
+        price: Math.round(bucketBest * 100) / 100,
+        count: bucketArticles.length,
+      };
     }
   }
 
-  // 2) 집주인 필터 (tagList에 "집주인" 포함된 매물 우선)
-  const ownerArticles = filteredArticles.filter(a => {
+  // ─── 전체 최저가 산출 (기존 UI 호환) ───
+  let bestPrice = null;
+  let bestAreaName = apt.size;
+  let isOwner = false;
+
+  // sizes 버킷 중 최저가 선택
+  for (const [key, data] of Object.entries(sizes)) {
+    if (bestPrice === null || data.price < bestPrice) {
+      bestPrice = data.price;
+      bestAreaName = `${key}㎡`;
+    }
+  }
+
+  // 버킷에 매칭되지 않은 매물도 전체 최저가 후보로 검토
+  const ownerAll = saleOnly.filter(a => {
     const tags = a.tagList || [];
     const cpName = (a.cpName || '').toLowerCase();
     return tags.includes('집주인') || cpName.includes('집주인');
   });
+  const allCandidates = ownerAll.length > 0 ? ownerAll : saleOnly;
+  isOwner = ownerAll.length > 0;
 
-  // 집주인 매물이 있으면 그 중에서, 없으면 전체에서 최저가
-  const targetArticles = ownerArticles.length > 0 ? ownerArticles : filteredArticles;
-  const isOwner = ownerArticles.length > 0;
-
-  // 3) 최저가 찾기
-  let bestPrice = null;
-  let bestAreaName = apt.size;
-  for (const article of targetArticles) {
+  for (const article of allCandidates) {
     const dealPrice = article.dealPrc || article.dealOrWarrantPrc;
     if (dealPrice) {
       const parsed = parsePrice(dealPrice);
@@ -217,14 +258,15 @@ async function fetchPriceByNavigation(page, apt) {
   }
 
   if (bestPrice === null) {
-    return { price: null, articleCount: filteredArticles.length, areaName: apt.size };
+    return { price: null, articleCount: saleOnly.length, areaName: apt.size };
   }
 
   return {
     price: Math.round(bestPrice * 100) / 100,
-    articleCount: targetArticles.length,
+    articleCount: saleOnly.length,
     areaName: bestAreaName,
     isOwner,
+    sizes,
   };
 }
 
@@ -278,13 +320,19 @@ async function main() {
           price: result.price,
           articleCount: result.articleCount,
           areaName: result.areaName,
+          sizes: result.sizes || {},
         };
         successCount++;
+        // 멀티사이즈 로그: 59㎡:9.5 | 84㎡:11.8 | 114㎡:--
+        const sizeInfo = SIZE_BUCKETS.map(b => {
+          const s = result.sizes && result.sizes[b.key];
+          return `${b.key}㎡:${s ? s.price : '--'}`;
+        }).join(' | ');
         const ownerTag = result.isOwner ? ' [집주인]' : '';
-        console.log(`${idx} ${apt.name} -> ${result.price}억 (${result.articleCount}건, ${result.areaName})${ownerTag}`);
+        console.log(`${idx} ${apt.name} -> ${result.price}억 (${sizeInfo})${ownerTag}`);
       } else {
         failCount++;
-        console.log(`${idx} ${apt.name} -> 매물 없음 (${result.articleCount || 0}건 중 면적 불일치)`);
+        console.log(`${idx} ${apt.name} -> 매물 없음 (매매 ${result.articleCount || 0}건)`);
       }
     } catch (e) {
       failCount++;
