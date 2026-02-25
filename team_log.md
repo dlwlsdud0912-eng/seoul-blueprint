@@ -9,3 +9,7 @@
 | 10:10 | W-02 | 노션 스타일 리디자인 | 성공 | 8개 파일 수정, 다크→라이트, Notion 컬러팔레트, 빌드 0에러 |
 | 10:25 | W-03 | 네이버부동산 API 연동 | 성공 | naver.ts + 3개 API 라우트 + PriceRefreshButton, 빌드 0에러 |
 | 10:40 | W-04 | 아파트 메모 기능 | 성공 | MemoEditor + memo-storage.ts, localStorage 저장, 빌드 0에러 |
+| -- | W-08 | 추가폼 퍼지검색 리디자인 | 성공 | fuzzy-search.ts 신규, 초성매칭 |
+| -- | W-09 | 폴더UX 칩+북마크 | 성공 | FolderChips 신규, ★ 버튼 |
+| -- | W-10 | QA 테스트 | 진행중 | 병렬 수행 |
+| -- | W-11 | 커밋+배포+기록 | 진행중 | 현재 |

@@ -13,6 +13,7 @@ interface DistrictGridProps {
   onDeleteMemo: (apartmentId: string) => void;
   onAddToFolder: (folderId: string, apartmentId: string) => void;
   onRemoveFromFolder: (folderId: string, apartmentId: string) => void;
+  onQuickToggleFolder?: (folderId: string, apartmentId: string, isAdding: boolean) => void;
   isManageMode?: boolean;
   overlayChangedIds?: Set<string>;
   customAddedIds?: Set<string>;
@@ -21,7 +22,7 @@ interface DistrictGridProps {
 
 export default function DistrictGrid({
   apartments, notes, memos, folders,
-  onSaveMemo, onDeleteMemo, onAddToFolder, onRemoveFromFolder,
+  onSaveMemo, onDeleteMemo, onAddToFolder, onRemoveFromFolder, onQuickToggleFolder,
   isManageMode, overlayChangedIds, customAddedIds, onOverlayChange,
 }: DistrictGridProps) {
   const grouped = apartments.reduce<Record<string, Apartment[]>>((acc, apt) => {
@@ -73,6 +74,8 @@ export default function DistrictGrid({
                   <div key={apt.id}>
                     <ApartmentCard
                       apartment={apt}
+                      folders={folders}
+                      onQuickToggleFolder={onQuickToggleFolder}
                       folderSlot={hasFolders ? (
                         <FolderDropdown
                           apartmentId={apt.id}

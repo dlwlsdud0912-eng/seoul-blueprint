@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Apartment, TierKey } from '@/types';
+import { Apartment, TierKey, FolderMap } from '@/types';
 import { saveTierChange, removeTierChange, removeAddition } from '@/lib/apartment-overlay';
 
 const TIERS: TierKey[] = ['12','14','16','20','24','28','32','50'];
@@ -12,6 +12,8 @@ interface ApartmentCardProps {
     sizes?: Record<string, { price: number; count: number }>;
   };
   folderSlot?: React.ReactNode;
+  folders?: FolderMap;
+  onQuickToggleFolder?: (folderId: string, apartmentId: string, isAdding: boolean) => void;
   isManageMode?: boolean;
   isOverlayChanged?: boolean;
   isCustomAdded?: boolean;
@@ -19,9 +21,16 @@ interface ApartmentCardProps {
 }
 
 export default function ApartmentCard({
-  apartment, folderSlot, isManageMode, isOverlayChanged, isCustomAdded, onOverlayChange,
+  apartment, folderSlot, folders, onQuickToggleFolder, isManageMode, isOverlayChanged, isCustomAdded, onOverlayChange,
 }: ApartmentCardProps) {
   const [showTierSelect, setShowTierSelect] = useState(false);
+
+  // Bookmark (folder) calculations
+  const folderList = folders ? Object.values(folders).sort((a, b) => a.createdAt - b.createdAt) : [];
+  const inFolders = folderList.filter(f => f.apartmentIds.includes(apartment.id));
+  const isBookmarked = inFolders.length > 0;
+  const hasSingleFolder = folderList.length === 1;
+
   const price = apartment.currentPrice ?? apartment.basePrice;
   const change = apartment.priceChange;
 
@@ -60,7 +69,31 @@ export default function ApartmentCard({
 
   return (
     <div className="group flex items-center gap-1">
-      {folderSlot}
+      {/* Bookmark star button */}
+      {folderList.length > 0 && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (hasSingleFolder) {
+              const folder = folderList[0];
+              onQuickToggleFolder?.(folder.id, apartment.id, !isBookmarked);
+            }
+          }}
+          className={`shrink-0 transition-colors ${
+            isBookmarked
+              ? 'text-[#2383e2] hover:text-[#1a6bc4]'
+              : 'text-[#d3d1cb] hover:text-[#787774]'
+          }`}
+          title={isBookmarked ? '즐겨찾기 해제' : '즐겨찾기'}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.3">
+            <path d="M3 2.5h10a.5.5 0 01.5.5v11.5l-5.5-3-5.5 3V3a.5.5 0 01.5-.5z" />
+          </svg>
+        </button>
+      )}
+      {/* Show folderSlot (dropdown) only when multiple folders exist */}
+      {!hasSingleFolder && folderSlot}
       {/* 관리모드 버튼들 - 호버 시에만 표시 (모바일은 항상) */}
       {isManageMode && (
         <div className="flex items-center gap-0.5 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">

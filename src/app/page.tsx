@@ -20,7 +20,7 @@ import TierTabs from '@/components/TierTabs';
 import SearchBar from '@/components/SearchBar';
 import StatsBar from '@/components/StatsBar';
 import DistrictGrid from '@/components/DistrictGrid';
-import FolderManager from '@/components/FolderManager';
+import FolderChips from '@/components/FolderChips';
 import ApartmentManager from '@/components/ApartmentManager';
 
 export default function Home() {
@@ -107,6 +107,21 @@ export default function Home() {
   // 오버레이 변경 핸들러
   const handleOverlayChange = useCallback(() => {
     setOverlay(getOverlay());
+  }, []);
+
+  // 원클릭 북마크 토글 핸들러
+  const handleQuickToggleFolder = useCallback((folderId: string, apartmentId: string, isAdding: boolean) => {
+    if (isAdding) {
+      handleAddToFolder(folderId, apartmentId);
+    } else {
+      handleRemoveFromFolder(folderId, apartmentId);
+    }
+  }, [handleAddToFolder, handleRemoveFromFolder]);
+
+  // 아파트 추가 완료 핸들러: 추가된 티어로 이동
+  const handleAddComplete = useCallback((tier: TierKey) => {
+    setActiveFolderId(null);
+    setActiveTier(tier);
   }, []);
 
   // 기본 데이터 + 오버레이 병합
@@ -217,8 +232,10 @@ export default function Home() {
             </div>
             <ApartmentManager
               isManageMode={isManageMode}
+              activeTier={activeTier}
               onToggleManageMode={() => setIsManageMode(m => !m)}
               onOverlayChange={handleOverlayChange}
+              onAddComplete={handleAddComplete}
             />
           </div>
 
@@ -227,19 +244,8 @@ export default function Home() {
             <TierTabs activeTier={activeTier} onTierChange={setActiveTier} />
           )}
 
-          {/* 폴더 뷰 헤더 */}
-          {isFolderView && activeFolder && (
-            <div className="flex items-center gap-2">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#2383e2" strokeWidth="1.3" className="shrink-0">
-                <path d="M2 4.5A1.5 1.5 0 013.5 3H6l1.5 2h5A1.5 1.5 0 0114 6.5v5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 11.5v-7z"/>
-              </svg>
-              <span className="text-[13px] font-semibold text-[#2383e2]">{activeFolder.name}</span>
-              <span className="text-[11px] text-[#b4b4b0]">{activeFolder.apartmentIds.length}개 단지</span>
-            </div>
-          )}
-
-          {/* 즐겨찾기 폴더 */}
-          <FolderManager
+          {/* 폴더 칩 필터 */}
+          <FolderChips
             folders={folders}
             activeFolderId={activeFolderId}
             onSelectFolder={(folderId) => setActiveFolderId(folderId)}
@@ -258,6 +264,7 @@ export default function Home() {
             onDeleteMemo={handleDeleteMemo}
             onAddToFolder={handleAddToFolder}
             onRemoveFromFolder={handleRemoveFromFolder}
+            onQuickToggleFolder={handleQuickToggleFolder}
             isManageMode={isManageMode}
             overlayChangedIds={overlayChangedIds}
             customAddedIds={customAddedIds}
