@@ -79,43 +79,39 @@ export default function FolderDropdown({
     >
       {/* Folder tags for folders this apartment belongs to */}
       {isInAnyFolder && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-0.5">
           {inFolders.map((folder) => (
             <span
               key={folder.id}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#2383e2]/8 text-[#2383e2] text-[10px] font-medium leading-tight"
+              className="inline-flex items-center gap-0.5 px-1.5 py-px rounded bg-[#f0f7ff] text-[#5b9bd5] text-[9px] leading-tight"
             >
-              <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" strokeWidth="0.5" className="shrink-0">
-                <path d="M2 4.5A1.5 1.5 0 013.5 3H6l1.5 2h5A1.5 1.5 0 0114 6.5v5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 11.5v-7z"/>
-              </svg>
               {folder.name}
             </span>
           ))}
         </div>
       )}
 
-      {/* Trigger button */}
+      {/* Trigger button - icon only, text on hover */}
       <button
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        className={`flex items-center gap-1 rounded-md transition-colors min-h-[28px] ${
+        className={`flex items-center gap-0.5 rounded transition-colors ${
           isInAnyFolder
-            ? 'px-1.5 text-[#2383e2] hover:bg-[#2383e2]/10'
-            : 'px-1.5 text-[#b4b4b0] hover:text-[#787774] hover:bg-[#f1f1ef]'
+            ? 'px-1 py-0.5 text-[#5b9bd5] hover:bg-[#2383e2]/10'
+            : 'px-1 py-0.5 text-[#c8c6c1] hover:text-[#787774] hover:bg-[#f1f1ef]'
         }`}
         title={isInAnyFolder ? `${inFolders.map(f => f.name).join(', ')}에 저장됨` : '폴더에 추가'}
         aria-label="폴더에 추가"
       >
-        <svg width="14" height="14" viewBox="0 0 16 16" fill={isInAnyFolder ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.3" className="shrink-0">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill={isInAnyFolder ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.3" className="shrink-0">
           <path d="M2 4.5A1.5 1.5 0 013.5 3H6l1.5 2h5A1.5 1.5 0 0114 6.5v5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 11.5v-7z"/>
         </svg>
-        {/* Show text label on hover or when no folders contain this apt */}
-        {(isHovered || !isInAnyFolder) && (
-          <span className="text-[11px] whitespace-nowrap">
-            {isInAnyFolder ? '편집' : '폴더'}
+        {isHovered && (
+          <span className="text-[10px] whitespace-nowrap">
+            {isInAnyFolder ? '편집' : '+'}
           </span>
         )}
       </button>

@@ -70,68 +70,68 @@ export default function ApartmentManager({
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      {/* 관리 토글 + 상태 바 */}
-      <div className="flex items-center gap-2 flex-wrap">
+    <>
+      {/* 인라인 버튼들 */}
+      <div className="flex items-center gap-1.5 shrink-0">
         <button
           onClick={onToggleManageMode}
-          className={`text-[11px] font-medium px-3 py-1.5 rounded-md border transition-colors ${
+          className={`text-[11px] font-medium px-2.5 py-1.5 rounded-md border transition-colors whitespace-nowrap ${
             isManageMode
               ? 'bg-[#fff3e0] border-[#ffcc80] text-[#e65100]'
               : 'bg-white border-[#e8e5e0] text-[#787774] hover:bg-[#f7f7f5]'
           }`}
         >
-          {isManageMode ? '관리모드 ON' : '관리'}
+          {isManageMode ? '관리 ON' : '관리'}
         </button>
 
         {isManageMode && (
           <>
             <button
               onClick={() => setShowAddForm(!showAddForm)}
-              className="text-[11px] font-medium px-3 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#2383e2] hover:bg-[#f0f7ff] transition-colors"
+              className="text-[11px] font-medium px-2 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#2383e2] hover:bg-[#f0f7ff] transition-colors whitespace-nowrap"
             >
-              + 아파트 추가
+              +추가
             </button>
             {hasOverlay && (
               <button
                 onClick={handleReset}
-                className="text-[11px] font-medium px-3 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#eb5757] hover:bg-[#fbe4e4] transition-colors"
+                className="text-[11px] font-medium px-2 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#eb5757] hover:bg-[#fbe4e4] transition-colors whitespace-nowrap"
               >
                 초기화
               </button>
             )}
             {hasOverlay && (
-              <span className="text-[11px] text-[#787774]">
-                {tierChangeCount > 0 && `티어 변경 ${tierChangeCount}건`}
-                {tierChangeCount > 0 && additionCount > 0 && ' / '}
-                {additionCount > 0 && `추가 ${additionCount}건`}
+              <span className="text-[10px] text-[#787774] whitespace-nowrap hidden sm:inline">
+                {tierChangeCount > 0 && `${tierChangeCount}변경`}
+                {tierChangeCount > 0 && additionCount > 0 && '/'}
+                {additionCount > 0 && `${additionCount}추가`}
               </span>
             )}
           </>
         )}
       </div>
 
-      {/* 아파트 추가 폼 */}
+      {/* 아파트 추가 폼 (펼쳐질 때 검색바+버튼 아래에 full-width) */}
       {isManageMode && showAddForm && (
-        <div className="rounded-lg border border-[#ffcc80] bg-[#fff3e0] p-4">
-          <h4 className="text-[13px] font-semibold text-[#e65100] mb-3">아파트 추가</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="w-full rounded-lg border border-[#ffcc80] bg-[#fff3e0] p-3 mt-2">
+          <h4 className="text-[12px] font-semibold text-[#e65100] mb-2">아파트 추가</h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             <div>
-              <label className="block text-[11px] text-[#787774] mb-1">이름 *</label>
+              <label className="block text-[10px] text-[#787774] mb-0.5">이름 *</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="아파트 이름"
-                className="w-full text-[13px] px-2.5 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
+                className="w-full text-[12px] px-2 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
               />
             </div>
             <div>
-              <label className="block text-[11px] text-[#787774] mb-1">구</label>
+              <label className="block text-[10px] text-[#787774] mb-0.5">구</label>
               <select
                 value={district}
                 onChange={(e) => setDistrict(e.target.value as District)}
-                className="w-full text-[13px] px-2.5 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
+                className="w-full text-[12px] px-2 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
               >
                 {DISTRICTS.map((d) => (
                   <option key={d} value={d}>{d}</option>
@@ -139,32 +139,32 @@ export default function ApartmentManager({
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-[#787774] mb-1">평형</label>
+              <label className="block text-[10px] text-[#787774] mb-0.5">평형</label>
               <input
                 type="text"
                 value={size}
                 onChange={(e) => setSize(e.target.value)}
                 placeholder="24평"
-                className="w-full text-[13px] px-2.5 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
+                className="w-full text-[12px] px-2 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
               />
             </div>
             <div>
-              <label className="block text-[11px] text-[#787774] mb-1">기준가 (억) *</label>
+              <label className="block text-[10px] text-[#787774] mb-0.5">기준가(억) *</label>
               <input
                 type="number"
                 step="0.1"
                 value={basePrice}
                 onChange={(e) => setBasePrice(e.target.value)}
                 placeholder="12.5"
-                className="w-full text-[13px] px-2.5 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
+                className="w-full text-[12px] px-2 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
               />
             </div>
             <div>
-              <label className="block text-[11px] text-[#787774] mb-1">티어</label>
+              <label className="block text-[10px] text-[#787774] mb-0.5">티어</label>
               <select
                 value={tier}
                 onChange={(e) => setTier(e.target.value as TierKey)}
-                className="w-full text-[13px] px-2.5 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
+                className="w-full text-[12px] px-2 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
               >
                 {TIERS.map((t) => (
                   <option key={t} value={t}>{t}억</option>
@@ -172,33 +172,33 @@ export default function ApartmentManager({
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-[#787774] mb-1">네이버 단지ID (선택)</label>
+              <label className="block text-[10px] text-[#787774] mb-0.5">단지ID</label>
               <input
                 type="text"
                 value={naverComplexId}
                 onChange={(e) => setNaverComplexId(e.target.value)}
                 placeholder="12345"
-                className="w-full text-[13px] px-2.5 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
+                className="w-full text-[12px] px-2 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#37352f] outline-none focus:border-[#2383e2]"
               />
             </div>
           </div>
-          <div className="mt-3 flex gap-2">
+          <div className="mt-2 flex gap-2">
             <button
               onClick={handleAdd}
               disabled={!name.trim() || !basePrice.trim()}
-              className="text-[12px] font-medium px-4 py-1.5 rounded-md bg-[#2383e2] text-white hover:bg-[#1b6ec2] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="text-[11px] font-medium px-3 py-1 rounded-md bg-[#2383e2] text-white hover:bg-[#1b6ec2] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               추가
             </button>
             <button
               onClick={() => setShowAddForm(false)}
-              className="text-[12px] font-medium px-4 py-1.5 rounded-md border border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5] transition-colors"
+              className="text-[11px] font-medium px-3 py-1 rounded-md border border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5] transition-colors"
             >
               취소
             </button>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

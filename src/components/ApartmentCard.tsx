@@ -61,12 +61,12 @@ export default function ApartmentCard({
   return (
     <div className="group flex items-center gap-1">
       {folderSlot}
-      {/* 관리모드 버튼들 */}
+      {/* 관리모드 버튼들 - 호버 시에만 표시 (모바일은 항상) */}
       {isManageMode && (
-        <div className="flex items-center gap-0.5 shrink-0">
+        <div className="flex items-center gap-0.5 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => setShowTierSelect(!showTierSelect)}
-            className="text-[10px] px-1.5 py-1 rounded border border-[#ffcc80] bg-[#fff3e0] text-[#e65100] hover:bg-[#ffe0b2] transition-colors"
+            className="text-[10px] px-1.5 py-0.5 rounded border border-[#ffcc80] bg-[#fff3e0] text-[#e65100] hover:bg-[#ffe0b2] transition-colors"
             title="티어 이동"
           >
             이동
@@ -74,7 +74,7 @@ export default function ApartmentCard({
           {isOverlayChanged && (
             <button
               onClick={handleRevertTier}
-              className="text-[10px] px-1 py-1 rounded border border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5] transition-colors"
+              className="text-[10px] px-1 py-0.5 rounded border border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5] transition-colors"
               title="티어 변경 되돌리기"
             >
               복원
@@ -83,7 +83,7 @@ export default function ApartmentCard({
           {isCustomAdded && (
             <button
               onClick={handleRemoveCustom}
-              className="text-[10px] px-1 py-1 rounded border border-[#e8e5e0] bg-white text-[#eb5757] hover:bg-[#fbe4e4] transition-colors"
+              className="text-[10px] px-1 py-0.5 rounded border border-[#e8e5e0] bg-white text-[#eb5757] hover:bg-[#fbe4e4] transition-colors"
               title="추가 아파트 삭제"
             >
               삭제
@@ -123,13 +123,13 @@ export default function ApartmentCard({
               {apartment.size}
             </span>
             {isOverlayChanged && (
-              <span className="shrink-0 text-[9px] font-medium text-[#e65100] bg-[#fff3e0] border border-[#ffcc80] px-1 py-0.5 rounded">
-                변경됨
+              <span className="shrink-0 text-[8px] text-[#c77c14] bg-[#fff8ee] px-1 py-px rounded">
+                변경
               </span>
             )}
             {isCustomAdded && (
-              <span className="shrink-0 text-[9px] font-medium text-[#2383e2] bg-[#e8f4fd] border border-[#90caf9] px-1 py-0.5 rounded">
-                추가됨
+              <span className="shrink-0 text-[8px] text-[#5b9bd5] bg-[#f0f7ff] px-1 py-px rounded">
+                추가
               </span>
             )}
           </div>
@@ -160,15 +160,16 @@ export default function ApartmentCard({
             )}
           </div>
         </div>
-        {apartment.sizes && Object.keys(apartment.sizes).length > 0 && (
+        {apartment.sizes && (
           <div className="flex gap-3 mt-1 ml-0">
             {(['59', '84', '114'] as const).map((sizeKey) => {
               const sizeData = apartment.sizes?.[sizeKey];
-              if (sizeData === undefined) return null;
               return (
                 <span key={sizeKey} className="text-[10px]">
                   <span className="text-[#b4b4b0]">{sizeKey}&#13217; </span>
-                  {sizeData === null ? (
+                  {sizeData === undefined ? (
+                    <span className="text-[#d3d1cb]">&mdash;</span>
+                  ) : sizeData === null ? (
                     <span className="text-[#b4b4b0]">매물없음</span>
                   ) : (
                     <span className="text-[#2383e2] font-medium">{sizeData.price}억</span>

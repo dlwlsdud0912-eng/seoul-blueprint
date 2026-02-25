@@ -205,30 +205,22 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <Header lastUpdated={lastUpdated} />
-      <main className="mx-auto max-w-6xl px-6 py-6">
-        <div className="flex flex-col gap-4">
-          {/* 폴더 매니저 */}
-          <FolderManager
-            folders={folders}
-            activeFolderId={activeFolderId}
-            onSelectFolder={(folderId) => setActiveFolderId(folderId)}
-            onCreateFolder={handleCreateFolder}
-            onDeleteFolder={handleDeleteFolder}
-            onRenameFolder={handleRenameFolder}
-          />
-
-          {/* 관리 패널 */}
-          <ApartmentManager
-            isManageMode={isManageMode}
-            onToggleManageMode={() => setIsManageMode(m => !m)}
-            onOverlayChange={handleOverlayChange}
-          />
-
-          {/* 아파트 검색 */}
-          <SearchBar
-            apartments={allApartmentsWithPrices}
-            onSelectApartment={handleSelectApartment}
-          />
+      <main className="mx-auto max-w-6xl px-4 py-4 sm:px-6">
+        <div className="flex flex-col gap-3">
+          {/* 검색 + 관리 (한 줄) + 추가폼(펼쳐질 때) */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <SearchBar
+                apartments={allApartmentsWithPrices}
+                onSelectApartment={handleSelectApartment}
+              />
+            </div>
+            <ApartmentManager
+              isManageMode={isManageMode}
+              onToggleManageMode={() => setIsManageMode(m => !m)}
+              onOverlayChange={handleOverlayChange}
+            />
+          </div>
 
           {/* 티어 탭: 폴더 뷰가 아닐 때만 표시 */}
           {!isFolderView && (
@@ -238,13 +230,23 @@ export default function Home() {
           {/* 폴더 뷰 헤더 */}
           {isFolderView && activeFolder && (
             <div className="flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#2383e2" strokeWidth="1.3" className="shrink-0">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#2383e2" strokeWidth="1.3" className="shrink-0">
                 <path d="M2 4.5A1.5 1.5 0 013.5 3H6l1.5 2h5A1.5 1.5 0 0114 6.5v5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 11.5v-7z"/>
               </svg>
-              <span className="text-sm font-semibold text-[#2383e2]">{activeFolder.name}</span>
+              <span className="text-[13px] font-semibold text-[#2383e2]">{activeFolder.name}</span>
               <span className="text-[11px] text-[#b4b4b0]">{activeFolder.apartmentIds.length}개 단지</span>
             </div>
           )}
+
+          {/* 즐겨찾기 폴더 */}
+          <FolderManager
+            folders={folders}
+            activeFolderId={activeFolderId}
+            onSelectFolder={(folderId) => setActiveFolderId(folderId)}
+            onCreateFolder={handleCreateFolder}
+            onDeleteFolder={handleDeleteFolder}
+            onRenameFolder={handleRenameFolder}
+          />
 
           <StatsBar apartments={apartmentsWithPrices} />
           <DistrictGrid
