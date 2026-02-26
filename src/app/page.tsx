@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Apartment, TierKey, PriceMap, MemoMap, FolderMap } from '@/types';
 import { getMemos, saveMemo, deleteMemo } from '@/lib/memo-storage';
 import { savePriceCache, loadPriceCache } from '@/lib/price-cache';
@@ -32,6 +32,16 @@ export default function Home() {
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
   const [isManageMode, setIsManageMode] = useState(false);
   const [overlay, setOverlay] = useState<ApartmentOverlay>({ tierChanges: {}, additions: [] });
+  const [showProximity, setShowProximity] = useState(false);
+  const [highlightedApartmentId, setHighlightedApartmentId] = useState<string | null>(null);
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cleanup highlight timer on unmount
+  useEffect(() => {
+    return () => {
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    };
+  }, []);
 
   // Load memos, folders, overlay, and cached prices on mount
   useEffect(() => {
@@ -184,6 +194,7 @@ export default function Home() {
             Math.round((livePrice.price - apt.basePrice) * 10) / 10,
           articleCount: livePrice.articleCount,
           sizes: livePrice.sizes,
+          areaName: livePrice.areaName,
         };
       }),
     [filteredApartments, prices]
@@ -205,10 +216,17 @@ export default function Home() {
     [mergedApartments, prices]
   );
 
-  // 검색 결과 선택 시 해당 티어로 이동
-  const handleSelectApartment = useCallback((apartment: { tier: TierKey }) => {
+  // 검색 결과 선택 시 해당 티어로 이동 + 하이라이트
+  const handleSelectApartment = useCallback((apartment: Apartment) => {
     setActiveFolderId(null); // 폴더 뷰 해제
     setActiveTier(apartment.tier);
+    setHighlightedApartmentId(apartment.id);
+    // 이전 타이머 정리 후 3초 후 하이라이트 해제
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = setTimeout(() => {
+      setHighlightedApartmentId(null);
+      highlightTimerRef.current = null;
+    }, 3000);
   }, []);
 
   return (
@@ -246,7 +264,19 @@ export default function Home() {
             onRenameFolder={handleRenameFolder}
           />
 
-          <StatsBar apartments={apartmentsWithPrices} />
+          <div className="flex items-center gap-2 flex-wrap">
+            <StatsBar apartments={apartmentsWithPrices} />
+            <button
+              onClick={() => setShowProximity(p => !p)}
+              className={`text-[11px] font-medium px-2.5 py-1 rounded-md border transition-colors whitespace-nowrap ${
+                showProximity
+                  ? 'bg-[#fbe4e4] border-[#f5c6c6] text-[#eb5757]'
+                  : 'bg-white border-[#e8e5e0] text-[#787774] hover:bg-[#f7f7f5]'
+              }`}
+            >
+              {showProximity ? '● 가격근접 ON' : '가격근접'}
+            </button>
+          </div>
           <DistrictGrid
             apartments={apartmentsWithPrices}
             notes={filteredNotes}
@@ -261,6 +291,8 @@ export default function Home() {
             overlayChangedIds={overlayChangedIds}
             customAddedIds={customAddedIds}
             onOverlayChange={handleOverlayChange}
+            showProximity={showProximity}
+            highlightedApartmentId={highlightedApartmentId}
           />
         </div>
       </main>

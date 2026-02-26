@@ -18,12 +18,14 @@ interface DistrictGridProps {
   overlayChangedIds?: Set<string>;
   customAddedIds?: Set<string>;
   onOverlayChange?: () => void;
+  highlightedApartmentId?: string | null;
+  showProximity?: boolean;
 }
 
 export default function DistrictGrid({
   apartments, notes, memos, folders,
   onSaveMemo, onDeleteMemo, onAddToFolder, onRemoveFromFolder, onQuickToggleFolder,
-  isManageMode, overlayChangedIds, customAddedIds, onOverlayChange,
+  isManageMode, overlayChangedIds, customAddedIds, onOverlayChange, highlightedApartmentId, showProximity,
 }: DistrictGridProps) {
   const grouped = apartments.reduce<Record<string, Apartment[]>>((acc, apt) => {
     if (!acc[apt.district]) acc[apt.district] = [];
@@ -90,6 +92,8 @@ export default function DistrictGrid({
                         isOverlayChanged={overlayChangedIds?.has(apt.id)}
                         isCustomAdded={customAddedIds?.has(apt.id)}
                         onOverlayChange={onOverlayChange}
+                        isHighlighted={highlightedApartmentId === apt.id}
+                        showProximity={showProximity}
                       />
                       {hasMemo && (
                         <div className="border-t border-dashed border-[#e8e5e0]">

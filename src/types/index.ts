@@ -61,7 +61,7 @@ export interface PriceResult {
   price: number;
   articleCount: number;
   areaName?: string;
-  sizes?: Record<string, SizePrice>;
+  sizes?: Record<string, SizePrice | null>;
 }
 
 export interface PriceMap {

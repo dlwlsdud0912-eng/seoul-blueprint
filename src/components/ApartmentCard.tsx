@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Apartment, TierKey, FolderMap } from '@/types';
 import { saveTierChange, removeTierChange, removeAddition } from '@/lib/apartment-overlay';
+import { checkPriceProximity } from '@/lib/price-proximity';
 
 const TIERS: TierKey[] = ['12','14','16','20','24','28','32','50'];
 
 interface ApartmentCardProps {
   apartment: Apartment & {
     articleCount?: number;
+    areaName?: string;
     sizes?: Record<string, { price: number; count: number }>;
   };
   folderSlot?: React.ReactNode;
@@ -18,12 +20,21 @@ interface ApartmentCardProps {
   isOverlayChanged?: boolean;
   isCustomAdded?: boolean;
   onOverlayChange?: () => void;
+  isHighlighted?: boolean;
+  showProximity?: boolean;
 }
 
 export default function ApartmentCard({
-  apartment, folderSlot, folders, onQuickToggleFolder, isManageMode, isOverlayChanged, isCustomAdded, onOverlayChange,
+  apartment, folderSlot, folders, onQuickToggleFolder, isManageMode, isOverlayChanged, isCustomAdded, onOverlayChange, isHighlighted, showProximity,
 }: ApartmentCardProps) {
   const [showTierSelect, setShowTierSelect] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isHighlighted && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [isHighlighted]);
 
   // Bookmark (folder) calculations
   const folderList = folders ? Object.values(folders).sort((a, b) => a.createdAt - b.createdAt) : [];
@@ -87,8 +98,16 @@ export default function ApartmentCard({
     onOverlayChange?.();
   };
 
+  // Display area name: prefer areaName from prices.json, fallback to minSizeKey
+  const displayAreaName = apartment.areaName || (minSizeKey ? `${minSizeKey}㎡` : null);
+
+  // Price proximity calculation
+  const proximity = showProximity ? checkPriceProximity(apartment.sizes) : null;
+  const hasProximity = proximity?.hasProximity ?? false;
+  const proximitySizeSet = new Set(proximity?.pairs.map(p => p.largeSize) ?? []);
+
   return (
-    <div className="group flex items-center gap-1">
+    <div ref={cardRef} className={`group flex items-center gap-1 transition-all duration-300 ${isHighlighted ? 'ring-2 ring-[#2383e2] bg-[#f0f7ff] rounded-lg' : ''} ${hasProximity ? 'border-l-2 border-l-[#eb5757]' : ''}`}>
       {/* Bookmark star button - only interactive for single folder (quick toggle) */}
       {folderList.length > 0 && hasSingleFolder && (
         <button
@@ -167,66 +186,81 @@ export default function ApartmentCard({
         onClick={handleClick}
         className="flex-1 flex flex-col px-2.5 py-2 rounded-md hover:bg-[#f7f7f5] transition-colors cursor-pointer no-underline min-w-0"
       >
-        <div className="flex items-center justify-between min-w-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[13px] text-[#37352f] truncate">{apartment.name}</span>
-            <span className="shrink-0 text-[11px] text-[#b4b4b0] bg-[#f1f1ef] px-1.5 py-0.5 rounded">
-              {apartment.size}
+        {/* 1행: 아파트이름 + 사이즈뱃지 + 변경/추가 뱃지 */}
+        <div className="flex items-center gap-2 min-w-0 flex-wrap">
+          <span className="text-[13px] text-[#37352f]">{apartment.name}</span>
+          <span className="shrink-0 text-[11px] text-[#b4b4b0] bg-[#f1f1ef] px-1.5 py-0.5 rounded">
+            {apartment.size}
+          </span>
+          {isOverlayChanged && (
+            <span className="shrink-0 text-[8px] text-[#c77c14] bg-[#fff8ee] px-1 py-px rounded">
+              변경
             </span>
-            {isOverlayChanged && (
-              <span className="shrink-0 text-[8px] text-[#c77c14] bg-[#fff8ee] px-1 py-px rounded">
-                변경
-              </span>
-            )}
-            {isCustomAdded && (
-              <span className="shrink-0 text-[8px] text-[#5b9bd5] bg-[#f0f7ff] px-1 py-px rounded">
-                추가
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0 ml-2">
-            <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[10px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100" title="네이버 부동산">
-              N
+          )}
+          {isCustomAdded && (
+            <span className="shrink-0 text-[8px] text-[#5b9bd5] bg-[#f0f7ff] px-1 py-px rounded">
+              추가
             </span>
-            {minSizeKey && (
-              <span className="text-[13px] font-semibold text-[#6b7280]">
-                {minSizeKey}㎡
-              </span>
-            )}
-            <span className="text-[15px] font-bold text-[#2383e2]">
-              {price}억~
+          )}
+          {hasProximity && (
+            <span className="shrink-0 text-[8px] text-[#eb5757] bg-[#fbe4e4] px-1 py-px rounded font-medium">
+              근접
             </span>
-            {isCustomUnverified && (
-              <span className="text-[10px] text-[#b4b4b0] italic">가격 미확인</span>
-            )}
-            {isPendingCrawl && (
-              <span className="text-[10px] text-[#1a73e8] italic">크롤링 대기</span>
-            )}
-          </div>
+          )}
+          <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[10px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100 ml-auto" title="네이버 부동산">
+            N
+          </span>
         </div>
-        {apartment.sizes && (() => {
-          const remainingKeys = (['59', '84', '114'] as const).filter(k => k !== minSizeKey);
-          if (remainingKeys.length === 0) return null;
-          return (
-            <div className="flex items-center gap-5 mt-1 pl-1">
-              {remainingKeys.map((sizeKey) => {
-                const sizeData = apartment.sizes?.[sizeKey];
-                return (
-                  <div key={sizeKey} className="flex items-center gap-1 text-[12px]">
-                    <span className="text-[#78716c] font-medium">{sizeKey}&#13217;</span>
-                    {sizeData === undefined ? (
-                      <span className="text-[#d5cec4]">&mdash;</span>
-                    ) : sizeData === null ? (
-                      <span className="text-[#c8b8a8] text-[11px]">매물없음</span>
-                    ) : (
-                      <span className="text-[#4f8fd8] font-bold text-[13px]">{sizeData.price}억</span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })()}
+        {/* 2행: 면적 + 가격 + 나머지 면적별 가격 */}
+        <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+          {displayAreaName && (
+            <span className="text-[13px] font-semibold text-[#6b7280]">
+              {displayAreaName}
+            </span>
+          )}
+          <span className="text-[15px] font-bold text-[#2383e2]">
+            {price}억~
+          </span>
+          {isCustomUnverified && (
+            <span className="text-[10px] text-[#b4b4b0] italic">가격 미확인</span>
+          )}
+          {isPendingCrawl && (
+            <span className="text-[10px] text-[#1a73e8] italic">크롤링 대기</span>
+          )}
+          {apartment.sizes && (() => {
+            const remainingKeys = (['59', '84', '114'] as const).filter(k => k !== minSizeKey);
+            if (remainingKeys.length === 0) return null;
+            return (
+              <>
+                <span className="text-[#d5cec4] mx-0.5">|</span>
+                {remainingKeys.map((sizeKey) => {
+                  const sizeData = apartment.sizes?.[sizeKey];
+                  return (
+                    <div key={sizeKey} className="flex items-center gap-1 text-[12px]">
+                      <span className="text-[#78716c] font-medium">{sizeKey}&#13217;</span>
+                      {sizeData === undefined ? (
+                        <span className="text-[#d5cec4]">&mdash;</span>
+                      ) : sizeData === null ? (
+                        <span className="text-[#c8b8a8] text-[11px]">매물없음</span>
+                      ) : (
+                        <span className={`font-bold text-[13px] ${proximitySizeSet.has(sizeKey) ? 'text-[#eb5757]' : 'text-[#4f8fd8]'}`}>{sizeData.price}억</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </>
+            );
+          })()}
+        </div>
+        {hasProximity && showProximity && proximity && (
+          <div className="flex items-center gap-1 mt-0.5 pl-1 flex-wrap">
+            {proximity.pairs.map((pair, i) => (
+              <span key={i} className="text-[10px] text-[#eb5757] bg-[#fbe4e4] px-1.5 py-0.5 rounded">
+                {pair.smallSize}↔{pair.largeSize} 차이 {pair.diff}억 ({pair.diffPercent}%)
+              </span>
+            ))}
+          </div>
+        )}
       </a>
     </div>
   );
