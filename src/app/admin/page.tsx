@@ -863,14 +863,30 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                   <span className="text-sm font-medium text-[#37352f]">{formatFullWon(dsrResult.monthlyPayment)}/월</span>
                 </div>
 
-                {/* 최대 대출가능액 */}
+                {/* 최대 대출가능액 (서울규제 반영) */}
                 <div className="flex justify-between items-center py-2 border-b border-[#f0ede8]">
                   <span className="text-sm text-[#787774]">최대 대출가능액</span>
                   <div className="text-right">
-                    <span className="text-base font-semibold text-[#37352f]">{formatFullWon(dsrResult.maxMortgage)}</span>
-                    <div className="text-[11px] text-[#787774]">{formatWon(dsrResult.maxMortgage)}</div>
+                    <span className="text-base font-semibold text-[#37352f]">{formatFullWon(dsrResult.effectiveMaxMortgage)}</span>
+                    <div className="text-[11px] text-[#787774]">{formatWon(dsrResult.effectiveMaxMortgage)}</div>
                   </div>
                 </div>
+                {/* DSR 기준 vs 서울규제 한도 비교 */}
+                {dsrResult.effectiveMaxMortgage < dsrResult.maxMortgage && (
+                  <div className="bg-[#fbf3db] rounded-md px-3 py-2 text-[11px] text-[#8b6914] flex flex-col gap-0.5">
+                    <div className="flex justify-between">
+                      <span>DSR 기준 한도</span>
+                      <span>{formatWon(dsrResult.maxMortgage)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>서울 규제 한도</span>
+                      <span>{formatWon(dsrResult.seoulCap)}</span>
+                    </div>
+                    <div className="text-[10px] text-[#8b6914]/70 mt-0.5">
+                      서울 규제 한도가 적용되어 대출이 제한됩니다
+                    </div>
+                  </div>
+                )}
 
                 {/* 최대 매매가 (강조) */}
                 <div className="bg-[#f0f7ff] rounded-lg p-4">

@@ -32,9 +32,11 @@ export interface DsrResult {
   stressDsr: number | null;    // 스트레스 DSR %
   monthlyPayment: number;      // 월 상환액 (만원)
   // 역산 결과
-  maxMortgage: number;         // 최대 대출가능액 (만원)
+  maxMortgage: number;         // DSR 기준 최대 대출가능액 (만원)
+  effectiveMaxMortgage: number;// 실제 최대 대출가능액 - 서울규제+LTV 반영 (만원)
   maxPurchasePrice: number;    // 최대 매매가 (만원)
   kbPrice: number;             // KB시세 추정 (만원)
+  seoulCap: number;            // 서울 규제 한도 (만원)
   // 상세
   homeAnnualPayment: number;   // 주담대 연간 상환액
   creditAnnualPayment: number; // 신용대출 연간 상환액
@@ -265,6 +267,18 @@ export function calculateDsr(input: DsrInput): DsrResult {
     firstHomeBuyer
   );
 
+  // ── 서울 규제 한도 반영한 실제 최대 대출가능액 ──
+  let seoulCap: number;
+  if (firstHomeBuyer) {
+    seoulCap = 60000; // 생애최초 6억
+  } else {
+    if (kbPrice <= 150000) seoulCap = 60000;       // KB시세 15억 이하 → 6억
+    else if (kbPrice <= 250000) seoulCap = 40000;   // 15~25억 → 4억
+    else seoulCap = 20000;                          // 25억 초과 → 2억
+  }
+  const ltvCap = firstHomeBuyer ? kbPrice * 0.7 : kbPrice * (ltvPercent / 100);
+  const effectiveMaxMortgage = Math.min(maxMortgage, ltvCap, seoulCap);
+
   // ── 정방향: 실제 대출금 기준 DSR/월상환액 ──
   // 실제 필요 대출금 = 최대매매가 - 자기자본 (음수면 0)
   const actualMortgage = mortgageAmount ?? Math.max(0, maxPurchasePrice - equity);
@@ -322,8 +336,10 @@ export function calculateDsr(input: DsrInput): DsrResult {
     stressDsr,
     monthlyPayment,
     maxMortgage,
+    effectiveMaxMortgage,
     maxPurchasePrice,
     kbPrice,
+    seoulCap,
     homeAnnualPayment,
     creditAnnualPayment,
     stressHomeAnnualPayment,
