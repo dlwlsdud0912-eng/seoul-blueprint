@@ -259,7 +259,7 @@ function buildArticleApiUrl(complexId, pageNum) {
     areaMin: '0',
     areaMax: '900000000',
     showArticle: 'false',
-    sameAddressGroup: 'true',
+    sameAddressGroup: 'false',
     priceType: 'RETAIL',
     page: String(pageNum),
     complexNo: complexId,
@@ -271,118 +271,150 @@ function buildArticleApiUrl(complexId, pageNum) {
 
 const MAX_PAGES = 10; // 안전 상한: 최대 200매물
 
-// ─── 단일 아파트: 하이브리드 방식 (인터셉트 + 부족시 직접 fetch 페이지네이션) ───
+// ─── 단일 아파트: 직접 fetch 방식 (세션 확보 후 page 1부터 전체 면적 수집) ───
 async function fetchPriceByNavigation(page, apt) {
   const complexId = apt.naverComplexId;
   const url = `https://new.land.naver.com/complexes/${complexId}?ms=37.5,127,16&a=APT&e=RETAIL&tradeType=A1`;
 
-  // ── 1단계: 페이지 접속 + 자연스러운 API 응답 인터셉트 ──
-  const allArticles = [];
-  let gotResponse = false;
-  let totalArticleCount = 0;
+  // ── 1단계: 페이지 접속 (세션/쿠키 확보 + authorization 헤더 캡처) ──
+  let sessionReady = false;
+  let capturedHeaders = {};
 
-  const responseHandler = async (res) => {
-    const resUrl = res.url();
-    if (resUrl.includes('/api/articles/complex/') && res.status() === 200) {
-      try {
-        const data = await res.json();
-        const list = data?.articleList || [];
-        if (list.length > 0) {
-          allArticles.push(...list);
-          gotResponse = true;
+  // 요청 헤더 캡처 (authorization 등 인증 헤더)
+  const requestHandler = (req) => {
+    if (req.url().includes('/api/articles/complex/') && Object.keys(capturedHeaders).length === 0) {
+      const headers = req.headers();
+      for (const [key, value] of Object.entries(headers)) {
+        if (key.startsWith(':')) continue; // HTTP/2 pseudo-header 제외
+        if (!['host', 'content-length', 'content-type'].includes(key.toLowerCase())) {
+          capturedHeaders[key] = value;
         }
-        if (typeof data?.totalCount === 'number') {
-          totalArticleCount = Math.max(totalArticleCount, data.totalCount);
-        }
-      } catch (e) {
-        console.warn(`  응답 파싱 실패: ${e.message}`);
       }
     }
   };
-  page.on('response', responseHandler);
+  page.on('request', requestHandler);
+
+  const sessionHandler = async (res) => {
+    if (res.url().includes('/api/articles/complex/') && res.status() === 200) {
+      sessionReady = true;
+    }
+  };
+  page.on('response', sessionHandler);
 
   try {
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 25000 });
-    for (let i = 0; i < 10 && !gotResponse; i++) {
+    for (let i = 0; i < 10 && !sessionReady; i++) {
       await delay(500);
     }
-
-    // "전체" 면적 탭 클릭 → 특정 면적 필터 해제, 전체 면적 매물 로드
-    // (네이버 페이지가 기본적으로 특정 면적만 보여줄 수 있으므로 반드시 클릭)
-    try {
-      const clickedAll = await page.evaluate(() => {
-        // 면적 탭 버튼 찾기: "전체" 텍스트를 포함하는 버튼/탭
-        const candidates = [...document.querySelectorAll('button, a, span, li, div[role="tab"]')];
-        const allTab = candidates.find(el => {
-          const text = (el.textContent || '').trim();
-          // "전체" 탭 (면적 선택 영역에 있는 것)
-          return text === '전체' || text === '전체면적';
-        });
-        if (allTab) { allTab.click(); return true; }
-        return false;
-      });
-      if (clickedAll) {
-        await delay(2000); // 전체면적 API 응답 대기
-      }
-    } catch {}
-
-    // 가격순 버튼 클릭 (자연스러운 API 재요청 → 가격순 page 1)
-    try {
-      const clicked = await page.evaluate(() => {
-        const buttons = [...document.querySelectorAll('button, a, span')];
-        const btn = buttons.find(b => b.textContent && b.textContent.trim().includes('가격순'));
-        if (btn) { btn.click(); return true; }
-        return false;
-      });
-      if (clicked) {
-        await delay(2000);
-      }
-    } catch {}
-
   } catch (e) {
-    console.warn(`  세션 확보 중 오류: ${e.message}`);
-    if (!gotResponse) {
-      page.off('response', responseHandler);
+    if (!sessionReady) {
+      page.off('request', requestHandler);
+      page.off('response', sessionHandler);
       return { error: e.message };
     }
   }
 
-  page.off('response', responseHandler);
+  page.off('request', requestHandler);
+  page.off('response', sessionHandler);
 
-  // ── 2단계: 부족한 매물이 있으면 직접 fetch로 추가 페이지 수집 ──
-  if (totalArticleCount > 0 && allArticles.length < totalArticleCount) {
-    const pageSize = 20;
-    const totalPages = Math.min(Math.ceil(totalArticleCount / pageSize), MAX_PAGES);
+  if (!sessionReady) {
+    console.warn(`  [${apt.name}] 세션 확보 실패 (API 응답 없음), 직접 fetch 시도`);
+  }
 
-    for (let p = 2; p <= totalPages; p++) {
-      try {
-        const result = await page.evaluate(async (apiUrl) => {
-          const res = await fetch(apiUrl);
-          if (!res.ok) return { articles: [], httpStatus: res.status };
-          const data = await res.json();
-          return { articles: data?.articleList || [], httpStatus: res.status };
-        }, buildArticleApiUrl(complexId, p));
-
-        if (result.httpStatus === 429 || result.httpStatus === 403) {
-          console.warn(`  API 차단 (HTTP ${result.httpStatus}), 페이지네이션 중단`);
-          break;
+  // ── 2단계: "전체면적" 드롭다운 선택 (안전장치 — API 파라미터가 주력이나 보험으로) ──
+  // 직접 fetch가 areaMin=0, areaMax=900000000으로 전체 면적을 요청하지만,
+  // 네이버가 세션 상태를 참조할 경우를 대비하여 UI에서도 전체면적 선택
+  try {
+    await page.evaluate(() => {
+      // 드롭다운(select)에서 "전체면적" 또는 "전체" 옵션 선택
+      const selects = [...document.querySelectorAll('select')];
+      for (const sel of selects) {
+        const options = [...sel.options];
+        const allOpt = options.find(o =>
+          o.text.includes('전체') || o.value === '' || o.value === 'all'
+        );
+        if (allOpt && !allOpt.selected) {
+          sel.value = allOpt.value;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+          return 'select';
         }
-        if (result.articles.length === 0) break;
-        allArticles.push(...result.articles);
-      } catch (e) {
-        console.warn(`  페이지 ${p} fetch 실패: ${e.message}`);
-        break;
+      }
+      // 커스텀 드롭다운/버튼 방식 대응 (네이버가 select 대신 커스텀 UI 사용 시)
+      // "전체 서비스 보기" 등 무관한 요소 방지: 정확히 "전체" 또는 "전체면적"만 매칭
+      const candidates = [...document.querySelectorAll('button, a, span, li, div[role="tab"], div[role="option"]')];
+      const allTab = candidates.find(el => {
+        const text = (el.textContent || '').trim();
+        return text === '전체' || text === '전체면적';
+      });
+      if (allTab) {
+        allTab.click();
+        return 'click';
+      }
+      return false;
+    });
+    await delay(1500);
+  } catch (e) { /* 선택적 UI 조작, 실패해도 직접 fetch가 전체 면적 요청 */ }
+
+  // 429 방지: 페이지 로드 API 호출 후 충분한 간격 확보
+  await delay(2000);
+
+  // ── 3단계: 직접 fetch로 전체 면적 매물 수집 (캡처된 헤더 + isMoreData 페이지네이션) ──
+  const allArticles = [];
+
+  // isMoreData 기반 페이지네이션: page 1부터 isMoreData=false가 될 때까지
+  for (let p = 1; p <= MAX_PAGES; p++) {
+    try {
+      const result = await page.evaluate(async (apiUrl, headers) => {
+        const res = await fetch(apiUrl, { headers });
+        if (!res.ok) return { articles: [], isMoreData: false, httpStatus: res.status };
+        const data = await res.json();
+        return {
+          articles: data?.articleList || [],
+          isMoreData: data?.isMoreData || false,
+          httpStatus: res.status,
+        };
+      }, buildArticleApiUrl(complexId, p), capturedHeaders);
+
+      if (result.httpStatus === 401) {
+        // 헤더 캡처 실패 시 fallback: Accept만으로 재시도
+        console.warn(`  HTTP 401 (page ${p}), Accept 헤더만으로 재시도`);
+        const retry = await page.evaluate(async (apiUrl) => {
+          const res = await fetch(apiUrl, { headers: { 'Accept': 'application/json, text/plain, */*' } });
+          if (!res.ok) return { articles: [], isMoreData: false, httpStatus: res.status };
+          const data = await res.json();
+          return { articles: data?.articleList || [], isMoreData: data?.isMoreData || false, httpStatus: res.status };
+        }, buildArticleApiUrl(complexId, p));
+        if (retry.httpStatus === 200 && retry.articles.length > 0) {
+          allArticles.push(...retry.articles);
+          if (!retry.isMoreData) break;
+          await delay(500);
+          continue;
+        }
       }
 
-      await delay(500);
+      if (result.httpStatus === 429 || result.httpStatus === 403) {
+        console.warn(`  API 차단 (HTTP ${result.httpStatus}), 페이지네이션 중단`);
+        break;
+      }
+      if (result.httpStatus !== 200 || result.articles.length === 0) break;
+
+      allArticles.push(...result.articles);
+
+      // isMoreData=false면 마지막 페이지
+      if (!result.isMoreData) break;
+    } catch (e) {
+      console.warn(`  페이지 ${p} fetch 실패: ${e.message}`);
+      break;
     }
+
+    await delay(500);
   }
 
   if (allArticles.length === 0) {
     return { price: null, articleCount: 0, areaName: apt.size };
   }
 
-  // ── 3단계: 중복 제거 (articleNo 기준) ──
+  // ── 4단계: 중복 제거 (articleNo 기준) ──
   const seen = new Set();
   const articles = allArticles.filter(a => {
     const key = a.articleNo || a.atclNo;
@@ -394,7 +426,7 @@ async function fetchPriceByNavigation(page, apt) {
     return { price: null, articleCount: 0, areaName: apt.size };
   }
 
-  // ── 4단계: 매매만 필터 (전세/월세 제외, 집주인인증 포함) ──
+  // ── 5단계: 매매만 필터 (전세/월세 제외, 집주인인증 포함) ──
   const saleOnly = articles.filter(a => {
     const tradeType = (a.tradeTypeName || '').trim();
     const tradeCode = a.tradeTypeCode || '';
@@ -405,17 +437,17 @@ async function fetchPriceByNavigation(page, apt) {
     return { price: null, articleCount: 0, areaName: apt.size };
   }
 
-  // ── 5단계: 면적별 최저가 수집 (명시적 최솟값 추적 — API 정렬에 의존 안함) ──
+  // ── 6단계: 면적별 최저가 수집 (명시적 최솟값 추적) ──
   const sizes = {};
   const bucketCounts = {};
 
   let bestPrice = null;
   let bestAreaName = apt.size;
 
-  // 면적 존재 여부 확인 (매매 매물 기준 — 전세/월세 제외)
+  // 면적 존재 여부 확인 (매매 매물 기준)
   const bucketExists = {};
   for (const a of saleOnly) {
-    const exArea = parseFloat(a.exclusiveArea || a.area2 || 0);
+    const exArea = parseFloat(a.area2 || a.exclusiveArea || 0);
     for (const bucket of SIZE_BUCKETS) {
       if (Math.abs(exArea - bucket.center) <= bucket.tolerance) {
         bucketExists[bucket.key] = true;
@@ -426,20 +458,18 @@ async function fetchPriceByNavigation(page, apt) {
 
   // 매매 매물을 순회하며 버킷별 최저가 + 카운트 수집
   for (const article of saleOnly) {
-    const exArea = parseFloat(article.exclusiveArea || article.area2 || 0);
+    const exArea = parseFloat(article.area2 || article.exclusiveArea || 0);
     const dealPrice = article.dealPrc != null ? article.dealPrc : article.dealOrWarrantPrc;
     if (!dealPrice) continue;
     const parsed = parsePrice(dealPrice);
-    if (parsed === null || parsed <= 0) continue;  // 0억/음수 방어
+    if (parsed === null || parsed <= 0) continue;
 
-    // 전체 최저가 추적 (라운딩 즉시 적용)
     const rounded = Math.round(parsed * 100) / 100;
     if (bestPrice === null || rounded < bestPrice) {
       bestPrice = rounded;
       if (exArea > 0) bestAreaName = `${Math.round(exArea)}㎡`;
     }
 
-    // 버킷 매칭: 명시적 최솟값 비교 (정렬 순서에 의존하지 않음)
     for (const bucket of SIZE_BUCKETS) {
       if (Math.abs(exArea - bucket.center) <= bucket.tolerance) {
         bucketCounts[bucket.key] = (bucketCounts[bucket.key] || 0) + 1;
@@ -485,7 +515,7 @@ async function fetchPriceByNavigation(page, apt) {
 // ─── 메인 ───
 async function main() {
   const startTime = Date.now();
-  console.log('=== 네이버 부동산 크롤러 (하이브리드: 인터셉트 + 가격순 페이지네이션) ===\n');
+  console.log('=== 네이버 부동산 크롤러 (API 직접호출 + 가격순 페이지네이션) ===\n');
 
   // 1) 아파트 데이터 로드
   const apartments = parseApartmentsFile();
