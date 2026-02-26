@@ -2,8 +2,10 @@
  * 네이버 부동산 아파트 최저가 크롤러 (브라우저 인터셉션 방식)
  * puppeteer-extra + stealth로 각 단지 페이지 접속 → API 응답 가로채기
  *
- * 사용법: node scripts/crawl-prices-browser.mjs
- *         npm run crawl:browser
+ * 사용법: node scripts/crawl-prices-browser.mjs          # 전체 크롤링
+ *         npm run crawl:browser                           # 전체 크롤링
+ *         node scripts/crawl-prices-browser.mjs --search "아파트이름"  # 단지ID 검색
+ *         npm run crawl:search "아파트이름"               # 단지ID 검색
  */
 
 import fs from 'fs';
@@ -16,6 +18,183 @@ puppeteer.use(StealthPlugin());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// ─── --search 모드: 네이버 부동산에서 아파트 단지ID 검색 ───
+const searchArgIdx = process.argv.indexOf('--search');
+if (searchArgIdx !== -1) {
+  const query = process.argv[searchArgIdx + 1];
+  if (!query) {
+    console.error('사용법: node scripts/crawl-prices-browser.mjs --search "아파트이름"');
+    console.error('예시: node scripts/crawl-prices-browser.mjs --search "보광동 신동아"');
+    process.exit(1);
+  }
+  await discoverComplexId(query);
+  process.exit(0);
+}
+
+async function discoverComplexId(query) {
+  console.log(`\n=== 네이버 부동산 단지ID 검색 ===`);
+  console.log(`검색어: "${query}"\n`);
+
+  const browser = await puppeteer.launch({
+    headless: false,
+    defaultViewport: { width: 1280, height: 900 },
+    args: [
+      '--no-sandbox',
+      '--disable-blink-features=AutomationControlled',
+    ],
+  });
+
+  const page = await browser.newPage();
+
+  // API 응답 인터셉션으로 검색 결과 캡처
+  const searchResults = [];
+  const responseHandler = async (res) => {
+    const url = res.url();
+    // 네이버 부동산 자동완성/검색 API 캡처
+    if (url.includes('/api/search') && res.status() === 200) {
+      try {
+        const data = await res.json();
+        // 자동완성 결과
+        if (data?.complexes) {
+          searchResults.push(...data.complexes);
+        }
+        // 검색 결과 리스트
+        if (data?.result?.list) {
+          searchResults.push(...data.result.list);
+        }
+      } catch {}
+    }
+    // 단지 자동완성 API
+    if (url.includes('/api/complexes/auto-complete') && res.status() === 200) {
+      try {
+        const data = await res.json();
+        if (data?.complexList) {
+          searchResults.push(...data.complexList);
+        }
+      } catch {}
+    }
+    // 통합검색 API
+    if (url.includes('/api/search/all') && res.status() === 200) {
+      try {
+        const data = await res.json();
+        if (data?.complexes) {
+          searchResults.push(...data.complexes);
+        }
+      } catch {}
+    }
+  };
+  page.on('response', responseHandler);
+
+  try {
+    // 네이버 부동산 검색 페이지로 이동
+    const searchUrl = `https://new.land.naver.com/search?query=${encodeURIComponent(query)}`;
+    await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 20000 });
+
+    // 검색 결과 로딩 대기
+    await new Promise(r => setTimeout(r, 3000));
+
+    // API 인터셉션으로 못 잡았으면 DOM에서 직접 추출
+    if (searchResults.length === 0) {
+      const domResults = await page.evaluate(() => {
+        const items = [];
+        // 검색 결과 링크에서 complexId 추출
+        const links = document.querySelectorAll('a[href*="/complexes/"]');
+        links.forEach(link => {
+          const href = link.getAttribute('href') || '';
+          const match = href.match(/\/complexes\/(\d+)/);
+          if (match) {
+            const name = link.textContent?.trim() || '';
+            items.push({
+              complexNo: match[1],
+              complexName: name,
+              href,
+            });
+          }
+        });
+        return items;
+      });
+      searchResults.push(...domResults);
+    }
+
+    // URL 리다이렉트로 직접 단지 페이지로 갔는지 확인
+    const currentUrl = page.url();
+    const directMatch = currentUrl.match(/\/complexes\/(\d+)/);
+    if (directMatch && searchResults.length === 0) {
+      // 직접 단지 페이지로 리다이렉트된 경우
+      const complexInfo = await page.evaluate(() => {
+        const titleEl = document.querySelector('[class*="complex_title"], [class*="ComplexTitle"], h2, h3, h4');
+        const addrEl = document.querySelector('[class*="address"], [class*="Address"]');
+        return {
+          complexName: titleEl?.textContent?.trim() || '',
+          address: addrEl?.textContent?.trim() || '',
+        };
+      });
+      searchResults.push({
+        complexNo: directMatch[1],
+        complexName: complexInfo.complexName || query,
+        address: complexInfo.address || '',
+      });
+    }
+
+  } catch (e) {
+    console.error(`검색 중 오류: ${e.message}`);
+  }
+
+  page.off('response', responseHandler);
+  await browser.close();
+
+  // 중복 제거 (complexNo 기준)
+  const seen = new Set();
+  const unique = searchResults.filter(r => {
+    const id = r.complexNo || r.complexNumber || r.markerId;
+    if (!id || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+
+  // 결과 출력
+  if (unique.length === 0) {
+    console.log(`"${query}" 검색 결과가 없습니다.\n`);
+    console.log('팁: 정확한 아파트 단지명으로 검색해보세요.');
+    console.log('예: "래미안 원베일리", "잠실엘스", "헬리오시티"');
+    return;
+  }
+
+  console.log(`검색 결과: ${unique.length}건\n`);
+  unique.slice(0, 10).forEach((r, i) => {
+    const id = r.complexNo || r.complexNumber || r.markerId;
+    const name = r.complexName || r.name || '';
+    const addr = r.address || r.roadAddress || r.cortarAddress || '';
+    const type = r.realEstateTypeName || r.type || 'APT';
+    console.log(`  ${i + 1}. ${name}`);
+    if (addr) console.log(`     주소: ${addr}`);
+    console.log(`     유형: ${type}`);
+    console.log(`     naverComplexId: '${id}'`);
+    console.log('');
+  });
+
+  // apartments.ts 추가 가이드 출력
+  if (unique.length > 0) {
+    const top = unique[0];
+    const id = top.complexNo || top.complexNumber || top.markerId;
+    const name = top.complexName || top.name || query;
+    console.log('─────────────────────────────────────────');
+    console.log('apartments.ts에 추가하려면:');
+    console.log('');
+    console.log(`  {`);
+    console.log(`    id: '${name.replace(/\s+/g, '-').toLowerCase()}',`);
+    console.log(`    name: '${name}',`);
+    console.log(`    district: '구이름',  // 해당 구 입력`);
+    console.log(`    size: '24평',`);
+    console.log(`    basePrice: 0,`);
+    console.log(`    tier: '12',  // 적절한 티어 입력`);
+    console.log(`    naverComplexId: '${id}',`);
+    console.log(`  },`);
+    console.log('');
+    console.log('추가 후 npm run crawl:browser 실행 시 가격이 자동 수집됩니다.');
+  }
+}
 
 // ─── 평형 -> 전용면적(m2) 매핑 ───
 const PYEONG_TO_M2 = {

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "crawl": "npx tsx scripts/crawl-prices.ts",
-    "crawl:browser": "node scripts/crawl-prices-browser.mjs"
+    "crawl:browser": "node scripts/crawl-prices-browser.mjs",
+    "crawl:search": "node scripts/crawl-prices-browser.mjs --search"
   },
   "dependencies": {
     "next": "16.1.6",

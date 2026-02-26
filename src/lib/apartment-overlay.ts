@@ -61,6 +61,14 @@ export function addApartment(apt: AddedApartment): void {
   saveOverlay(overlay);
 }
 
+export function updateAddition(aptId: string, updates: Partial<AddedApartment>): void {
+  const overlay = getOverlay();
+  const idx = overlay.additions.findIndex(a => a.id === aptId);
+  if (idx === -1) return;
+  overlay.additions[idx] = { ...overlay.additions[idx], ...updates };
+  saveOverlay(overlay);
+}
+
 export function removeAddition(aptId: string): void {
   const overlay = getOverlay();
   overlay.additions = overlay.additions.filter(a => a.id !== aptId);

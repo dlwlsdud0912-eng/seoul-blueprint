@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { District, TierKey } from '@/types';
+import { District, TierKey, PriceResult } from '@/types';
 import {
   addApartment,
   clearOverlay,
   getOverlay,
+  updateAddition,
   AddedApartment,
 } from '@/lib/apartment-overlay';
 import { APARTMENTS } from '@/data/apartments';
@@ -30,12 +31,23 @@ function determineTier(price: number): TierKey {
   return '50';
 }
 
+type DiscoveryStatus = 'idle' | 'searching' | 'found' | 'not-found' | 'error';
+
+interface DiscoveryInfo {
+  status: DiscoveryStatus;
+  name?: string;
+  complexId?: string;
+  price?: number;
+  message?: string;
+}
+
 interface ApartmentManagerProps {
   isManageMode: boolean;
   activeTier: TierKey;
   onToggleManageMode: () => void;
   onOverlayChange: () => void;
   onAddComplete?: (tier: TierKey) => void;
+  onPriceDiscovered?: (aptId: string, priceInfo: PriceResult) => void;
 }
 
 export default function ApartmentManager({
@@ -44,6 +56,7 @@ export default function ApartmentManager({
   onToggleManageMode,
   onOverlayChange,
   onAddComplete,
+  onPriceDiscovered,
 }: ApartmentManagerProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,6 +67,9 @@ export default function ApartmentManager({
   // 직접 추가 폼 상태
   const [manualName, setManualName] = useState('');
   const [manualDistrict, setManualDistrict] = useState<District>('강남구');
+
+  // 네이버 검색/크롤링 상태
+  const [discovery, setDiscovery] = useState<DiscoveryInfo>({ status: 'idle' });
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -88,6 +104,32 @@ export default function ApartmentManager({
     };
   }, [searchQuery, selectedDistrict]);
 
+  // 네이버에서 가격 크롤링 (백그라운드)
+  const crawlPrice = useCallback(async (aptId: string, complexId: string) => {
+    try {
+      const priceRes = await fetch(`/api/naver-price?complexId=${encodeURIComponent(complexId)}`);
+      if (!priceRes.ok) return;
+      const priceData = await priceRes.json();
+      if (priceData.price) {
+        const correctTier = determineTier(priceData.price);
+        updateAddition(aptId, {
+          naverComplexId: complexId,
+          basePrice: priceData.price,
+          tier: correctTier,
+        });
+        onPriceDiscovered?.(aptId, {
+          price: priceData.price,
+          articleCount: priceData.articleCount,
+          sizes: priceData.sizes,
+        });
+        onOverlayChange();
+        onAddComplete?.(correctTier);
+      }
+    } catch {
+      // 가격 크롤링 실패는 무시 (아파트는 이미 추가됨)
+    }
+  }, [onPriceDiscovered, onOverlayChange, onAddComplete]);
+
   // 검색 결과에서 아파트 추가
   const handleAddFromSearch = useCallback(
     (result: SearchResult) => {
@@ -105,16 +147,21 @@ export default function ApartmentManager({
       onOverlayChange();
       onAddComplete?.(apt.tier);
 
+      // naverComplexId가 있으면 최신 가격 크롤링
+      if (apt.naverComplexId) {
+        crawlPrice(apt.id, apt.naverComplexId);
+      }
+
       // 검색 초기화
       setSearchQuery('');
       setSearchResults([]);
       setShowAddForm(false);
     },
-    [onOverlayChange, onAddComplete],
+    [onOverlayChange, onAddComplete, crawlPrice],
   );
 
-  // 직접 추가 (현재 보고 있는 티어에 자동 배정)
-  const handleManualAdd = useCallback(() => {
+  // 직접 추가 (현재 보고 있는 티어에 자동 배정) + 네이버 자동 검색
+  const handleManualAdd = useCallback(async () => {
     if (!manualName.trim()) return;
 
     const tierPrice: Record<TierKey, number> = {
@@ -122,9 +169,10 @@ export default function ApartmentManager({
       '24': 24, '28': 28, '32': 32, '50': 50,
     };
     const id = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const name = manualName.trim();
     const apt: AddedApartment = {
       id,
-      name: manualName.trim(),
+      name,
       district: manualDistrict,
       size: '24평',
       basePrice: tierPrice[activeTier] ?? 12,
@@ -138,7 +186,84 @@ export default function ApartmentManager({
     setManualName('');
     setShowManualForm(false);
     setShowAddForm(false);
-  }, [manualName, manualDistrict, activeTier, onOverlayChange, onAddComplete]);
+
+    // 백그라운드: 네이버 검색으로 complexId 발견
+    setDiscovery({ status: 'searching', message: '네이버에서 단지 검색 중...' });
+
+    try {
+      const searchRes = await fetch(`/api/naver-search?query=${encodeURIComponent(name)}`);
+      if (!searchRes.ok) {
+        setDiscovery({ status: 'error', message: '네이버 검색 실패' });
+        return;
+      }
+      const searchData = await searchRes.json();
+
+      if (!searchData.results || searchData.results.length === 0) {
+        setDiscovery({ status: 'not-found', message: '네이버에서 찾을 수 없습니다' });
+        return;
+      }
+
+      const best = searchData.results[0];
+      setDiscovery({
+        status: 'searching',
+        name: best.name,
+        complexId: best.complexId,
+        message: `단지 발견 (${best.name}) - 가격 조회 중...`,
+      });
+
+      // complexId로 overlay 업데이트
+      updateAddition(id, { naverComplexId: best.complexId, name: best.name || name });
+      onOverlayChange();
+
+      // 가격 크롤링
+      const priceRes = await fetch(`/api/naver-price?complexId=${encodeURIComponent(best.complexId)}`);
+      if (!priceRes.ok) {
+        setDiscovery({
+          status: 'found',
+          name: best.name,
+          complexId: best.complexId,
+          message: `단지 발견 (${best.name}, ID: ${best.complexId}) - 가격 조회 실패`,
+        });
+        return;
+      }
+
+      const priceData = await priceRes.json();
+
+      if (priceData.price) {
+        const correctTier = determineTier(priceData.price);
+        updateAddition(id, {
+          naverComplexId: best.complexId,
+          basePrice: priceData.price,
+          tier: correctTier,
+          name: best.name || name,
+        });
+        onPriceDiscovered?.(id, {
+          price: priceData.price,
+          articleCount: priceData.articleCount,
+          sizes: priceData.sizes,
+        });
+        onOverlayChange();
+        onAddComplete?.(correctTier);
+
+        setDiscovery({
+          status: 'found',
+          name: best.name,
+          complexId: best.complexId,
+          price: priceData.price,
+          message: `단지 발견! (${best.name}, ID: ${best.complexId}) 가격: ${priceData.price}억`,
+        });
+      } else {
+        setDiscovery({
+          status: 'found',
+          name: best.name,
+          complexId: best.complexId,
+          message: `단지 발견 (${best.name}, ID: ${best.complexId}) - 매물 없음`,
+        });
+      }
+    } catch {
+      setDiscovery({ status: 'error', message: '네이버 검색/크롤링 실패' });
+    }
+  }, [manualName, manualDistrict, activeTier, onOverlayChange, onAddComplete, onPriceDiscovered]);
 
   const handleReset = () => {
     if (window.confirm('모든 오버레이(티어 변경, 추가 아파트)를 초기화하시겠습니까?')) {
@@ -154,6 +279,7 @@ export default function ApartmentManager({
       setSearchQuery('');
       setSearchResults([]);
       setShowManualForm(false);
+      setDiscovery({ status: 'idle' });
     }
   };
 
@@ -318,7 +444,7 @@ export default function ApartmentManager({
                 </select>
               </div>
               <p className="mt-1 text-[10px] text-[#787774]">
-                현재 티어({activeTier}억)에 자동 배정됩니다. 크롤링 후 실제 가격이 반영됩니다.
+                현재 티어({activeTier}억)에 배정 후 네이버에서 자동으로 단지ID와 가격을 검색합니다.
               </p>
               <div className="mt-2 flex gap-2">
                 <button
@@ -335,6 +461,24 @@ export default function ApartmentManager({
                   취소
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* 네이버 검색 상태 피드백 */}
+          {discovery.status !== 'idle' && (
+            <div className={`mt-2 px-2.5 py-1.5 rounded-md text-[11px] ${
+              discovery.status === 'searching'
+                ? 'bg-[#e8f4fd] text-[#1a73e8]'
+                : discovery.status === 'found'
+                ? 'bg-[#e6f4ea] text-[#1e8e3e]'
+                : discovery.status === 'not-found'
+                ? 'bg-[#fef7e0] text-[#b06000]'
+                : 'bg-[#fce8e6] text-[#c5221f]'
+            }`}>
+              {discovery.status === 'searching' && (
+                <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5 align-middle" />
+              )}
+              {discovery.message}
             </div>
           )}
 
