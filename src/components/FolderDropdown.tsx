@@ -77,20 +77,6 @@ export default function FolderDropdown({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Folder tags for folders this apartment belongs to */}
-      {isInAnyFolder && (
-        <div className="flex flex-wrap gap-0.5">
-          {inFolders.map((folder) => (
-            <span
-              key={folder.id}
-              className="inline-flex items-center gap-0.5 px-1.5 py-px rounded bg-[#f0f7ff] text-[#5b9bd5] text-[9px] leading-tight"
-            >
-              {folder.name}
-            </span>
-          ))}
-        </div>
-      )}
-
       {/* Trigger button - icon only, text on hover */}
       <button
         onClick={(e) => {

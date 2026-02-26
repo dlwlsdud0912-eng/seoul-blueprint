@@ -31,6 +31,9 @@ export default function ApartmentCard({
   const isBookmarked = inFolders.length > 0;
   const hasSingleFolder = folderList.length === 1;
 
+  const isCustomUnverified = apartment.id.startsWith('custom-') && !apartment.naverComplexId;
+  const isPendingCrawl = apartment.id.startsWith('custom-') && !!apartment.naverComplexId && !apartment.currentPrice;
+
   const price = apartment.currentPrice ?? apartment.basePrice;
   const change = apartment.priceChange;
 
@@ -189,23 +192,29 @@ export default function ApartmentCard({
                 {change > 0 ? '▲' : '▼'}{Math.abs(change)}
               </span>
             )}
+            {isCustomUnverified && (
+              <span className="text-[10px] text-[#b4b4b0] italic">가격 미확인</span>
+            )}
+            {isPendingCrawl && (
+              <span className="text-[10px] text-[#1a73e8] italic">크롤링 대기</span>
+            )}
           </div>
         </div>
         {apartment.sizes && (
-          <div className="flex gap-3 mt-1 ml-0">
+          <div className="flex items-center gap-4 mt-1 pl-0.5">
             {(['59', '84', '114'] as const).map((sizeKey) => {
               const sizeData = apartment.sizes?.[sizeKey];
               return (
-                <span key={sizeKey} className="text-[10px]">
-                  <span className="text-[#b4b4b0]">{sizeKey}&#13217; </span>
+                <div key={sizeKey} className="flex items-center gap-1 text-[11px]">
+                  <span className="text-[#9a9a97] font-medium">{sizeKey}&#13217;</span>
                   {sizeData === undefined ? (
                     <span className="text-[#d3d1cb]">&mdash;</span>
                   ) : sizeData === null ? (
-                    <span className="text-[#b4b4b0]">매물없음</span>
+                    <span className="text-[#b4b4b0] text-[10px]">매물없음</span>
                   ) : (
-                    <span className="text-[#2383e2] font-medium">{sizeData.price}억</span>
+                    <span className="text-[#2383e2] font-semibold">{sizeData.price}억</span>
                   )}
-                </span>
+                </div>
               );
             })}
           </div>

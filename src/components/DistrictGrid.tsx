@@ -70,36 +70,52 @@ export default function DistrictGrid({
               ))}
               {districtApts.map((apt) => {
                 const aptNote = aptNotes.find((n) => n.apartmentId === apt.id);
+                const hasMemo = !!memos[apt.id];
                 return (
                   <div key={apt.id}>
-                    <ApartmentCard
-                      apartment={apt}
-                      folders={folders}
-                      onQuickToggleFolder={onQuickToggleFolder}
-                      folderSlot={hasFolders ? (
-                        <FolderDropdown
-                          apartmentId={apt.id}
-                          folders={folders}
-                          onAddToFolder={onAddToFolder}
-                          onRemoveFromFolder={onRemoveFromFolder}
-                        />
-                      ) : undefined}
-                      isManageMode={isManageMode}
-                      isOverlayChanged={overlayChangedIds?.has(apt.id)}
-                      isCustomAdded={customAddedIds?.has(apt.id)}
-                      onOverlayChange={onOverlayChange}
-                    />
+                    <div className={hasMemo ? 'rounded-lg border border-[#e8e5e0] bg-white overflow-hidden' : ''}>
+                      <ApartmentCard
+                        apartment={apt}
+                        folders={folders}
+                        onQuickToggleFolder={onQuickToggleFolder}
+                        folderSlot={hasFolders ? (
+                          <FolderDropdown
+                            apartmentId={apt.id}
+                            folders={folders}
+                            onAddToFolder={onAddToFolder}
+                            onRemoveFromFolder={onRemoveFromFolder}
+                          />
+                        ) : undefined}
+                        isManageMode={isManageMode}
+                        isOverlayChanged={overlayChangedIds?.has(apt.id)}
+                        isCustomAdded={customAddedIds?.has(apt.id)}
+                        onOverlayChange={onOverlayChange}
+                      />
+                      {hasMemo && (
+                        <div className="border-t border-dashed border-[#e8e5e0]">
+                          <MemoEditor
+                            apartmentId={apt.id}
+                            initialMemo={memos[apt.id]}
+                            onSave={onSaveMemo}
+                            onDelete={onDeleteMemo}
+                            inline
+                          />
+                        </div>
+                      )}
+                    </div>
                     {aptNote && (
                       <div className="mt-1 ml-2">
                         <NoteCard content={aptNote.content} />
                       </div>
                     )}
-                    <MemoEditor
-                      apartmentId={apt.id}
-                      initialMemo={memos[apt.id]}
-                      onSave={onSaveMemo}
-                      onDelete={onDeleteMemo}
-                    />
+                    {!hasMemo && (
+                      <MemoEditor
+                        apartmentId={apt.id}
+                        initialMemo={memos[apt.id]}
+                        onSave={onSaveMemo}
+                        onDelete={onDeleteMemo}
+                      />
+                    )}
                   </div>
                 );
               })}

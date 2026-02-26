@@ -7,6 +7,7 @@ interface MemoEditorProps {
   initialMemo?: string;
   onSave: (apartmentId: string, content: string) => void;
   onDelete: (apartmentId: string) => void;
+  inline?: boolean;
 }
 
 export default function MemoEditor({
@@ -14,6 +15,7 @@ export default function MemoEditor({
   initialMemo,
   onSave,
   onDelete,
+  inline,
 }: MemoEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(initialMemo ?? '');
@@ -89,8 +91,11 @@ export default function MemoEditor({
   // Editing mode
   if (isEditing) {
     return (
-      <div className="mt-1.5">
-        <div className="bg-[#fbf3db] border border-[#f1e5bc] rounded-md px-2.5 py-2">
+      <div className={inline ? '' : 'mt-1.5'}>
+        <div className={inline
+          ? 'bg-[#faf8f5] px-2.5 py-2'
+          : 'bg-[#fbf3db] border border-[#f1e5bc] rounded-md px-2.5 py-2'
+        }>
           <div className="flex gap-2">
             <span className="shrink-0 text-[11px]">✏️</span>
             <textarea
@@ -110,10 +115,10 @@ export default function MemoEditor({
               }}
               placeholder="메모를 입력하세요..."
               rows={1}
-              className="w-full resize-none border-none bg-transparent text-[11px] text-[#8b6914] leading-relaxed outline-none placeholder:text-[#c4a03a]"
+              className="w-full resize-none border-none bg-transparent text-[11px] text-[#787774] leading-relaxed outline-none placeholder:text-[#b4b4b0]"
             />
           </div>
-          <div className="flex items-center gap-2 mt-1 ml-6 text-[10px] text-[#c4a03a]">
+          <div className="flex items-center gap-2 mt-1 ml-6 text-[10px] text-[#b4b4b0]">
             <span>Enter 저장</span>
             <span>·</span>
             <span>Esc 취소</span>
@@ -128,16 +133,23 @@ export default function MemoEditor({
   // Has memo - display mode (NoteCard style)
   if (initialMemo) {
     return (
-      <div className="mt-1.5 group/memo cursor-pointer">
+      <div className={`${inline ? '' : 'mt-1.5'} group/memo cursor-pointer`}>
         <div
-          className="flex gap-2 bg-[#fbf3db] border border-[#f1e5bc] rounded-md px-2.5 py-2 text-[11px] text-[#8b6914] leading-relaxed transition-shadow hover:shadow-sm"
+          className={inline
+            ? 'flex gap-2 px-2.5 py-1.5 text-[11px] text-[#787774] leading-relaxed transition-colors hover:bg-[#f7f7f5]'
+            : 'flex gap-2 bg-[#fbf3db] border border-[#f1e5bc] rounded-md px-2.5 py-2 text-[11px] text-[#8b6914] leading-relaxed transition-shadow hover:shadow-sm'
+          }
           onClick={() => setIsEditing(true)}
         >
           <span className="shrink-0">✏️</span>
           <span className="whitespace-pre-line flex-1 min-w-0">{initialMemo}</span>
           <button
             onClick={handleDelete}
-            className="shrink-0 self-start text-[#c4a03a] hover:text-[#eb5757] transition-colors opacity-40 group-hover/memo:opacity-100"
+            className={`shrink-0 self-start transition-colors opacity-40 group-hover/memo:opacity-100 ${
+              inline
+                ? 'text-[#b4b4b0] hover:text-[#eb5757]'
+                : 'text-[#c4a03a] hover:text-[#eb5757]'
+            }`}
             title="메모 삭제"
           >
             <svg
