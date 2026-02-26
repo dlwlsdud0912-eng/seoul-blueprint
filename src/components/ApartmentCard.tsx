@@ -106,10 +106,13 @@ export default function ApartmentCard({
   const hasProximity = proximity?.hasProximity ?? false;
   const proximitySizeSet = new Set(proximity?.pairs.map(p => p.largeSize) ?? []);
 
-  // Build the remaining sizes for row 2 (all sizes except minSizeKey)
+  // Build the remaining sizes for row 2 (all sizes except the one displayed in row 1)
+  // displayAreaName과 minSizeKey가 다를 수 있음 (동일 가격 시 크롤러/카드 선택 불일치)
+  // → displayAreaName에서 버킷 키를 추출하여 해당 버킷만 제외
   const allSizeKeys = ['59', '84'] as const;
+  const displayedBucket = displayAreaName?.match(/(\d+)/)?.[1] || minSizeKey;
   const remainingKeys = apartment.sizes
-    ? allSizeKeys.filter(k => k !== minSizeKey)
+    ? allSizeKeys.filter(k => k !== displayedBucket)
     : [];
 
   return (
