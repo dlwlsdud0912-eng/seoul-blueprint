@@ -107,7 +107,7 @@ export default function ApartmentCard({
   const proximitySizeSet = new Set(proximity?.pairs.map(p => p.largeSize) ?? []);
 
   // Build the remaining sizes for row 2 (all sizes except minSizeKey)
-  const allSizeKeys = ['59', '84', '114'] as const;
+  const allSizeKeys = ['59', '84'] as const;
   const remainingKeys = apartment.sizes
     ? allSizeKeys.filter(k => k !== minSizeKey)
     : [];

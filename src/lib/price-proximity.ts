@@ -18,7 +18,7 @@ export function checkPriceProximity(
 ): ProximityResult {
   if (!sizes) return { hasProximity: false, pairs: [] };
 
-  const sizeOrder = ['59', '84', '114'];
+  const sizeOrder = ['59', '84'];
   const pairs: ProximityPair[] = [];
 
   for (let i = 0; i < sizeOrder.length - 1; i++) {
