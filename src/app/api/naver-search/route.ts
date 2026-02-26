@@ -31,12 +31,18 @@ export async function GET(request: NextRequest) {
     'User-Agent':
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     Referer: 'https://new.land.naver.com/',
-    Accept: 'application/json',
+    Accept: '*/*',
+    'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
   };
 
   // Fallback URL 순서
   const urls = [
-    `https://new.land.naver.com/api/search?query=${encodeURIComponent(query)}&type=APT`,
+    `https://new.land.naver.com/api/search?query=${encodeURIComponent(query)}&type=apt`,
     `https://new.land.naver.com/api/search?query=${encodeURIComponent(query)}`,
     `https://m.land.naver.com/search/result/${encodeURIComponent(query)}`,
   ];

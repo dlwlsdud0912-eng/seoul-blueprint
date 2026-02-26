@@ -35,22 +35,39 @@ export default function ApartmentCard({
   const isPendingCrawl = apartment.id.startsWith('custom-') && !!apartment.naverComplexId && !apartment.currentPrice;
 
   const price = apartment.currentPrice ?? apartment.basePrice;
-  const change = apartment.priceChange;
+
+  // Minimum size key: the size key with the lowest price
+  const sizeEntries = apartment.sizes
+    ? Object.entries(apartment.sizes).filter(([, v]) => v && (v as { price: number; count: number }).price)
+    : [];
+  const minSizeEntry = sizeEntries.length > 0
+    ? sizeEntries.reduce((min, curr) =>
+        (curr[1] as { price: number; count: number }).price < (min[1] as { price: number; count: number }).price ? curr : min
+      )
+    : null;
+  const minSizeKey = minSizeEntry ? minSizeEntry[0] : null;
 
   const desktopUrl = apartment.naverComplexId
     ? `https://new.land.naver.com/complexes/${apartment.naverComplexId}?markerId=${apartment.naverComplexId}&a=APT&e=RETAIL`
-    : `https://new.land.naver.com/search?query=${encodeURIComponent(apartment.name)}`;
+    : `https://new.land.naver.com/complexes?query=${encodeURIComponent(apartment.name)}`;
 
   const handleClick = (e: React.MouseEvent) => {
-    if (!apartment.naverComplexId) return;
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) {
       e.preventDefault();
-      window.open(
-        `https://fin.land.naver.com/complexes/${apartment.naverComplexId}?tab=article`,
-        '_blank',
-        'noopener,noreferrer'
-      );
+      if (apartment.naverComplexId) {
+        window.open(
+          `https://fin.land.naver.com/complexes/${apartment.naverComplexId}?tab=article`,
+          '_blank',
+          'noopener,noreferrer'
+        );
+      } else {
+        window.open(
+          `https://m.land.naver.com/search/result/${encodeURIComponent(apartment.name)}`,
+          '_blank',
+          'noopener,noreferrer'
+        );
+      }
     }
   };
 
@@ -171,27 +188,14 @@ export default function ApartmentCard({
             <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[10px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100" title="네이버 부동산">
               N
             </span>
-            {apartment.articleCount !== undefined && apartment.articleCount > 0 && (
+            {minSizeKey && (
               <span className="text-[10px] text-[#b4b4b0]">
-                {apartment.articleCount}건
+                {minSizeKey}㎡
               </span>
             )}
-            <span className={`text-[13px] font-semibold ${
-              change && change > 0 ? 'text-[#eb5757]' :
-              change && change < 0 ? 'text-[#0f7b6c]' :
-              'text-[#2383e2]'
-            }`}>
+            <span className="text-[13px] font-semibold text-[#2383e2]">
               {price}억~
             </span>
-            {change !== undefined && change !== 0 && (
-              <span className={`text-[10px] font-medium px-1 py-0.5 rounded ${
-                change > 0
-                  ? 'text-[#eb5757] bg-[#fbe4e4]'
-                  : 'text-[#0f7b6c] bg-[#dbeddb]'
-              }`}>
-                {change > 0 ? '▲' : '▼'}{Math.abs(change)}
-              </span>
-            )}
             {isCustomUnverified && (
               <span className="text-[10px] text-[#b4b4b0] italic">가격 미확인</span>
             )}
@@ -200,25 +204,29 @@ export default function ApartmentCard({
             )}
           </div>
         </div>
-        {apartment.sizes && (
-          <div className="flex items-center gap-4 mt-1 pl-0.5">
-            {(['59', '84', '114'] as const).map((sizeKey) => {
-              const sizeData = apartment.sizes?.[sizeKey];
-              return (
-                <div key={sizeKey} className="flex items-center gap-1 text-[11px]">
-                  <span className="text-[#9a9a97] font-medium">{sizeKey}&#13217;</span>
-                  {sizeData === undefined ? (
-                    <span className="text-[#d3d1cb]">&mdash;</span>
-                  ) : sizeData === null ? (
-                    <span className="text-[#b4b4b0] text-[10px]">매물없음</span>
-                  ) : (
-                    <span className="text-[#2383e2] font-semibold">{sizeData.price}억</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {apartment.sizes && (() => {
+          const remainingKeys = (['59', '84', '114'] as const).filter(k => k !== minSizeKey);
+          if (remainingKeys.length === 0) return null;
+          return (
+            <div className="flex items-center gap-4 mt-1 pl-0.5">
+              {remainingKeys.map((sizeKey) => {
+                const sizeData = apartment.sizes?.[sizeKey];
+                return (
+                  <div key={sizeKey} className="flex items-center gap-1 text-[11px]">
+                    <span className="text-[#9a9a97] font-medium">{sizeKey}&#13217;</span>
+                    {sizeData === undefined ? (
+                      <span className="text-[#d3d1cb]">&mdash;</span>
+                    ) : sizeData === null ? (
+                      <span className="text-[#b4b4b0] text-[10px]">매물없음</span>
+                    ) : (
+                      <span className="text-[#2383e2] font-semibold">{sizeData.price}억</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </a>
     </div>
   );
