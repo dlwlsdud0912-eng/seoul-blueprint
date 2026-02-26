@@ -27,6 +27,12 @@ export default function Header({ lastUpdated }: HeaderProps) {
           </div>
           <div className="flex items-center gap-4">
             <Link
+              href="/admin"
+              className="text-[11px] text-[#787774] hover:text-[#2383e2] transition-colors no-underline"
+            >
+              관리자
+            </Link>
+            <Link
               href="/guide"
               className="text-[11px] text-[#787774] hover:text-[#2383e2] transition-colors no-underline"
             >
