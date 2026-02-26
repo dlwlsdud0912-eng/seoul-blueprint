@@ -247,24 +247,42 @@ export function calculateDsr(input: DsrInput): DsrResult {
     'equal-principal-interest'
   );
 
-  // 주담대 연간 상환액 (정방향: mortgageAmount 있을 때)
-  const principal = mortgageAmount ?? 0;
+  // ── 역산: 최대 대출가능액 ──
+  // 가용상환액 = 연소득 × (targetDsr/100) - 신용대출연간상환액
+  const availableForMortgage = annualIncome * (targetDsr / 100) - creditAnnualPayment;
+
+  let maxMortgage = 0;
+  if (availableForMortgage > 0) {
+    const unitPayment = firstYearAnnualPayment(1, mortgageRate, mortgageTerm, repaymentType);
+    maxMortgage = unitPayment > 0 ? availableForMortgage / unitPayment : 0;
+  }
+
+  // 최대 매매가 이진탐색
+  const { price: maxPurchasePrice, kbPrice } = findMaxPurchasePrice(
+    maxMortgage,
+    equity,
+    ltvPercent,
+    firstHomeBuyer
+  );
+
+  // ── 정방향: 실제 대출금 기준 DSR/월상환액 ──
+  // 실제 필요 대출금 = 최대매매가 - 자기자본 (음수면 0)
+  const actualMortgage = mortgageAmount ?? Math.max(0, maxPurchasePrice - equity);
+
   const homeAnnualPayment = firstYearAnnualPayment(
-    principal,
+    actualMortgage,
     mortgageRate,
     mortgageTerm,
     repaymentType
   );
 
-  // 기본 DSR
   const basicDsr =
     annualIncome > 0
       ? ((homeAnnualPayment + creditAnnualPayment) / annualIncome) * 100
       : 0;
 
-  // 월 상환액
   const monthlyPayment = monthlyPaymentCalc(
-    principal,
+    actualMortgage,
     mortgageRate,
     mortgageTerm,
     repaymentType
@@ -281,7 +299,7 @@ export function calculateDsr(input: DsrInput): DsrResult {
     const creditAddon = getCreditStressAddon(creditBalance, stressBase);
 
     stressHomeAnnualPayment = firstYearAnnualPayment(
-      principal,
+      actualMortgage,
       mortgageRate + mortgageAddon,
       mortgageTerm,
       repaymentType
@@ -298,25 +316,6 @@ export function calculateDsr(input: DsrInput): DsrResult {
         ? ((stressHomeAnnualPayment + stressCreditAnnualPayment) / annualIncome) * 100
         : 0;
   }
-
-  // 역산: 최대 대출가능액
-  // 가용상환액 = 연소득 × (targetDsr/100) - 신용대출연간상환액
-  const availableForMortgage = annualIncome * (targetDsr / 100) - creditAnnualPayment;
-
-  let maxMortgage = 0;
-  if (availableForMortgage > 0) {
-    // 1만원당 1년 상환액
-    const unitPayment = firstYearAnnualPayment(1, mortgageRate, mortgageTerm, repaymentType);
-    maxMortgage = unitPayment > 0 ? availableForMortgage / unitPayment : 0;
-  }
-
-  // 최대 매매가 이진탐색
-  const { price: maxPurchasePrice, kbPrice } = findMaxPurchasePrice(
-    maxMortgage,
-    equity,
-    ltvPercent,
-    firstHomeBuyer
-  );
 
   return {
     basicDsr,
@@ -338,7 +337,7 @@ export function calculateDsr(input: DsrInput): DsrResult {
 
 /** 만원 → "X억 Y만원" 형식 */
 export function formatWon(manwon: number): string {
-  if (manwon <= 0) return '0만원';
+  if (manwon <= 0) return '0원';
   const eok = Math.floor(manwon / 10000);
   const man = Math.round(manwon % 10000);
   if (eok === 0) return `${man.toLocaleString()}만원`;
@@ -351,4 +350,11 @@ export function formatEok(manwon: number): string {
   if (manwon <= 0) return '0억';
   const eok = manwon / 10000;
   return `${eok.toFixed(1)}억`;
+}
+
+/** 만원 → 원 단위 콤마 포맷 (예: 79,000만원 → "790,000,000원") */
+export function formatFullWon(manwon: number): string {
+  if (manwon <= 0) return '0원';
+  const won = Math.round(manwon * 10000);
+  return `${won.toLocaleString('ko-KR')}원`;
 }
