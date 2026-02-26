@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Apartment, TierKey, PriceMap, PriceResult, MemoMap, FolderMap } from '@/types';
+import { Apartment, TierKey, PriceMap, MemoMap, FolderMap } from '@/types';
 import { getMemos, saveMemo, deleteMemo } from '@/lib/memo-storage';
 import { savePriceCache, loadPriceCache } from '@/lib/price-cache';
 import {
@@ -118,20 +118,6 @@ export default function Home() {
     }
   }, [handleAddToFolder, handleRemoveFromFolder]);
 
-  // 아파트 추가 완료 핸들러: 추가된 티어로 이동
-  const handleAddComplete = useCallback((tier: TierKey) => {
-    setActiveFolderId(null);
-    setActiveTier(tier);
-  }, []);
-
-  // 네이버 가격 발견 핸들러: prices 상태에 즉시 반영
-  const handlePriceDiscovered = useCallback((aptId: string, priceInfo: PriceResult) => {
-    setPrices(prev => ({
-      ...prev,
-      [aptId]: priceInfo,
-    }));
-  }, []);
-
   // 기본 데이터 + 오버레이 병합
   const mergedApartments = useMemo((): Apartment[] => {
     // 1. 기존 아파트에 티어 변경 적용
@@ -240,11 +226,8 @@ export default function Home() {
             </div>
             <ApartmentManager
               isManageMode={isManageMode}
-              activeTier={activeTier}
               onToggleManageMode={() => setIsManageMode(m => !m)}
               onOverlayChange={handleOverlayChange}
-              onAddComplete={handleAddComplete}
-              onPriceDiscovered={handlePriceDiscovered}
             />
           </div>
 
