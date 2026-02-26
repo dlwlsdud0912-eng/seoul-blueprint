@@ -320,24 +320,21 @@ async function fetchPriceByNavigation(page, apt) {
       }
     } catch {}
 
-    // 동일매물묶기 활성화 (매물 수 대폭 감소 → 페이지네이션 오류 방지)
+    // 동일매물묶기 비활성화 (묶으면 집주인 최저가 매물이 대표매물에 숨겨질 수 있음)
+    // 가격순 정렬 + 페이지네이션으로 최저가를 정확히 수집
     try {
       await page.evaluate(() => {
-        const labels = [...document.querySelectorAll('label, button, span, div')];
-        const el = labels.find(e => e.textContent && e.textContent.trim().includes('동일매물'));
-        if (el) { el.click(); return true; }
-        // 체크박스 직접 탐색
         const checkboxes = [...document.querySelectorAll('input[type="checkbox"]')];
         for (const cb of checkboxes) {
           const parent = cb.closest('label') || cb.parentElement;
           if (parent && parent.textContent && parent.textContent.includes('동일매물')) {
-            if (!cb.checked) cb.click();
+            if (cb.checked) cb.click(); // 켜져있으면 끄기
             return true;
           }
         }
         return false;
       });
-      await delay(1500);
+      await delay(1000);
     } catch {}
   } catch (e) {
     console.warn(`  세션 확보 중 오류: ${e.message}`);
