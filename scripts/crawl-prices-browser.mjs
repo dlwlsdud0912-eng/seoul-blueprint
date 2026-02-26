@@ -307,6 +307,25 @@ async function fetchPriceByNavigation(page, apt) {
       await delay(500);
     }
 
+    // "전체" 면적 탭 클릭 → 특정 면적 필터 해제, 전체 면적 매물 로드
+    // (네이버 페이지가 기본적으로 특정 면적만 보여줄 수 있으므로 반드시 클릭)
+    try {
+      const clickedAll = await page.evaluate(() => {
+        // 면적 탭 버튼 찾기: "전체" 텍스트를 포함하는 버튼/탭
+        const candidates = [...document.querySelectorAll('button, a, span, li, div[role="tab"]')];
+        const allTab = candidates.find(el => {
+          const text = (el.textContent || '').trim();
+          // "전체" 탭 (면적 선택 영역에 있는 것)
+          return text === '전체' || text === '전체면적';
+        });
+        if (allTab) { allTab.click(); return true; }
+        return false;
+      });
+      if (clickedAll) {
+        await delay(2000); // 전체면적 API 응답 대기
+      }
+    } catch {}
+
     // 가격순 버튼 클릭 (자연스러운 API 재요청 → 가격순 page 1)
     try {
       const clicked = await page.evaluate(() => {
@@ -320,22 +339,6 @@ async function fetchPriceByNavigation(page, apt) {
       }
     } catch {}
 
-    // 동일매물묶기 비활성화 (묶으면 집주인 최저가 매물이 대표매물에 숨겨질 수 있음)
-    // 가격순 정렬 + 페이지네이션으로 최저가를 정확히 수집
-    try {
-      await page.evaluate(() => {
-        const checkboxes = [...document.querySelectorAll('input[type="checkbox"]')];
-        for (const cb of checkboxes) {
-          const parent = cb.closest('label') || cb.parentElement;
-          if (parent && parent.textContent && parent.textContent.includes('동일매물')) {
-            if (cb.checked) cb.click(); // 켜져있으면 끄기
-            return true;
-          }
-        }
-        return false;
-      });
-      await delay(1000);
-    } catch {}
   } catch (e) {
     console.warn(`  세션 확보 중 오류: ${e.message}`);
     if (!gotResponse) {
@@ -409,9 +412,9 @@ async function fetchPriceByNavigation(page, apt) {
   let bestPrice = null;
   let bestAreaName = apt.size;
 
-  // 면적 존재 여부 확인 (전체 매물에서)
+  // 면적 존재 여부 확인 (매매 매물 기준 — 전세/월세 제외)
   const bucketExists = {};
-  for (const a of articles) {
+  for (const a of saleOnly) {
     const exArea = parseFloat(a.exclusiveArea || a.area2 || 0);
     for (const bucket of SIZE_BUCKETS) {
       if (Math.abs(exArea - bucket.center) <= bucket.tolerance) {
