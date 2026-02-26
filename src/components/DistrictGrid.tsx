@@ -20,12 +20,15 @@ interface DistrictGridProps {
   onOverlayChange?: () => void;
   highlightedApartmentId?: string | null;
   showProximity?: boolean;
+  onSaveNote?: (noteId: string, content: string) => void;
+  onDeleteNote?: (noteId: string) => void;
 }
 
 export default function DistrictGrid({
   apartments, notes, memos, folders,
   onSaveMemo, onDeleteMemo, onAddToFolder, onRemoveFromFolder, onQuickToggleFolder,
   isManageMode, overlayChangedIds, customAddedIds, onOverlayChange, highlightedApartmentId, showProximity,
+  onSaveNote, onDeleteNote,
 }: DistrictGridProps) {
   const grouped = apartments.reduce<Record<string, Apartment[]>>((acc, apt) => {
     if (!acc[apt.district]) acc[apt.district] = [];
@@ -68,7 +71,13 @@ export default function DistrictGrid({
             </div>
             <div className="p-2 flex flex-col gap-1.5">
               {districtNotes.map((note, idx) => (
-                <NoteCard key={`dn-${idx}`} content={note.content} />
+                <NoteCard
+                  key={`dn-${idx}`}
+                  content={note.content}
+                  noteId={note.noteId}
+                  onSave={onSaveNote}
+                  onDelete={onDeleteNote}
+                />
               ))}
               {districtApts.map((apt) => {
                 const aptNote = aptNotes.find((n) => n.apartmentId === apt.id);
@@ -109,7 +118,12 @@ export default function DistrictGrid({
                     </div>
                     {aptNote && (
                       <div className="mt-1 ml-2">
-                        <NoteCard content={aptNote.content} />
+                        <NoteCard
+                          content={aptNote.content}
+                          noteId={aptNote.noteId}
+                          onSave={onSaveNote}
+                          onDelete={onDeleteNote}
+                        />
                       </div>
                     )}
                     {!hasMemo && (

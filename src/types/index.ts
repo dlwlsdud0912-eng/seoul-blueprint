@@ -50,6 +50,7 @@ export interface DistrictNote {
   district?: District;
   apartmentId?: string;
   content: string;
+  noteId?: string;
 }
 
 export interface SizePrice {

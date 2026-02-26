@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Apartment, TierKey, PriceMap, MemoMap, FolderMap } from '@/types';
 import { getMemos, saveMemo, deleteMemo } from '@/lib/memo-storage';
+import { getNoteOverrides, saveNoteOverride, deleteNoteOverride } from '@/lib/note-storage';
 import { savePriceCache, loadPriceCache } from '@/lib/price-cache';
 import {
   getFolders,
@@ -30,6 +31,7 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [folders, setFolders] = useState<FolderMap>({});
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
+  const [noteOverrides, setNoteOverrides] = useState<{ overrides: Record<string, string>; deleted: string[] }>({ overrides: {}, deleted: [] });
   const [isManageMode, setIsManageMode] = useState(false);
   const [overlay, setOverlay] = useState<ApartmentOverlay>({ tierChanges: {}, additions: [] });
   const [showProximity, setShowProximity] = useState(false);
@@ -48,6 +50,7 @@ export default function Home() {
     setMemos(getMemos());
     setFolders(getFolders());
     setOverlay(getOverlay());
+    setNoteOverrides(getNoteOverrides());
 
     // 1순위: prices.json (크롤링 데이터)
     fetch('/prices.json')
@@ -85,6 +88,17 @@ export default function Home() {
   const handleDeleteMemo = useCallback((apartmentId: string) => {
     deleteMemo(apartmentId);
     setMemos(getMemos());
+  }, []);
+
+  // Note override handlers
+  const handleSaveNote = useCallback((noteId: string, content: string) => {
+    saveNoteOverride(noteId, content);
+    setNoteOverrides(getNoteOverrides());
+  }, []);
+
+  const handleDeleteNote = useCallback((noteId: string) => {
+    deleteNoteOverride(noteId);
+    setNoteOverrides(getNoteOverrides());
   }, []);
 
   // Folder handlers
@@ -178,8 +192,14 @@ export default function Home() {
 
   const filteredNotes = useMemo(() => {
     if (isFolderView) return []; // 폴더 뷰에서는 노트 미표시
-    return NOTES.filter(n => n.tier === activeTier);
-  }, [isFolderView, activeTier]);
+    return NOTES
+      .map((n, i) => ({ ...n, noteId: `note-${i}` }))
+      .filter(n => n.tier === activeTier && !noteOverrides.deleted.includes(n.noteId))
+      .map(n => ({
+        ...n,
+        content: noteOverrides.overrides[n.noteId] ?? n.content,
+      }));
+  }, [isFolderView, activeTier, noteOverrides]);
 
   // 실시간 가격이 있으면 반영한 아파트 목록
   const apartmentsWithPrices = useMemo(
@@ -293,6 +313,8 @@ export default function Home() {
             onOverlayChange={handleOverlayChange}
             showProximity={showProximity}
             highlightedApartmentId={highlightedApartmentId}
+            onSaveNote={handleSaveNote}
+            onDeleteNote={handleDeleteNote}
           />
         </div>
       </main>
