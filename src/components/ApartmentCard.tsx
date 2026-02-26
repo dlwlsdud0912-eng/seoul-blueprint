@@ -189,11 +189,11 @@ export default function ApartmentCard({
               N
             </span>
             {minSizeKey && (
-              <span className="text-[10px] text-[#b4b4b0]">
+              <span className="text-[13px] font-semibold text-[#6b7280]">
                 {minSizeKey}㎡
               </span>
             )}
-            <span className="text-[13px] font-semibold text-[#2383e2]">
+            <span className="text-[15px] font-bold text-[#2383e2]">
               {price}억~
             </span>
             {isCustomUnverified && (
@@ -208,18 +208,18 @@ export default function ApartmentCard({
           const remainingKeys = (['59', '84', '114'] as const).filter(k => k !== minSizeKey);
           if (remainingKeys.length === 0) return null;
           return (
-            <div className="flex items-center gap-4 mt-1 pl-0.5">
+            <div className="flex items-center gap-5 mt-1 pl-1">
               {remainingKeys.map((sizeKey) => {
                 const sizeData = apartment.sizes?.[sizeKey];
                 return (
-                  <div key={sizeKey} className="flex items-center gap-1 text-[11px]">
-                    <span className="text-[#9a9a97] font-medium">{sizeKey}&#13217;</span>
+                  <div key={sizeKey} className="flex items-center gap-1 text-[12px]">
+                    <span className="text-[#78716c] font-medium">{sizeKey}&#13217;</span>
                     {sizeData === undefined ? (
-                      <span className="text-[#d3d1cb]">&mdash;</span>
+                      <span className="text-[#d5cec4]">&mdash;</span>
                     ) : sizeData === null ? (
-                      <span className="text-[#b4b4b0] text-[10px]">매물없음</span>
+                      <span className="text-[#c8b8a8] text-[11px]">매물없음</span>
                     ) : (
-                      <span className="text-[#2383e2] font-semibold">{sizeData.price}억</span>
+                      <span className="text-[#4f8fd8] font-bold text-[13px]">{sizeData.price}억</span>
                     )}
                   </div>
                 );

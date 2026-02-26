@@ -497,6 +497,9 @@ export const APARTMENTS: Apartment[] = [
 
   // ========== 티어 50 (매매가 32억 초과 프리미엄) ==========
 
+  // 용산구
+  { id: 'yongsan-bogwang-shindonga', name: '보광동 신동아아파트', district: '용산구', size: '31평', basePrice: 38, tier: '50', naverComplexId: '756' },
+
   // 강남구
   { id: 'gangnam-sangnoksu', name: '상록수', district: '강남구', size: '34평', basePrice: 33, tier: '50', naverComplexId: '5760' },
 

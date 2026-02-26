@@ -113,17 +113,10 @@ export default function MemoEditor({
                 }
                 handleSave();
               }}
-              placeholder="메모를 입력하세요..."
+              placeholder="메모"
               rows={1}
               className="w-full resize-none border-none bg-transparent text-[11px] text-[#787774] leading-relaxed outline-none placeholder:text-[#b4b4b0]"
             />
-          </div>
-          <div className="flex items-center gap-2 mt-1 ml-6 text-[10px] text-[#b4b4b0]">
-            <span>Enter 저장</span>
-            <span>·</span>
-            <span>Esc 취소</span>
-            <span>·</span>
-            <span>Shift+Enter 줄바꿈</span>
           </div>
         </div>
       </div>
@@ -180,7 +173,7 @@ export default function MemoEditor({
         className="flex items-center gap-1.5 text-[11px] text-[#c4a03a] hover:text-[#8b6914] transition-colors px-2.5 py-1.5 rounded-md border border-dashed border-[#f1e5bc] hover:bg-[#fbf3db]/50 w-full opacity-50 hover:opacity-100"
       >
         <span>✏️</span>
-        <span>메모 추가...</span>
+        <span>메모</span>
       </button>
     </div>
   );
