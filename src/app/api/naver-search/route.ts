@@ -1,5 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+function extractResults(data: Record<string, unknown>): Record<string, unknown>[] {
+  // new.land.naver.com 응답 형식
+  const complexes = data?.complexes;
+  if (Array.isArray(complexes) && complexes.length > 0) return complexes;
+
+  // fallback 응답 형식
+  const resultList = (data?.result as Record<string, unknown>)?.list;
+  if (Array.isArray(resultList) && resultList.length > 0) return resultList;
+
+  return [];
+}
+
+function mapResults(list: Record<string, unknown>[]) {
+  return list.slice(0, 5).map((c) => ({
+    complexId: c.complexNo ?? c.complexNumber ?? c.hscpNo ?? '',
+    name: c.complexName ?? c.name ?? '',
+    address: c.cortarAddress ?? c.address ?? '',
+    totalHouseholdCount: c.totalHouseholdCount ?? 0,
+  }));
+}
+
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('query');
   if (!query) {
@@ -13,51 +34,46 @@ export async function GET(request: NextRequest) {
     Accept: 'application/json',
   };
 
-  try {
-    // 1차: new.land.naver.com 검색 API
-    const searchUrl = `https://new.land.naver.com/api/search?query=${encodeURIComponent(query)}&type=APT`;
-    const searchRes = await fetch(searchUrl, { headers });
+  // Fallback URL 순서
+  const urls = [
+    `https://new.land.naver.com/api/search?query=${encodeURIComponent(query)}&type=APT`,
+    `https://new.land.naver.com/api/search?query=${encodeURIComponent(query)}`,
+    `https://m.land.naver.com/search/result/${encodeURIComponent(query)}`,
+  ];
 
-    if (searchRes.ok) {
-      const searchData = await searchRes.json();
-      const complexes = searchData?.complexes ?? [];
+  let lastStatus = 0;
 
-      if (complexes.length > 0) {
-        const results = complexes.slice(0, 5).map((c: Record<string, unknown>) => ({
-          complexId: c.complexNo ?? c.complexNumber ?? c.hscpNo ?? '',
-          name: c.complexName ?? c.name ?? '',
-          address: c.cortarAddress ?? c.address ?? '',
-          totalHouseholdCount: c.totalHouseholdCount ?? 0,
-        }));
-        return NextResponse.json({ results });
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { headers });
+      lastStatus = res.status;
+
+      if (res.status === 403 || res.status === 429) {
+        // 접근 제한 - 다음 URL 시도
+        continue;
       }
-    }
 
-    // 2차 fallback: 다른 엔드포인트 시도
-    const fallbackUrl = `https://new.land.naver.com/api/search?query=${encodeURIComponent(query)}`;
-    const fallbackRes = await fetch(fallbackUrl, { headers });
+      if (!res.ok) continue;
 
-    if (fallbackRes.ok) {
-      const fallbackData = await fallbackRes.json();
-      const list =
-        fallbackData?.complexes ??
-        fallbackData?.result?.list ??
-        [];
+      const data = await res.json();
+      const list = extractResults(data);
 
       if (list.length > 0) {
-        const results = list.slice(0, 5).map((c: Record<string, unknown>) => ({
-          complexId: c.complexNo ?? c.complexNumber ?? c.hscpNo ?? '',
-          name: c.complexName ?? c.name ?? '',
-          address: c.cortarAddress ?? c.address ?? '',
-          totalHouseholdCount: c.totalHouseholdCount ?? 0,
-        }));
-        return NextResponse.json({ results });
+        return NextResponse.json({ results: mapResults(list) });
       }
+    } catch {
+      // 네트워크 오류 - 다음 URL 시도
+      continue;
     }
-
-    return NextResponse.json({ results: [] });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
   }
+
+  // 모든 URL 실패
+  if (lastStatus === 403 || lastStatus === 429) {
+    return NextResponse.json(
+      { error: '네이버 접근 제한됨 (잠시 후 재시도)', results: [] },
+      { status: 429 },
+    );
+  }
+
+  return NextResponse.json({ results: [] });
 }

@@ -31,7 +31,16 @@ export async function GET(request: NextRequest) {
 
     const res = await fetch(articleUrl, { headers });
     if (!res.ok) {
-      return NextResponse.json({ error: 'price fetch failed' }, { status: 502 });
+      if (res.status === 403 || res.status === 429) {
+        return NextResponse.json(
+          { error: '네이버 접근 제한됨 (잠시 후 재시도)' },
+          { status: 429 },
+        );
+      }
+      return NextResponse.json(
+        { error: `가격 조회 실패 (HTTP ${res.status})` },
+        { status: 502 },
+      );
     }
 
     const data = await res.json();
@@ -99,6 +108,10 @@ export async function GET(request: NextRequest) {
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    const isNetwork = message.includes('fetch') || message.includes('ECONNREFUSED') || message.includes('ETIMEDOUT');
+    return NextResponse.json(
+      { error: isNetwork ? '네이버 연결 실패' : message },
+      { status: 500 },
+    );
   }
 }

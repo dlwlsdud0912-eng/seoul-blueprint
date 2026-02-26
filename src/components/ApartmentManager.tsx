@@ -72,6 +72,19 @@ export default function ApartmentManager({
   const [discovery, setDiscovery] = useState<DiscoveryInfo>({ status: 'idle' });
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastManualRef = useRef<{ id: string; name: string; district: District } | null>(null);
+
+  // 자동 숨김: 성공/실패/에러 상태에서 8초 후 idle로
+  useEffect(() => {
+    if (
+      discovery.status === 'found' ||
+      discovery.status === 'not-found' ||
+      discovery.status === 'error'
+    ) {
+      const timer = setTimeout(() => setDiscovery({ status: 'idle' }), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [discovery.status]);
 
   const overlay = getOverlay();
   const tierChangeCount = Object.keys(overlay.tierChanges).length;
@@ -182,6 +195,9 @@ export default function ApartmentManager({
     onOverlayChange();
     onAddComplete?.(activeTier);
 
+    // 재시도용 정보 저장
+    lastManualRef.current = { id, name, district: manualDistrict };
+
     // 폼 초기화
     setManualName('');
     setShowManualForm(false);
@@ -193,13 +209,18 @@ export default function ApartmentManager({
     try {
       const searchRes = await fetch(`/api/naver-search?query=${encodeURIComponent(name)}`);
       if (!searchRes.ok) {
-        setDiscovery({ status: 'error', message: '네이버 검색 실패' });
+        const errData = await searchRes.json().catch(() => ({}));
+        const errMsg = errData?.error ?? '네이버 검색 실패';
+        setDiscovery({ status: 'error', message: errMsg });
         return;
       }
       const searchData = await searchRes.json();
 
       if (!searchData.results || searchData.results.length === 0) {
-        setDiscovery({ status: 'not-found', message: '네이버에서 찾을 수 없습니다' });
+        setDiscovery({
+          status: 'not-found',
+          message: '검색 결과가 없습니다. 정확한 아파트 이름으로 다시 시도하세요',
+        });
         return;
       }
 
@@ -218,11 +239,13 @@ export default function ApartmentManager({
       // 가격 크롤링
       const priceRes = await fetch(`/api/naver-price?complexId=${encodeURIComponent(best.complexId)}`);
       if (!priceRes.ok) {
+        const priceErr = await priceRes.json().catch(() => ({}));
+        const priceErrMsg = priceErr?.error ?? '가격 조회 실패';
         setDiscovery({
           status: 'found',
           name: best.name,
           complexId: best.complexId,
-          message: `단지 발견 (${best.name}, ID: ${best.complexId}) - 가격 조회 실패`,
+          message: `단지 발견 (${best.name}, ID: ${best.complexId}) - ${priceErrMsg}`,
         });
         return;
       }
@@ -257,13 +280,93 @@ export default function ApartmentManager({
           status: 'found',
           name: best.name,
           complexId: best.complexId,
-          message: `단지 발견 (${best.name}, ID: ${best.complexId}) - 매물 없음`,
+          message: `단지 발견 (${best.name}, ID: ${best.complexId}) - 매물 정보 없음`,
         });
       }
     } catch {
-      setDiscovery({ status: 'error', message: '네이버 검색/크롤링 실패' });
+      setDiscovery({ status: 'error', message: '네이버 연결 실패 (네트워크 오류)' });
     }
   }, [manualName, manualDistrict, activeTier, onOverlayChange, onAddComplete, onPriceDiscovered]);
+
+  // 재검색 (마지막 수동 추가 아파트)
+  const retrySearch = useCallback(async () => {
+    const last = lastManualRef.current;
+    if (!last) return;
+
+    setDiscovery({ status: 'searching', message: `"${last.name}" 재검색 중...` });
+
+    try {
+      const searchRes = await fetch(`/api/naver-search?query=${encodeURIComponent(last.name)}`);
+      if (!searchRes.ok) {
+        const errData = await searchRes.json().catch(() => ({}));
+        setDiscovery({ status: 'error', message: errData?.error ?? '네이버 검색 실패' });
+        return;
+      }
+      const searchData = await searchRes.json();
+
+      if (!searchData.results || searchData.results.length === 0) {
+        setDiscovery({ status: 'not-found', message: '검색 결과가 없습니다. 정확한 이름으로 다시 시도하세요' });
+        return;
+      }
+
+      const best = searchData.results[0];
+      setDiscovery({
+        status: 'searching',
+        name: best.name,
+        complexId: best.complexId,
+        message: `단지 발견 (${best.name}) - 가격 조회 중...`,
+      });
+
+      updateAddition(last.id, { naverComplexId: best.complexId, name: best.name || last.name });
+      onOverlayChange();
+
+      const priceRes = await fetch(`/api/naver-price?complexId=${encodeURIComponent(best.complexId)}`);
+      if (!priceRes.ok) {
+        const priceErr = await priceRes.json().catch(() => ({}));
+        setDiscovery({
+          status: 'found',
+          name: best.name,
+          complexId: best.complexId,
+          message: `단지 발견 (${best.name}, ID: ${best.complexId}) - ${priceErr?.error ?? '가격 조회 실패'}`,
+        });
+        return;
+      }
+
+      const priceData = await priceRes.json();
+      if (priceData.price) {
+        const correctTier = determineTier(priceData.price);
+        updateAddition(last.id, {
+          naverComplexId: best.complexId,
+          basePrice: priceData.price,
+          tier: correctTier,
+          name: best.name || last.name,
+        });
+        onPriceDiscovered?.(last.id, {
+          price: priceData.price,
+          articleCount: priceData.articleCount,
+          sizes: priceData.sizes,
+        });
+        onOverlayChange();
+        onAddComplete?.(correctTier);
+        setDiscovery({
+          status: 'found',
+          name: best.name,
+          complexId: best.complexId,
+          price: priceData.price,
+          message: `단지 발견! (${best.name}, ID: ${best.complexId}) 가격: ${priceData.price}억`,
+        });
+      } else {
+        setDiscovery({
+          status: 'found',
+          name: best.name,
+          complexId: best.complexId,
+          message: `단지 발견 (${best.name}, ID: ${best.complexId}) - 매물 정보 없음`,
+        });
+      }
+    } catch {
+      setDiscovery({ status: 'error', message: '네이버 연결 실패 (네트워크 오류)' });
+    }
+  }, [onOverlayChange, onAddComplete, onPriceDiscovered]);
 
   const handleReset = () => {
     if (window.confirm('모든 오버레이(티어 변경, 추가 아파트)를 초기화하시겠습니까?')) {
@@ -275,11 +378,10 @@ export default function ApartmentManager({
   const handleOpenForm = () => {
     setShowAddForm(!showAddForm);
     if (showAddForm) {
-      // 닫을 때 초기화
+      // 닫을 때 초기화 (discovery는 폼 밖이므로 유지)
       setSearchQuery('');
       setSearchResults([]);
       setShowManualForm(false);
-      setDiscovery({ status: 'idle' });
     }
   };
 
@@ -335,6 +437,32 @@ export default function ApartmentManager({
           </>
         )}
       </div>
+
+      {/* 크롤링 상태 알림 - 폼 바깥, 항상 표시 */}
+      {discovery.status !== 'idle' && (
+        <div className={`w-full mt-2 px-3 py-2 rounded-lg text-[11px] flex items-center gap-2 ${
+          discovery.status === 'searching'
+            ? 'bg-[#e8f4fd] text-[#1a73e8] border border-[#b3d7f7]'
+            : discovery.status === 'found'
+            ? 'bg-[#e6f4ea] text-[#1e8e3e] border border-[#b7dfbf]'
+            : discovery.status === 'not-found'
+            ? 'bg-[#fef7e0] text-[#b06000] border border-[#f5e6b8]'
+            : 'bg-[#fce8e6] text-[#c5221f] border border-[#f5c6c2]'
+        }`}>
+          {discovery.status === 'searching' && (
+            <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin shrink-0" />
+          )}
+          <span className="flex-1">{discovery.message}</span>
+          {(discovery.status === 'not-found' || discovery.status === 'error') && (
+            <button
+              onClick={retrySearch}
+              className="shrink-0 text-[10px] font-medium px-2 py-0.5 rounded border border-current opacity-80 hover:opacity-100 transition-opacity"
+            >
+              다시 검색
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 아파트 추가 폼 (검색 기반) */}
       {isManageMode && showAddForm && (
@@ -461,24 +589,6 @@ export default function ApartmentManager({
                   취소
                 </button>
               </div>
-            </div>
-          )}
-
-          {/* 네이버 검색 상태 피드백 */}
-          {discovery.status !== 'idle' && (
-            <div className={`mt-2 px-2.5 py-1.5 rounded-md text-[11px] ${
-              discovery.status === 'searching'
-                ? 'bg-[#e8f4fd] text-[#1a73e8]'
-                : discovery.status === 'found'
-                ? 'bg-[#e6f4ea] text-[#1e8e3e]'
-                : discovery.status === 'not-found'
-                ? 'bg-[#fef7e0] text-[#b06000]'
-                : 'bg-[#fce8e6] text-[#c5221f]'
-            }`}>
-              {discovery.status === 'searching' && (
-                <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1.5 align-middle" />
-              )}
-              {discovery.message}
             </div>
           )}
 
