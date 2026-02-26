@@ -1,4 +1,5 @@
 import { Apartment, DistrictNote, District, MemoMap, FolderMap } from '@/types';
+import { CustomNote } from '@/lib/note-storage';
 import ApartmentCard from './ApartmentCard';
 import NoteCard from './NoteCard';
 import MemoEditor from './MemoEditor';
@@ -22,6 +23,9 @@ interface DistrictGridProps {
   showProximity?: boolean;
   onSaveNote?: (noteId: string, content: string) => void;
   onDeleteNote?: (noteId: string) => void;
+  customNotes?: CustomNote[];
+  onAddNote?: (district: string) => void;
+  newNoteId?: string | null; // 방금 추가된 커스텀 노트 ID (자동 편집모드용)
 }
 
 export default function DistrictGrid({
@@ -29,6 +33,7 @@ export default function DistrictGrid({
   onSaveMemo, onDeleteMemo, onAddToFolder, onRemoveFromFolder, onQuickToggleFolder,
   isManageMode, overlayChangedIds, customAddedIds, onOverlayChange, highlightedApartmentId, showProximity,
   onSaveNote, onDeleteNote,
+  customNotes, onAddNote, newNoteId,
 }: DistrictGridProps) {
   const grouped = apartments.reduce<Record<string, Apartment[]>>((acc, apt) => {
     if (!acc[apt.district]) acc[apt.district] = [];
@@ -58,6 +63,9 @@ export default function DistrictGrid({
         const aptNotes = notes.filter(
           (n) => n.apartmentId && districtApts.some((a) => a.id === n.apartmentId)
         );
+        const districtCustomNotes = (customNotes ?? []).filter(
+          (n) => n.district === district
+        );
 
         return (
           <div key={district} className="rounded-lg border border-[#e8e5e0] bg-white">
@@ -79,6 +87,26 @@ export default function DistrictGrid({
                   onDelete={onDeleteNote}
                 />
               ))}
+              {districtCustomNotes.map((note) => (
+                <NoteCard
+                  key={note.id}
+                  content={note.content}
+                  noteId={note.id}
+                  onSave={onSaveNote}
+                  onDelete={onDeleteNote}
+                  isCustom={true}
+                  isNew={note.id === newNoteId}
+                />
+              ))}
+              {onAddNote && (
+                <button
+                  onClick={() => onAddNote(district)}
+                  className="flex items-center gap-1 text-[11px] text-[#c4a03a] hover:text-[#8b6914] border border-dashed border-[#f1e5bc] hover:bg-[#fbf3db]/50 rounded-md px-2.5 py-1.5 opacity-50 hover:opacity-100 transition-all w-full"
+                >
+                  <span>💡</span>
+                  <span>노트 추가</span>
+                </button>
+              )}
               {districtApts.map((apt) => {
                 const aptNote = aptNotes.find((n) => n.apartmentId === apt.id);
                 const hasMemo = !!memos[apt.id];

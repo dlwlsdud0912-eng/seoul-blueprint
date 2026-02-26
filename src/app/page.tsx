@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Apartment, TierKey, PriceMap, MemoMap, FolderMap } from '@/types';
 import { getMemos, saveMemo, deleteMemo } from '@/lib/memo-storage';
-import { getNoteOverrides, saveNoteOverride, deleteNoteOverride } from '@/lib/note-storage';
+import { getNoteOverrides, saveNoteOverride, deleteNoteOverride, addCustomNote, updateCustomNote, deleteCustomNote, CustomNote } from '@/lib/note-storage';
 import { savePriceCache, loadPriceCache } from '@/lib/price-cache';
 import {
   getFolders,
@@ -31,7 +31,8 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [folders, setFolders] = useState<FolderMap>({});
   const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
-  const [noteOverrides, setNoteOverrides] = useState<{ overrides: Record<string, string>; deleted: string[] }>({ overrides: {}, deleted: [] });
+  const [noteOverrides, setNoteOverrides] = useState<{ overrides: Record<string, string>; deleted: string[]; additions: CustomNote[] }>({ overrides: {}, deleted: [], additions: [] });
+  const [newNoteId, setNewNoteId] = useState<string | null>(null);
   const [isManageMode, setIsManageMode] = useState(false);
   const [overlay, setOverlay] = useState<ApartmentOverlay>({ tierChanges: {}, additions: [] });
   const [showProximity, setShowProximity] = useState(false);
@@ -92,14 +93,29 @@ export default function Home() {
 
   // Note override handlers
   const handleSaveNote = useCallback((noteId: string, content: string) => {
-    saveNoteOverride(noteId, content);
+    if (noteId.startsWith('custom-note-')) {
+      updateCustomNote(noteId, content);
+    } else {
+      saveNoteOverride(noteId, content);
+    }
     setNoteOverrides(getNoteOverrides());
   }, []);
 
   const handleDeleteNote = useCallback((noteId: string) => {
-    deleteNoteOverride(noteId);
+    if (noteId.startsWith('custom-note-')) {
+      deleteCustomNote(noteId);
+    } else {
+      deleteNoteOverride(noteId);
+    }
     setNoteOverrides(getNoteOverrides());
+    setNewNoteId(null);
   }, []);
+
+  const handleAddNote = useCallback((district: string) => {
+    const id = addCustomNote(activeTier, district, '');
+    setNoteOverrides(getNoteOverrides());
+    setNewNoteId(id);
+  }, [activeTier]);
 
   // Folder handlers
   const handleCreateFolder = useCallback((name: string) => {
@@ -199,6 +215,11 @@ export default function Home() {
         ...n,
         content: noteOverrides.overrides[n.noteId] ?? n.content,
       }));
+  }, [isFolderView, activeTier, noteOverrides]);
+
+  const filteredCustomNotes = useMemo((): CustomNote[] => {
+    if (isFolderView) return [];
+    return (noteOverrides.additions ?? []).filter(n => n.tier === activeTier);
   }, [isFolderView, activeTier, noteOverrides]);
 
   // 실시간 가격이 있으면 반영한 아파트 목록
@@ -315,6 +336,9 @@ export default function Home() {
             highlightedApartmentId={highlightedApartmentId}
             onSaveNote={handleSaveNote}
             onDeleteNote={handleDeleteNote}
+            customNotes={filteredCustomNotes}
+            onAddNote={isFolderView ? undefined : handleAddNote}
+            newNoteId={newNoteId}
           />
         </div>
       </main>
