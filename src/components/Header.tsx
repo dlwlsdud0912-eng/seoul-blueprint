@@ -32,12 +32,6 @@ export default function Header({ lastUpdated }: HeaderProps) {
             >
               관리자
             </Link>
-            <Link
-              href="/guide"
-              className="text-[11px] text-[#787774] hover:text-[#2383e2] transition-colors no-underline"
-            >
-              가이드
-            </Link>
             <div className="text-[11px] text-[#b4b4b0] flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 bg-[#0f7b6c] rounded-full" />
               {lastUpdated ? `마지막 크롤링: ${lastUpdated}` : '갱신 전'}
