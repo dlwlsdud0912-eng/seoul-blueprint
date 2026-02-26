@@ -11,7 +11,7 @@ interface ApartmentCardProps {
   apartment: Apartment & {
     articleCount?: number;
     areaName?: string;
-    sizes?: Record<string, { price: number; count: number }>;
+    sizes?: Record<string, { price: number; count: number } | null>;
   };
   folderSlot?: React.ReactNode;
   folders?: FolderMap;
@@ -106,6 +106,12 @@ export default function ApartmentCard({
   const hasProximity = proximity?.hasProximity ?? false;
   const proximitySizeSet = new Set(proximity?.pairs.map(p => p.largeSize) ?? []);
 
+  // Build the remaining sizes for row 2 (all sizes except minSizeKey)
+  const allSizeKeys = ['59', '84', '114'] as const;
+  const remainingKeys = apartment.sizes
+    ? allSizeKeys.filter(k => k !== minSizeKey)
+    : [];
+
   return (
     <div ref={cardRef} className={`group flex items-center gap-1 transition-all duration-300 ${isHighlighted ? 'ring-2 ring-[#2383e2] bg-[#f0f7ff] rounded-lg' : ''} ${hasProximity ? 'border-l-2 border-l-[#eb5757]' : ''}`}>
       {/* Bookmark star button - only interactive for single folder (quick toggle) */}
@@ -186,9 +192,9 @@ export default function ApartmentCard({
         onClick={handleClick}
         className="flex-1 flex flex-col px-2.5 py-2 rounded-md hover:bg-[#f7f7f5] transition-colors cursor-pointer no-underline min-w-0"
       >
-        {/* 1행: 아파트이름 + 사이즈뱃지 + 변경/추가 뱃지 */}
-        <div className="flex items-center gap-2 min-w-0 flex-wrap">
-          <span className="text-[13px] text-[#37352f]">{apartment.name}</span>
+        {/* 1행: 이름 + 뱃지들 + N버튼 + 면적 + 가격 */}
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-[13px] text-[#37352f] font-medium truncate">{apartment.name}</span>
           <span className="shrink-0 text-[11px] text-[#b4b4b0] bg-[#f1f1ef] px-1.5 py-0.5 rounded">
             {apartment.size}
           </span>
@@ -207,51 +213,50 @@ export default function ApartmentCard({
               근접
             </span>
           )}
-          <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[10px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100 ml-auto" title="네이버 부동산">
-            N
-          </span>
-        </div>
-        {/* 2행: 면적 + 가격 + 나머지 면적별 가격 */}
-        <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-          {displayAreaName && (
-            <span className="text-[13px] font-semibold text-[#6b7280]">
-              {displayAreaName}
-            </span>
-          )}
-          <span className="text-[15px] font-bold text-[#2383e2]">
-            {price}억~
-          </span>
           {isCustomUnverified && (
-            <span className="text-[10px] text-[#b4b4b0] italic">가격 미확인</span>
+            <span className="shrink-0 text-[10px] text-[#b4b4b0] italic">가격 미확인</span>
           )}
           {isPendingCrawl && (
-            <span className="text-[10px] text-[#1a73e8] italic">크롤링 대기</span>
+            <span className="shrink-0 text-[10px] text-[#1a73e8] italic">크롤링 대기</span>
           )}
-          {apartment.sizes && (() => {
-            const remainingKeys = (['59', '84', '114'] as const).filter(k => k !== minSizeKey);
-            if (remainingKeys.length === 0) return null;
-            return (
-              <>
-                <span className="text-[#d5cec4] mx-0.5">|</span>
-                {remainingKeys.map((sizeKey) => {
-                  const sizeData = apartment.sizes?.[sizeKey];
-                  return (
-                    <div key={sizeKey} className="flex items-center gap-1 text-[12px]">
-                      <span className="text-[#78716c] font-medium">{sizeKey}&#13217;</span>
-                      {sizeData === undefined ? (
-                        <span className="text-[#d5cec4]">&mdash;</span>
-                      ) : sizeData === null ? (
-                        <span className="text-[#c8b8a8] text-[11px]">매물없음</span>
-                      ) : (
-                        <span className={`font-bold text-[13px] ${proximitySizeSet.has(sizeKey) ? 'text-[#eb5757]' : 'text-[#4f8fd8]'}`}>{sizeData.price}억</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </>
-            );
-          })()}
+          {/* N 버튼 (hover시 표시) */}
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[10px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100 ml-auto" title="네이버 부동산">
+            N
+          </span>
+          {/* 최소면적 + 가격 (오른쪽 정렬) */}
+          <div className="flex items-baseline gap-1 shrink-0">
+            {displayAreaName && (
+              <span className="text-[12px] text-[#9ca3af] font-medium">
+                {displayAreaName}
+              </span>
+            )}
+            <span className="text-[17px] font-bold text-[#2383e2] leading-tight">
+              {price}억~
+            </span>
+          </div>
         </div>
+        {/* 2행: 면적별 가격 (부가 정보, 작고 컴팩트) */}
+        {remainingKeys.length > 0 && (
+          <div className="flex items-center gap-3 mt-0.5 pl-1">
+            {remainingKeys.map((sizeKey, idx) => {
+              const sizeData = apartment.sizes?.[sizeKey];
+              return (
+                <div key={sizeKey} className="flex items-center gap-0">
+                  {idx > 0 && <span className="text-[#d5cec4] text-[10px] mr-3">&middot;</span>}
+                  <span className="text-[11px] text-[#9ca3af] mr-0.5">{sizeKey}&#13217;</span>
+                  {sizeData === undefined ? (
+                    <span className="text-[#d5cec4] text-[11px]">&mdash;</span>
+                  ) : sizeData === null ? (
+                    <span className="text-[#d1d5db] text-[10px]">매물없음</span>
+                  ) : (
+                    <span className={`text-[12px] font-medium ${proximitySizeSet.has(sizeKey) ? 'text-[#eb5757]' : 'text-[#6b7280]'}`}>{sizeData.price}억</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {/* 근접 상세 정보 */}
         {hasProximity && showProximity && proximity && (
           <div className="flex items-center gap-1 mt-0.5 pl-1 flex-wrap">
             {proximity.pairs.map((pair, i) => (
