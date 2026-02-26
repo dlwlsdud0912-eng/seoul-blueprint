@@ -190,77 +190,61 @@ export default function ApartmentCard({
         target="_blank"
         rel="noopener noreferrer"
         onClick={handleClick}
-        className="flex-1 flex flex-col px-2.5 py-2 rounded-md hover:bg-[#f7f7f5] transition-colors cursor-pointer no-underline min-w-0"
+        className="flex-1 flex flex-col px-3 py-2 rounded-lg border border-[#f0ede8] bg-[#fafaf8] hover:bg-[#f5f4f1] hover:border-[#e8e5e0] transition-colors cursor-pointer no-underline min-w-0"
       >
-        {/* 1행: 이름 + 뱃지들 + N버튼 + 면적 + 가격 */}
+        {/* 1행: 이름 + 평형뱃지 + 상태뱃지 + N버튼 */}
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-[13px] text-[#37352f] font-medium truncate">{apartment.name}</span>
-          <span className="shrink-0 text-[11px] text-[#b4b4b0] bg-[#f1f1ef] px-1.5 py-0.5 rounded">
-            {apartment.size}
-          </span>
+          <span className="text-[13px] text-[#37352f] font-medium leading-snug">{apartment.name}</span>
           {isOverlayChanged && (
-            <span className="shrink-0 text-[8px] text-[#c77c14] bg-[#fff8ee] px-1 py-px rounded">
-              변경
-            </span>
+            <span className="shrink-0 text-[8px] text-[#c77c14] bg-[#fff8ee] px-1 py-px rounded">변경</span>
           )}
           {isCustomAdded && (
-            <span className="shrink-0 text-[8px] text-[#5b9bd5] bg-[#f0f7ff] px-1 py-px rounded">
-              추가
-            </span>
+            <span className="shrink-0 text-[8px] text-[#5b9bd5] bg-[#f0f7ff] px-1 py-px rounded">추가</span>
           )}
           {hasProximity && (
-            <span className="shrink-0 text-[8px] text-[#eb5757] bg-[#fbe4e4] px-1 py-px rounded font-medium">
-              근접
-            </span>
+            <span className="shrink-0 text-[8px] text-[#eb5757] bg-[#fbe4e4] px-1 py-px rounded font-medium">근접</span>
           )}
           {isCustomUnverified && (
-            <span className="shrink-0 text-[10px] text-[#b4b4b0] italic">가격 미확인</span>
+            <span className="shrink-0 text-[10px] text-[#b4b4b0] italic">미확인</span>
           )}
           {isPendingCrawl && (
-            <span className="shrink-0 text-[10px] text-[#1a73e8] italic">크롤링 대기</span>
+            <span className="shrink-0 text-[10px] text-[#1a73e8] italic">대기</span>
           )}
-          {/* N 버튼 (hover시 표시) */}
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[10px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100 ml-auto" title="네이버 부동산">
+          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-[#dbeddb] text-[9px] font-bold text-[#0f7b6c] opacity-0 transition-opacity group-hover:opacity-100 ml-auto" title="네이버 부동산">
             N
           </span>
-          {/* 최소면적 + 가격 (오른쪽 정렬) */}
-          <div className="flex items-baseline gap-1 shrink-0">
-            {displayAreaName && (
-              <span className="text-[12px] text-[#9ca3af] font-medium">
-                {displayAreaName}
-              </span>
-            )}
-            <span className="text-[17px] font-bold text-[#2383e2] leading-tight">
-              {price}억~
-            </span>
-          </div>
         </div>
-        {/* 2행: 면적별 가격 (부가 정보, 작고 컴팩트) */}
-        {remainingKeys.length > 0 && (
-          <div className="flex items-center gap-3 mt-0.5 pl-1">
-            {remainingKeys.map((sizeKey, idx) => {
-              const sizeData = apartment.sizes?.[sizeKey];
-              return (
-                <div key={sizeKey} className="flex items-center gap-0">
-                  {idx > 0 && <span className="text-[#d5cec4] text-[10px] mr-3">&middot;</span>}
-                  <span className="text-[11px] text-[#9ca3af] mr-0.5">{sizeKey}&#13217;</span>
-                  {sizeData === undefined ? (
-                    <span className="text-[#d5cec4] text-[11px]">&mdash;</span>
-                  ) : sizeData === null ? (
-                    <span className="text-[#d1d5db] text-[10px]">매물없음</span>
-                  ) : (
-                    <span className={`text-[12px] font-medium ${proximitySizeSet.has(sizeKey) ? 'text-[#eb5757]' : 'text-[#6b7280]'}`}>{sizeData.price}억</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {/* 2행: 면적 + 가격 (모든 사이즈 한 줄) */}
+        <div className="flex items-baseline gap-1 mt-0.5 flex-wrap">
+          {/* 최소면적 가격 (강조) */}
+          {displayAreaName && (
+            <span className="text-[11px] text-[#9ca3af]">{displayAreaName}</span>
+          )}
+          <span className="text-[16px] font-bold text-[#2383e2] leading-none">
+            {price}억~
+          </span>
+          {/* 나머지 면적 가격 */}
+          {remainingKeys.length > 0 && remainingKeys.map((sizeKey) => {
+            const sizeData = apartment.sizes?.[sizeKey];
+            return (
+              <span key={sizeKey} className="flex items-baseline gap-0.5 ml-1.5">
+                <span className="text-[10px] text-[#b4b4b0]">{sizeKey}&#13217;</span>
+                {sizeData === undefined ? (
+                  <span className="text-[#d5cec4] text-[10px]">&mdash;</span>
+                ) : sizeData === null ? (
+                  <span className="text-[#d1d5db] text-[10px]">매물없음</span>
+                ) : (
+                  <span className={`text-[12px] font-semibold ${proximitySizeSet.has(sizeKey) ? 'text-[#eb5757]' : 'text-[#78909c]'}`}>{sizeData.price}억</span>
+                )}
+              </span>
+            );
+          })}
+        </div>
         {/* 근접 상세 정보 */}
         {hasProximity && showProximity && proximity && (
-          <div className="flex items-center gap-1 mt-0.5 pl-1 flex-wrap">
+          <div className="flex items-center gap-1 mt-0.5 flex-wrap">
             {proximity.pairs.map((pair, i) => (
-              <span key={i} className="text-[10px] text-[#eb5757] bg-[#fbe4e4] px-1.5 py-0.5 rounded">
+              <span key={`${pair.smallSize}-${pair.largeSize}`} className="text-[10px] text-[#eb5757] bg-[#fbe4e4] px-1.5 py-0.5 rounded">
                 {pair.smallSize}↔{pair.largeSize} 차이 {pair.diff}억 ({pair.diffPercent}%)
               </span>
             ))}
