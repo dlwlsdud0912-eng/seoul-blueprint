@@ -426,7 +426,7 @@ async function fetchPriceByNavigation(page, apt) {
     return { price: null, articleCount: 0, areaName: apt.size };
   }
 
-  // ── 5단계: 매매만 필터 (전세/월세 제외, 집주인인증 포함) ──
+  // ── 5단계: 매매만 필터 (전세/월세 제외) ──
   const saleOnly = articles.filter(a => {
     const tradeType = (a.tradeTypeName || '').trim();
     const tradeCode = a.tradeTypeCode || '';
@@ -437,16 +437,18 @@ async function fetchPriceByNavigation(page, apt) {
     return { price: null, articleCount: 0, areaName: apt.size };
   }
 
-  // ── 6단계: 면적별 최저가 수집 (명시적 최솟값 추적) ──
+  // ── 6단계: 집주인인증 매물만 필터 (verificationTypeCode === 'OWNER') ──
+  const ownerOnly = saleOnly.filter(a => a.verificationTypeCode === 'OWNER');
+
   const sizes = {};
   const bucketCounts = {};
 
   let bestPrice = null;
   let bestAreaName = apt.size;
 
-  // 면적 존재 여부 확인 (매매 매물 기준)
+  // 면적 존재 여부 확인 (집주인 매물 기준)
   const bucketExists = {};
-  for (const a of saleOnly) {
+  for (const a of ownerOnly) {
     const exArea = parseFloat(a.area2 || a.exclusiveArea || 0);
     for (const bucket of SIZE_BUCKETS) {
       if (Math.abs(exArea - bucket.center) <= bucket.tolerance) {
@@ -456,8 +458,8 @@ async function fetchPriceByNavigation(page, apt) {
     }
   }
 
-  // 매매 매물을 순회하며 버킷별 최저가 + 카운트 수집
-  for (const article of saleOnly) {
+  // 집주인 매물만 순회하며 버킷별 최저가 + 카운트 수집
+  for (const article of ownerOnly) {
     const exArea = parseFloat(article.area2 || article.exclusiveArea || 0);
     const dealPrice = article.dealPrc != null ? article.dealPrc : article.dealOrWarrantPrc;
     if (!dealPrice) continue;
@@ -465,6 +467,7 @@ async function fetchPriceByNavigation(page, apt) {
     if (parsed === null || parsed <= 0) continue;
 
     const rounded = Math.round(parsed * 100) / 100;
+
     if (bestPrice === null || rounded < bestPrice) {
       bestPrice = rounded;
       if (exArea > 0) bestAreaName = `${Math.round(exArea)}㎡`;
@@ -481,16 +484,14 @@ async function fetchPriceByNavigation(page, apt) {
     }
   }
 
-  // 버킷 카운트 업데이트
-  for (const [key, count] of Object.entries(bucketCounts)) {
-    if (sizes[key]) sizes[key].count = count;
-  }
-
-  // 면적은 존재하나 매매 매물이 없는 버킷 → null 처리
+  // 버킷별 카운트 반영 + 매물없음 처리
   for (const bucket of SIZE_BUCKETS) {
-    if (bucketExists[bucket.key] && !sizes[bucket.key]) {
-      sizes[bucket.key] = null;
+    if (sizes[bucket.key]) {
+      sizes[bucket.key].count = bucketCounts[bucket.key] || 0;
+    } else if (bucketExists[bucket.key]) {
+      sizes[bucket.key] = null; // 집주인 매물 존재하나 가격 파싱 실패
     }
+    // bucketExists에 없으면 → sizes에 안 들어감 → UI에서 "—" 표시
   }
 
   // sizes 버킷 중 최저가로 bestAreaName 보정
@@ -501,12 +502,12 @@ async function fetchPriceByNavigation(page, apt) {
   }
 
   if (bestPrice === null) {
-    return { price: null, articleCount: saleOnly.length, areaName: apt.size };
+    return { price: null, articleCount: ownerOnly.length, areaName: apt.size };
   }
 
   return {
     price: bestPrice,
-    articleCount: saleOnly.length,
+    articleCount: ownerOnly.length,
     areaName: bestAreaName,
     sizes,
   };
