@@ -385,6 +385,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   const [dsrResult, setDsrResult] = useState<DsrResult | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [prices, setPrices] = useState<PriceMap>({});
+  const hasCalculated = useRef(false);
 
   // 로드
   useEffect(() => {
@@ -432,7 +433,16 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
     };
     const result = calculateDsr(dsrInput);
     setDsrResult(result);
+    hasCalculated.current = true;
   };
+
+  // 입력값 변경 시 자동 재계산 (최초 계산 이후)
+  useEffect(() => {
+    if (hasCalculated.current && wonToManwon(inputs.annualIncome) > 0) {
+      handleCalculate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputs]);
 
   const handleLogout = () => {
     adminLogout();
@@ -680,17 +690,20 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                 <div>
                   <label className="text-xs text-[#787774] mb-1 block">목표 DSR</label>
                   <div className="flex gap-1.5">
-                    {[40, 50].map((v) => (
+                    {([
+                      { value: 40, label: '40% (1금융)' },
+                      { value: 50, label: '50% (2금융)' },
+                    ]).map((opt) => (
                       <button
-                        key={v}
-                        onClick={() => updateField('targetDsr', v)}
+                        key={opt.value}
+                        onClick={() => updateField('targetDsr', opt.value)}
                         className={`px-4 py-1.5 rounded-md text-xs border transition-colors ${
-                          inputs.targetDsr === v
+                          inputs.targetDsr === opt.value
                             ? 'bg-[#2383e2] text-white border-[#2383e2]'
                             : 'bg-white text-[#787774] border-[#e8e5e0] hover:bg-[#f7f7f5]'
                         }`}
                       >
-                        {v}%
+                        {opt.label}
                       </button>
                     ))}
                   </div>
@@ -820,14 +833,14 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                   return (
                     <>
                       {/* 실제 대출가능액 (메인) */}
-                      <div className="rounded-lg p-4 bg-[#2383e2]/5 border border-[#2383e2]/20">
-                        <div className="text-xs text-[#2383e2] font-medium mb-1">
+                      <div className="rounded-lg p-4 bg-[#eb5757]/5 border border-[#eb5757]/20">
+                        <div className="text-xs text-[#eb5757] font-medium mb-1">
                           DSR {inputs.targetDsr}% 이내 실제 대출가능액
                         </div>
-                        <div className="text-2xl font-bold text-[#2383e2]">
+                        <div className="text-2xl font-bold text-[#eb5757]">
                           {formatFullWon(displayEffective)}
                         </div>
-                        <div className="text-sm text-[#2383e2]/60 mt-0.5">
+                        <div className="text-sm text-[#eb5757]/60 mt-0.5">
                           {formatEok(displayEffective)}
                         </div>
                         {displayEffective < displayMaxMortgage && (
