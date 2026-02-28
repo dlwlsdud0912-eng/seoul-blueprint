@@ -384,7 +384,6 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   const [inputs, setInputs] = useState<StoredInputs>(DEFAULT_INPUTS);
   const [dsrResult, setDsrResult] = useState<DsrResult | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showStress, setShowStress] = useState(false);
   const [prices, setPrices] = useState<PriceMap>({});
 
   // 로드
@@ -695,55 +694,33 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                     ))}
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* 스트레스 DSR 섹션 */}
-            <div className="bg-white border border-[#e8e5e0] rounded-lg overflow-hidden">
-              <button
-                onClick={() => setShowStress(!showStress)}
-                className="w-full flex items-center justify-between px-5 py-3 text-sm font-medium text-[#37352f] hover:bg-[#f7f7f5] transition-colors"
-              >
-                <span>스트레스 DSR</span>
-                <span className="text-[#787774] text-xs">{showStress ? '▲ 접기' : '▼ 펼치기'}</span>
-              </button>
-
-              {showStress && (
-                <div className="px-5 pb-5 space-y-3 border-t border-[#e8e5e0] pt-4">
-                  {/* 스트레스 적용 토글 */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#787774]">스트레스 적용</span>
-                    <button
-                      onClick={() => updateField('stressEnabled', !inputs.stressEnabled)}
-                      className={`relative w-10 h-5 rounded-full transition-colors ${
-                        inputs.stressEnabled ? 'bg-[#2383e2]' : 'bg-[#e8e5e0]'
-                      }`}
-                    >
-                      <span
-                        className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                          inputs.stressEnabled ? 'translate-x-5' : 'translate-x-0.5'
-                        }`}
-                      />
-                    </button>
-                  </div>
+                {/* 스트레스 DSR */}
+                <div>
+                  <label className="flex items-center gap-2 cursor-pointer mb-2">
+                    <input
+                      type="checkbox"
+                      checked={inputs.stressEnabled}
+                      onChange={(e) => updateField('stressEnabled', e.target.checked)}
+                      className="accent-[#2383e2]"
+                    />
+                    <span className="text-xs font-medium text-[#37352f]">스트레스 DSR 적용</span>
+                  </label>
 
                   {inputs.stressEnabled && (
-                    <>
-                      {/* 금리유형 */}
-                      <div>
-                        <label className="text-xs text-[#787774] mb-1 block">금리유형</label>
+                    <div className="space-y-2.5 pl-5 border-l-2 border-[#2383e2]/20">
+                      {/* 금리유형 + 지역 한 줄 */}
+                      <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex rounded-md border border-[#e8e5e0] overflow-hidden">
-                          {(
-                            [
-                              { value: 'variable', label: '변동형' },
-                              { value: 'mixed', label: '혼합형' },
-                              { value: 'cycle', label: '주기형' },
-                            ] as { value: RateType; label: string }[]
-                          ).map((opt) => (
+                          {([
+                            { value: 'variable' as RateType, label: '변동' },
+                            { value: 'mixed' as RateType, label: '혼합' },
+                            { value: 'cycle' as RateType, label: '주기' },
+                          ]).map((opt) => (
                             <button
                               key={opt.value}
                               onClick={() => updateField('rateType', opt.value)}
-                              className={`flex-1 py-1.5 text-xs transition-colors ${
+                              className={`px-2.5 py-1 text-[11px] transition-colors ${
                                 inputs.rateType === opt.value
                                   ? 'bg-[#2383e2] text-white'
                                   : 'bg-white text-[#787774] hover:bg-[#f7f7f5]'
@@ -753,45 +730,35 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                             </button>
                           ))}
                         </div>
-                      </div>
-
-                      {/* 지역 */}
-                      <div>
-                        <label className="text-xs text-[#787774] mb-1 block">지역</label>
                         <div className="flex gap-2">
-                          {(
-                            [
-                              { value: 'metro', label: '수도권' },
-                              { value: 'non-metro', label: '비수도권' },
-                            ] as { value: Region; label: string }[]
-                          ).map((opt) => (
-                            <label key={opt.value} className="flex items-center gap-1.5 cursor-pointer">
+                          {([
+                            { value: 'metro' as Region, label: '수도권' },
+                            { value: 'non-metro' as Region, label: '비수도권' },
+                          ]).map((opt) => (
+                            <label key={opt.value} className="flex items-center gap-1 cursor-pointer">
                               <input
                                 type="radio"
                                 checked={inputs.region === opt.value}
                                 onChange={() => updateField('region', opt.value)}
-                                className="accent-[#2383e2]"
+                                className="accent-[#2383e2] w-3 h-3"
                               />
-                              <span className="text-xs text-[#37352f]">{opt.label}</span>
+                              <span className="text-[11px] text-[#37352f]">{opt.label}</span>
                             </label>
                           ))}
                         </div>
                       </div>
 
-                      {/* 스트레스 수준 */}
-                      <div>
-                        <label className="text-xs text-[#787774] mb-1 block">스트레스 수준</label>
-                        <div className="flex gap-1.5">
-                          {(
-                            [
-                              { value: 'basic', label: '기본 1.5%p' },
-                              { value: 'enhanced', label: '강화 3.0%p' },
-                            ] as { value: StressLevel; label: string }[]
-                          ).map((opt) => (
+                      {/* 스트레스 수준 + 서울생초아 한 줄 */}
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <div className="flex gap-1">
+                          {([
+                            { value: 'basic' as StressLevel, label: '1.5%p' },
+                            { value: 'enhanced' as StressLevel, label: '3.0%p' },
+                          ]).map((opt) => (
                             <button
                               key={opt.value}
                               onClick={() => updateField('stressLevel', opt.value)}
-                              className={`px-3 py-1.5 rounded-md text-xs border transition-colors ${
+                              className={`px-2.5 py-1 rounded text-[11px] border transition-colors ${
                                 inputs.stressLevel === opt.value
                                   ? 'bg-[#2383e2] text-white border-[#2383e2]'
                                   : 'bg-white text-[#787774] border-[#e8e5e0] hover:bg-[#f7f7f5]'
@@ -801,22 +768,20 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                             </button>
                           ))}
                         </div>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={inputs.firstHomeBuyer}
+                            onChange={(e) => updateField('firstHomeBuyer', e.target.checked)}
+                            className="accent-[#2383e2]"
+                          />
+                          <span className="text-[11px] text-[#37352f]">서울생초아</span>
+                        </label>
                       </div>
-
-                      {/* 서울생초아 */}
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={inputs.firstHomeBuyer}
-                          onChange={(e) => updateField('firstHomeBuyer', e.target.checked)}
-                          className="accent-[#2383e2]"
-                        />
-                        <span className="text-xs text-[#37352f]">서울생초아 (LTV 70%, 한도 6억)</span>
-                      </label>
-                    </>
+                    </div>
                   )}
                 </div>
-              )}
+              </div>
             </div>
 
             {/* 계산 버튼 */}
