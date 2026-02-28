@@ -819,24 +819,16 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                   return (
                     <>
                       {/* 실제 대출가능액 (메인) */}
-                      <div className="rounded-lg p-4 bg-[#f7f7f5]">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs text-[#787774]">실제 대출가능액</span>
-                          <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${dsrBg(displayDsr)} ${dsrColor(displayDsr)}`}>
-                            {displayLabel} {displayDsr.toFixed(1)}%
-                          </span>
+                      <div className="rounded-lg p-4 bg-[#2383e2]/5 border border-[#2383e2]/20">
+                        <div className="text-xs text-[#2383e2] font-medium mb-1">
+                          DSR {inputs.targetDsr}% 이내 실제 대출가능액
                         </div>
-                        <div className="text-2xl font-bold text-[#37352f]">
+                        <div className="text-2xl font-bold text-[#2383e2]">
                           {formatFullWon(displayEffective)}
                         </div>
-                        <div className="text-sm text-[#787774] mt-0.5">
+                        <div className="text-sm text-[#2383e2]/60 mt-0.5">
                           {formatEok(displayEffective)}
                         </div>
-                        {isOverLimit && (
-                          <div className="text-xs text-[#eb5757] mt-1.5">
-                            목표 DSR {inputs.targetDsr}% 초과 → 한도 축소 적용
-                          </div>
-                        )}
                         {displayEffective < displayMaxMortgage && (
                           <div className="text-[11px] text-[#8b6914] bg-[#fbf3db] rounded px-2.5 py-1.5 mt-2">
                             서울 규제 한도 {formatWon(dsrResult.seoulCap)} 적용
