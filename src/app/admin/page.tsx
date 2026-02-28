@@ -443,7 +443,8 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   // 살 수 있는 아파트
   const affordableApartments = useMemo(() => {
     if (!dsrResult) return [];
-    const maxPriceEok = dsrResult.maxPurchasePrice / 10000;
+    // 스트레스 기준이 있으면 그 값 사용, 없으면 기본값
+    const maxPriceEok = (dsrResult.stressMaxPurchasePrice ?? dsrResult.maxPurchasePrice) / 10000;
     return APARTMENTS.map((apt) => {
       const livePrice = prices[apt.id];
       const price = livePrice?.price ?? apt.basePrice;
@@ -839,69 +840,86 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
               <div className="bg-white border border-[#e8e5e0] rounded-lg p-5 space-y-4">
                 <h2 className="text-sm font-semibold text-[#37352f]">계산 결과</h2>
 
-                {/* DSR 수치 */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className={`rounded-lg p-3 ${dsrBg(dsrResult.basicDsr)}`}>
-                    <div className="text-xs text-[#787774] mb-1">기본 DSR</div>
-                    <div className={`text-2xl font-bold ${dsrColor(dsrResult.basicDsr)}`}>
-                      {dsrResult.basicDsr.toFixed(1)}%
-                    </div>
-                  </div>
-                  {dsrResult.stressDsr !== null && (
-                    <div className={`rounded-lg p-3 ${dsrBg(dsrResult.stressDsr)}`}>
-                      <div className="text-xs text-[#787774] mb-1">스트레스 DSR</div>
-                      <div className={`text-2xl font-bold ${dsrColor(dsrResult.stressDsr)}`}>
-                        {dsrResult.stressDsr.toFixed(1)}%
+                {/* DSR 수치 + 대출한도 + 최대 매매가 */}
+                {(() => {
+                  const displayDsr = dsrResult.stressDsr !== null ? dsrResult.stressDsr : dsrResult.basicDsr;
+                  const displayLabel = dsrResult.stressDsr !== null ? 'DSR (스트레스 적용)' : 'DSR';
+                  const isOverLimit = displayDsr > inputs.targetDsr;
+
+                  const displayMaxMortgage = dsrResult.stressMaxMortgage ?? dsrResult.maxMortgage;
+                  const displayEffective = dsrResult.stressEffectiveMaxMortgage ?? dsrResult.effectiveMaxMortgage;
+                  const displayMaxPrice = dsrResult.stressMaxPurchasePrice ?? dsrResult.maxPurchasePrice;
+                  const displayKbPrice = dsrResult.stressKbPrice ?? dsrResult.kbPrice;
+
+                  return (
+                    <>
+                      {/* DSR 수치 */}
+                      <div className={`rounded-lg p-3 ${dsrBg(displayDsr)}`}>
+                        <div className="text-xs text-[#787774] mb-1">{displayLabel}</div>
+                        <div className={`text-2xl font-bold ${dsrColor(displayDsr)}`}>
+                          {displayDsr.toFixed(1)}%
+                        </div>
+                        {isOverLimit && (
+                          <div className="text-xs text-[#eb5757] mt-1">
+                            목표 DSR {inputs.targetDsr}% 초과
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  )}
-                </div>
 
-                {/* 월 상환액 */}
-                <div className="flex justify-between items-center py-2 border-b border-[#f0ede8]">
-                  <span className="text-sm text-[#787774]">월 상환액</span>
-                  <span className="text-sm font-medium text-[#37352f]">{formatFullWon(dsrResult.monthlyPayment)}/월</span>
-                </div>
+                      {/* 월 상환액 */}
+                      <div className="py-2 border-b border-[#f0ede8]">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-[#787774]">월 상환액</span>
+                          <span className="text-sm font-medium text-[#37352f]">{formatFullWon(dsrResult.monthlyPayment)}/월</span>
+                        </div>
+                        <div className="flex justify-end gap-3 mt-1">
+                          <span className="text-[11px] text-[#787774]">원금 {formatFullWon(dsrResult.monthlyPrincipal)}</span>
+                          <span className="text-[11px] text-[#787774]">이자 {formatFullWon(dsrResult.monthlyInterest)}</span>
+                        </div>
+                      </div>
 
-                {/* 최대 대출가능액 — 두 줄 표시 */}
-                <div className="py-3 border-b border-[#f0ede8] space-y-2">
-                  {/* 1줄: DSR 기준 */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-[#787774]">DSR 기준 대출한도</span>
-                    <div className="text-right">
-                      <span className="text-sm text-[#37352f]">{formatFullWon(dsrResult.maxMortgage)}</span>
-                      <span className="text-[11px] text-[#787774] ml-1">({formatEok(dsrResult.maxMortgage)})</span>
-                    </div>
-                  </div>
-                  {/* 2줄: 실제 대출가능액 (형광펜) */}
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-[#787774]">실제 대출가능액</span>
-                    <div className="text-right">
-                      <span className="text-base font-bold text-[#37352f] bg-[#fff066]/60 px-1.5 py-0.5 rounded">{formatFullWon(dsrResult.effectiveMaxMortgage)}</span>
-                      <span className="text-[11px] text-[#787774] ml-1">({formatEok(dsrResult.effectiveMaxMortgage)})</span>
-                    </div>
-                  </div>
-                  {/* 서울 규제 안내 */}
-                  {dsrResult.effectiveMaxMortgage < dsrResult.maxMortgage && (
-                    <div className="text-[11px] text-[#8b6914] bg-[#fbf3db] rounded px-2.5 py-1.5">
-                      서울 규제 한도 {formatWon(dsrResult.seoulCap)}이 적용되어 대출이 제한됩니다
-                    </div>
-                  )}
-                </div>
+                      {/* 최대 대출가능액 — 두 줄 표시 */}
+                      <div className="py-3 border-b border-[#f0ede8] space-y-2">
+                        {/* 1줄: DSR 기준 */}
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-[#787774]">DSR 기준 대출한도</span>
+                          <div className="text-right">
+                            <span className="text-sm text-[#37352f]">{formatFullWon(displayMaxMortgage)}</span>
+                            <span className="text-[11px] text-[#787774] ml-1">({formatEok(displayMaxMortgage)})</span>
+                          </div>
+                        </div>
+                        {/* 2줄: 실제 대출가능액 (형광펜) */}
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-[#787774]">실제 대출가능액</span>
+                          <div className="text-right">
+                            <span className="text-base font-bold text-[#37352f] bg-[#fff066]/60 px-1.5 py-0.5 rounded">{formatFullWon(displayEffective)}</span>
+                            <span className="text-[11px] text-[#787774] ml-1">({formatEok(displayEffective)})</span>
+                          </div>
+                        </div>
+                        {/* 서울 규제 안내 */}
+                        {displayEffective < displayMaxMortgage && (
+                          <div className="text-[11px] text-[#8b6914] bg-[#fbf3db] rounded px-2.5 py-1.5">
+                            서울 규제 한도 {formatWon(dsrResult.seoulCap)}이 적용되어 대출이 제한됩니다
+                          </div>
+                        )}
+                      </div>
 
-                {/* 최대 매매가 (강조) */}
-                <div className="bg-[#f0f7ff] rounded-lg p-4">
-                  <div className="text-xs text-[#787774] mb-1">최대 매매가</div>
-                  <div className="text-3xl font-bold text-[#2383e2]">
-                    {formatFullWon(dsrResult.maxPurchasePrice)}
-                  </div>
-                  <div className="text-sm text-[#2383e2]/70 font-medium mt-0.5">
-                    {formatEok(dsrResult.maxPurchasePrice)}
-                  </div>
-                  <div className="text-xs text-[#787774] mt-1">
-                    KB시세 추정 {formatFullWon(dsrResult.kbPrice)} ({formatEok(dsrResult.kbPrice)})
-                  </div>
-                </div>
+                      {/* 최대 매매가 (강조) */}
+                      <div className="bg-[#f0f7ff] rounded-lg p-4">
+                        <div className="text-xs text-[#787774] mb-1">최대 매매가</div>
+                        <div className="text-3xl font-bold text-[#2383e2]">
+                          {formatFullWon(displayMaxPrice)}
+                        </div>
+                        <div className="text-sm text-[#2383e2]/70 font-medium mt-0.5">
+                          {formatEok(displayMaxPrice)}
+                        </div>
+                        <div className="text-xs text-[#787774] mt-1">
+                          KB시세 추정 {formatFullWon(displayKbPrice)} ({formatEok(displayKbPrice)})
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             )}
 

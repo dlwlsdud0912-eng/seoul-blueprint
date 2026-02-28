@@ -37,11 +37,19 @@ export interface DsrResult {
   maxPurchasePrice: number;    // 최대 매매가 (만원)
   kbPrice: number;             // KB시세 추정 (만원)
   seoulCap: number;            // 서울 규제 한도 (만원)
+  // 월 원금/이자 분리
+  monthlyPrincipal: number;    // 월 원금 (만원)
+  monthlyInterest: number;     // 월 이자 (만원)
   // 상세
   homeAnnualPayment: number;   // 주담대 연간 상환액
   creditAnnualPayment: number; // 신용대출 연간 상환액
   stressHomeAnnualPayment: number | null;
   stressCreditAnnualPayment: number | null;
+  // 스트레스 기준 역산 (스트레스 활성화 시)
+  stressMaxMortgage: number | null;           // 스트레스 금리 기준 최대 대출가능액 (만원)
+  stressEffectiveMaxMortgage: number | null;  // 스트레스 기준 실제 대출가능액 (서울규제+LTV)
+  stressMaxPurchasePrice: number | null;      // 스트레스 기준 최대 매매가
+  stressKbPrice: number | null;               // 스트레스 기준 KB시세 추정
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -306,6 +314,10 @@ export function calculateDsr(input: DsrInput): DsrResult {
   let stressDsr: number | null = null;
   let stressHomeAnnualPayment: number | null = null;
   let stressCreditAnnualPayment: number | null = null;
+  let stressMaxMortgageVal = 0;
+  let stressEffectiveMaxMortgageVal = 0;
+  let stressMaxPurchasePriceVal = 0;
+  let stressKbPriceVal = 0;
 
   if (stressEnabled) {
     const stressBase = stressLevel === 'basic' ? 1.5 : 3.0;
@@ -329,12 +341,52 @@ export function calculateDsr(input: DsrInput): DsrResult {
       annualIncome > 0
         ? ((stressHomeAnnualPayment + stressCreditAnnualPayment) / annualIncome) * 100
         : 0;
+
+    // 스트레스 금리 기준 역산: targetDsr 이내 최대 대출가능액
+    const stressCreditAnnualPmt = firstYearAnnualPayment(
+      creditBalance, creditRate + creditAddon, 5, 'equal-principal-interest'
+    );
+    const stressAvailable = annualIncome * (targetDsr / 100) - stressCreditAnnualPmt;
+
+    if (stressAvailable > 0) {
+      const stressUnitPayment = firstYearAnnualPayment(
+        1, mortgageRate + mortgageAddon, mortgageTerm, repaymentType
+      );
+      stressMaxMortgageVal = stressUnitPayment > 0 ? stressAvailable / stressUnitPayment : 0;
+    }
+
+    // 스트레스 기준 최대 매매가 이진탐색
+    const stressFindResult = findMaxPurchasePrice(
+      stressMaxMortgageVal, equity, ltvPercent, firstHomeBuyer
+    );
+    stressMaxPurchasePriceVal = stressFindResult.price;
+    stressKbPriceVal = stressFindResult.kbPrice;
+
+    // 스트레스 기준 서울 규제 + LTV 적용
+    const stressKb = stressKbPriceVal;
+    let stressSeoulCap: number;
+    if (firstHomeBuyer) {
+      stressSeoulCap = 60000;
+    } else {
+      if (stressKb <= 150000) stressSeoulCap = 60000;
+      else if (stressKb <= 250000) stressSeoulCap = 40000;
+      else stressSeoulCap = 20000;
+    }
+    const stressLtvCap = firstHomeBuyer ? stressKb * 0.7 : stressKb * (ltvPercent / 100);
+    stressEffectiveMaxMortgageVal = Math.min(stressMaxMortgageVal, stressLtvCap, stressSeoulCap);
   }
+
+  // 월 원금/이자 분리 (1개월차 기준)
+  const monthlyRate = mortgageRate / 100 / 12;
+  const monthlyInterest = actualMortgage * monthlyRate;
+  const monthlyPrincipal = repaymentType === 'bullet' ? 0 : monthlyPayment - monthlyInterest;
 
   return {
     basicDsr,
     stressDsr,
     monthlyPayment,
+    monthlyPrincipal,
+    monthlyInterest,
     maxMortgage,
     effectiveMaxMortgage,
     maxPurchasePrice,
@@ -344,6 +396,10 @@ export function calculateDsr(input: DsrInput): DsrResult {
     creditAnnualPayment,
     stressHomeAnnualPayment,
     stressCreditAnnualPayment,
+    stressMaxMortgage: stressEnabled ? stressMaxMortgageVal : null,
+    stressEffectiveMaxMortgage: stressEnabled ? stressEffectiveMaxMortgageVal : null,
+    stressMaxPurchasePrice: stressEnabled ? stressMaxPurchasePriceVal : null,
+    stressKbPrice: stressEnabled ? stressKbPriceVal : null,
   };
 }
 
