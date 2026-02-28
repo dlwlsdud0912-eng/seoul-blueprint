@@ -386,6 +386,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [prices, setPrices] = useState<PriceMap>({});
   const hasCalculated = useRef(false);
+  const prevLtv = useRef(inputs.ltvPercent);
 
   // 로드
   useEffect(() => {
@@ -668,17 +669,20 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
 
                 {/* LTV */}
                 <div>
-                  <label className="text-xs text-[#787774] mb-1 block">LTV</label>
+                  <label className="text-xs text-[#787774] mb-1 block">
+                    LTV{inputs.firstHomeBuyer && <span className="text-[#2383e2] ml-1">(생초아 70% 고정)</span>}
+                  </label>
                   <div className="flex gap-1.5 flex-wrap">
                     {[40, 50, 60, 70, 80].map((v) => (
                       <button
                         key={v}
                         onClick={() => updateField('ltvPercent', v)}
+                        disabled={inputs.firstHomeBuyer}
                         className={`px-3 py-1.5 rounded-md text-xs border transition-colors ${
                           inputs.ltvPercent === v
                             ? 'bg-[#2383e2] text-white border-[#2383e2]'
                             : 'bg-white text-[#787774] border-[#e8e5e0] hover:bg-[#f7f7f5]'
-                        }`}
+                        } ${inputs.firstHomeBuyer ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         {v}%
                       </button>
@@ -786,7 +790,20 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                           <input
                             type="checkbox"
                             checked={inputs.firstHomeBuyer}
-                            onChange={(e) => updateField('firstHomeBuyer', e.target.checked)}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setInputs((prev) => {
+                                const next = { ...prev, firstHomeBuyer: checked };
+                                if (checked) {
+                                  prevLtv.current = prev.ltvPercent;
+                                  next.ltvPercent = 70;
+                                } else {
+                                  next.ltvPercent = prevLtv.current;
+                                }
+                                saveInputs(next);
+                                return next;
+                              });
+                            }}
                             className="accent-[#2383e2]"
                           />
                           <span className="text-[11px] text-[#37352f]">서울생초아</span>
