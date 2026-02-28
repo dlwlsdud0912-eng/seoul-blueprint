@@ -818,15 +818,28 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
 
                   return (
                     <>
-                      {/* DSR 수치 */}
-                      <div className={`rounded-lg p-3 ${dsrBg(displayDsr)}`}>
-                        <div className="text-xs text-[#787774] mb-1">{displayLabel}</div>
-                        <div className={`text-2xl font-bold ${dsrColor(displayDsr)}`}>
-                          {displayDsr.toFixed(1)}%
+                      {/* 실제 대출가능액 (메인) */}
+                      <div className="rounded-lg p-4 bg-[#f7f7f5]">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-[#787774]">실제 대출가능액</span>
+                          <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${dsrBg(displayDsr)} ${dsrColor(displayDsr)}`}>
+                            {displayLabel} {displayDsr.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="text-2xl font-bold text-[#37352f]">
+                          {formatFullWon(displayEffective)}
+                        </div>
+                        <div className="text-sm text-[#787774] mt-0.5">
+                          {formatEok(displayEffective)}
                         </div>
                         {isOverLimit && (
-                          <div className="text-xs text-[#eb5757] mt-1">
-                            목표 DSR {inputs.targetDsr}% 초과
+                          <div className="text-xs text-[#eb5757] mt-1.5">
+                            목표 DSR {inputs.targetDsr}% 초과 → 한도 축소 적용
+                          </div>
+                        )}
+                        {displayEffective < displayMaxMortgage && (
+                          <div className="text-[11px] text-[#8b6914] bg-[#fbf3db] rounded px-2.5 py-1.5 mt-2">
+                            서울 규제 한도 {formatWon(dsrResult.seoulCap)} 적용
                           </div>
                         )}
                       </div>
@@ -843,33 +856,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                         </div>
                       </div>
 
-                      {/* 최대 대출가능액 — 두 줄 표시 */}
-                      <div className="py-3 border-b border-[#f0ede8] space-y-2">
-                        {/* 1줄: DSR 기준 */}
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-[#787774]">DSR 기준 대출한도</span>
-                          <div className="text-right">
-                            <span className="text-sm text-[#37352f]">{formatFullWon(displayMaxMortgage)}</span>
-                            <span className="text-[11px] text-[#787774] ml-1">({formatEok(displayMaxMortgage)})</span>
-                          </div>
-                        </div>
-                        {/* 2줄: 실제 대출가능액 (형광펜) */}
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-[#787774]">실제 대출가능액</span>
-                          <div className="text-right">
-                            <span className="text-base font-bold text-[#37352f] bg-[#fff066]/60 px-1.5 py-0.5 rounded">{formatFullWon(displayEffective)}</span>
-                            <span className="text-[11px] text-[#787774] ml-1">({formatEok(displayEffective)})</span>
-                          </div>
-                        </div>
-                        {/* 서울 규제 안내 */}
-                        {displayEffective < displayMaxMortgage && (
-                          <div className="text-[11px] text-[#8b6914] bg-[#fbf3db] rounded px-2.5 py-1.5">
-                            서울 규제 한도 {formatWon(dsrResult.seoulCap)}이 적용되어 대출이 제한됩니다
-                          </div>
-                        )}
-                      </div>
-
-                      {/* 최대 매매가 (강조) */}
+                      {/* 최대 매매가 */}
                       <div className="bg-[#f0f7ff] rounded-lg p-4">
                         <div className="text-xs text-[#787774] mb-1">최대 매매가</div>
                         <div className="text-3xl font-bold text-[#2383e2]">
