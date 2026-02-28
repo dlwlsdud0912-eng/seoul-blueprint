@@ -448,7 +448,8 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       const livePrice = prices[apt.id];
       const price = livePrice?.price ?? apt.basePrice;
       return { ...apt, currentPrice: livePrice?.price, effectivePrice: price, sizes: livePrice?.sizes };
-    }).filter((apt) => apt.effectivePrice <= maxPriceEok);
+    }).filter((apt) => apt.effectivePrice <= maxPriceEok)
+      .sort((a, b) => b.effectivePrice - a.effectivePrice);
   }, [dsrResult, prices]);
 
   // 구별 그룹핑
