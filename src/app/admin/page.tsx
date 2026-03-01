@@ -1072,6 +1072,8 @@ function FundingPlanTab() {
   // 부동산 처분대금 총액 입력 (ratio 모드용 별도 state)
   const [realEstateTotalInput, setRealEstateTotalInput] = useState('');
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     const loaded = loadFundingInputs();
@@ -1163,15 +1165,45 @@ function FundingPlanTab() {
         body: JSON.stringify(fi),
       });
       if (!resp.ok) throw new Error('PDF 생성 실패: ' + resp.status);
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
+
+      const arrayBuffer = await resp.arrayBuffer();
+
+      // pdfjs-dist 동적 import (클라이언트에서만)
+      const pdfjsLib = await import('pdfjs-dist');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const images: string[] = [];
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const scale = 3; // 고해상도 (3x for retina, 텍스트 선명)
+        const viewport = page.getViewport({ scale });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d')!;
+
+        await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+        images.push(canvas.toDataURL('image/png'));
+      }
+
+      setPreviewImages(images);
+      setShowPreview(true);
     } catch (err) {
       console.error('PDF 생성 실패:', err);
       alert('PDF 생성에 실패했습니다.');
     } finally {
       setPdfLoading(false);
     }
+  }
+
+  function downloadImage(dataUrl: string, pageNum: number) {
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `자금조달계획서_${pageNum}.png`;
+    link.click();
   }
 
   const inputClass = 'w-full border border-[#e8e5e0] rounded px-3 py-2 text-sm text-[#37352f] focus:outline-none focus:border-[#2383e2]';
@@ -1215,6 +1247,7 @@ function FundingPlanTab() {
   const ok2 = Math.abs(grandTotal2 - share2) < 1;
 
   return (
+    <>
     <div className="max-w-3xl mx-auto space-y-4">
       <div className="bg-white border border-[#e8e5e0] rounded-lg p-5 space-y-5">
 
@@ -1687,15 +1720,60 @@ function FundingPlanTab() {
               {pdfLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-                  PDF 생성 중...
+                  이미지 생성 중...
                 </span>
-              ) : '양식 생성 / 프린트'}
+              ) : '양식 미리보기'}
             </button>
           </div>
         </div>
 
       </div>
     </div>
+
+    {/* 이미지 미리보기 모달 */}
+    {showPreview && previewImages.length > 0 && (
+      <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+        {/* 상단 바 */}
+        <div className="sticky top-0 z-10 bg-white border-b border-[#e8e5e0] px-4 py-3 flex items-center justify-between">
+          <button
+            onClick={() => setShowPreview(false)}
+            className="text-[#37352f] text-sm font-medium flex items-center gap-1"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+            닫기
+          </button>
+          <span className="text-xs text-[#787774]">이미지를 길게 눌러 저장</span>
+          <button
+            onClick={() => previewImages.forEach((img, i) => downloadImage(img, i + 1))}
+            className="px-3 py-1.5 text-xs bg-[#2383e2] text-white rounded hover:bg-[#1a6fba]"
+          >
+            전체 저장
+          </button>
+        </div>
+        {/* 이미지 목록 */}
+        <div className="px-2 py-4 space-y-4">
+          {previewImages.map((src, i) => (
+            <div key={i} className="flex flex-col items-center">
+              <img
+                src={src}
+                alt={`자금조달계획서 ${i + 1}페이지`}
+                className="w-full border border-[#e8e5e0] shadow-sm"
+                style={{ imageRendering: 'auto' }}
+              />
+              <button
+                onClick={() => downloadImage(src, i + 1)}
+                className="mt-2 px-4 py-2 text-xs border border-[#e8e5e0] rounded text-[#787774] hover:bg-[#f7f7f5]"
+              >
+                {i + 1}페이지 다운로드
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
