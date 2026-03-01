@@ -75,15 +75,27 @@ async function generateFormPdf(
     });
   }
 
-  /** 체크마크 삽입 */
-  function drawCheck(checked: boolean, xLeft: number, yFromTop: number, size = 9) {
+  /** 체크마크 삽입 (파란색, PDF 선 그리기 — 폰트 글리프 깨짐 방지) */
+  function drawCheck(checked: boolean, xLeft: number, yFromTop: number, size = 11) {
     if (!checked) return;
-    page.drawText('✓', {
-      x: xLeft,
-      y: y(yFromTop),
-      size,
-      font,
-      color: rgb(0, 0, 0),
+    const baseY = y(yFromTop);
+    const w = size * 0.55;
+    const h = size * 0.55;
+    const cx = xLeft + 1;
+    const cy = baseY;
+    // 짧은 획: 좌하단 → 중하단
+    page.drawLine({
+      start: { x: cx, y: cy + h * 0.4 },
+      end: { x: cx + w * 0.35, y: cy },
+      thickness: 2.0,
+      color: rgb(0, 0.1, 0.7),
+    });
+    // 긴 획: 중하단 → 우상단
+    page.drawLine({
+      start: { x: cx + w * 0.35, y: cy },
+      end: { x: cx + w, y: cy + h },
+      thickness: 2.0,
+      color: rgb(0, 0.1, 0.7),
     });
   }
 
@@ -172,16 +184,21 @@ async function generateFormPdf(
   drawAmount(form.cashEtc,       OWN_RIGHT_R, CASH_Y);
 
   // ④ 체크박스 — 1행: 부부, 직계존비속 / 2행: 그밖
-  const giftRel = input.giftRelation ?? '';
-  drawCheck(giftRel === '부부',         CHK_GIFT_SPOUSE_X, CHK_GIFT_Y);
-  drawCheck(giftRel === '직계존비속',   CHK_GIFT_LINEAL_X, CHK_GIFT_Y);
-  drawCheck(giftRel !== '' && giftRel !== '부부' && giftRel !== '직계존비속',
-                                        CHK_GIFT_OTHER_X,  CHK_GIFT_OTHER_Y);
+  const giftRel = form.giftRelation ?? '';
+  const giftNone = giftRel === '' || giftRel === '해당없음';
+  drawCheck(!giftNone && giftRel === '부부',         CHK_GIFT_SPOUSE_X, CHK_GIFT_Y);
+  drawCheck(!giftNone && giftRel === '직계존비속',   CHK_GIFT_LINEAL_X, CHK_GIFT_Y);
+  drawCheck(!giftNone && giftRel !== '부부' && giftRel !== '직계존비속',
+                                                      CHK_GIFT_OTHER_X,  CHK_GIFT_OTHER_Y);
+  if (!giftNone && giftRel !== '부부' && giftRel !== '직계존비속') {
+    drawText(giftRel, 202, CHK_GIFT_OTHER_Y, 7);
+  }
 
   // ⑤ 체크박스 — 1행: 보유현금 / 2행: 그밖의 자산
-  const cashT = input.cashType ?? '';
-  drawCheck(cashT === '보유현금' || cashT === '', CHK_CASH_HOLD_X, CHK_CASH_Y);
-  drawCheck(cashT !== '' && cashT !== '보유현금', CHK_CASH_ASSET_X, CHK_CASH_OTHER_Y);
+  const cashT = form.cashType ?? '';
+  const cashNone = cashT === '' || cashT === '해당없음';
+  drawCheck(!cashNone && cashT === '보유현금', CHK_CASH_HOLD_X, CHK_CASH_Y);
+  drawCheck(!cashNone && cashT !== '보유현금', CHK_CASH_ASSET_X, CHK_CASH_OTHER_Y);
 
   // ⑥ 부동산 처분
   drawAmount(form.realEstateSale,   OWN_RIGHT_L, RE_Y);
@@ -195,10 +212,10 @@ async function generateFormPdf(
   drawAmount(form.otherLoan,    BOR_RIGHT_R, OTH_LOAN_Y);
 
   // 기존 주택 체크박스
-  drawCheck(input.housingOwnership === 'none', CHK_HOUSE_NONE_X, CHK_HOUSE_Y);
-  drawCheck(input.housingOwnership === 'own',  CHK_HOUSE_OWN_X,  CHK_HOUSE_Y);
-  if (input.housingOwnership === 'own' && input.housingCount) {
-    drawText(`${input.housingCount}`, 292, CHK_HOUSE_Y, 8);
+  drawCheck(form.housingOwnership === 'none', CHK_HOUSE_NONE_X, CHK_HOUSE_Y);
+  drawCheck(form.housingOwnership === 'own',  CHK_HOUSE_OWN_X,  CHK_HOUSE_Y);
+  if (form.housingOwnership === 'own' && form.housingCount) {
+    drawText(`${form.housingCount}`, 292, CHK_HOUSE_Y, 8);
   }
 
   // 대출 종류
@@ -216,11 +233,15 @@ async function generateFormPdf(
   drawAmount(form.borrowSubtotal, BOR_RIGHT_R, BOR_SUB_Y);
 
   // ⑪ 체크박스 — 1행: 부부, 직계존비속 / 2행: 그밖
-  const borrowRel = input.otherBorrowRelation ?? '';
-  drawCheck(borrowRel === '부부',         CHK_BOR_SPOUSE_X, CHK_BOR_Y);
-  drawCheck(borrowRel === '직계존비속',   CHK_BOR_LINEAL_X, CHK_BOR_Y);
-  drawCheck(borrowRel !== '' && borrowRel !== '부부' && borrowRel !== '직계존비속',
-                                          CHK_BOR_OTHER_X,  CHK_BOR_OTHER_Y);
+  const borrowRel = form.otherBorrowRelation ?? '';
+  const borrowNone = borrowRel === '' || borrowRel === '해당없음';
+  drawCheck(!borrowNone && borrowRel === '부부',         CHK_BOR_SPOUSE_X, CHK_BOR_Y);
+  drawCheck(!borrowNone && borrowRel === '직계존비속',   CHK_BOR_LINEAL_X, CHK_BOR_Y);
+  drawCheck(!borrowNone && borrowRel !== '부부' && borrowRel !== '직계존비속',
+                                                          CHK_BOR_OTHER_X,  CHK_BOR_OTHER_Y);
+  if (!borrowNone && borrowRel !== '부부' && borrowRel !== '직계존비속') {
+    drawText(borrowRel, 202, CHK_BOR_OTHER_Y, 7);
+  }
 
   // ⑬ 합계
   drawAmount(form.grandTotal,    GRAND_RIGHT, GRAND_Y, 9);
@@ -238,15 +259,15 @@ async function generateFormPdf(
   }
 
   // ⑱ 입주계획 체크박스
-  drawCheck(input.moveInType === 'self',   CHK_SELF_X,   CHK_MOVEIN_Y);
-  drawCheck(input.moveInType === 'family', CHK_FAMILY_X, CHK_MOVEIN_Y);
-  drawCheck(input.moveInType === 'rental', CHK_RENTAL_X, CHK_MOVEIN2_Y);
-  drawCheck(input.moveInType === 'other',  CHK_OTHER_X,  CHK_MOVEIN2_Y);
+  drawCheck(form.moveInType === 'self',   CHK_SELF_X,   CHK_MOVEIN_Y);
+  drawCheck(form.moveInType === 'family', CHK_FAMILY_X, CHK_MOVEIN_Y);
+  drawCheck(form.moveInType === 'rental', CHK_RENTAL_X, CHK_MOVEIN2_Y);
+  drawCheck(form.moveInType === 'other',  CHK_OTHER_X,  CHK_MOVEIN2_Y);
 
   // 입주 예정 시기
-  if (input.moveInYear || input.moveInMonth) {
-    if (input.moveInYear)  drawText(`${input.moveInYear}`,  265, MOVEIN_SCH_Y, 8);
-    if (input.moveInMonth) drawText(`${input.moveInMonth}`, 300, MOVEIN_SCH_Y, 8);
+  if (form.moveInYear || form.moveInMonth) {
+    if (form.moveInYear)  drawText(`${form.moveInYear}`,  265, MOVEIN_SCH_Y, 8);
+    if (form.moveInMonth) drawText(`${form.moveInMonth}`, 300, MOVEIN_SCH_Y, 8);
   }
 
   // 서명란 — 이름만 삽입

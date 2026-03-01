@@ -25,33 +25,43 @@ export interface FundingInput {
   deposit: FundingItemInput;        // ② 금융기관 예금액
   stockBond: FundingItemInput;      // ③ 주식·채권 매각대금
   gift: FundingItemInput;           // ④ 증여·상속
-  giftRelation?: string;
   cashEtc: FundingItemInput;        // ⑤ 현금 등 그 밖의 자금
-  cashType?: string;
   realEstateSale: FundingItemInput; // ⑥ 부동산 처분대금
 
   // 차입금
   mortgageLoan: FundingItemInput;   // 주택담보대출
   creditLoan: FundingItemInput;     // 신용대출
   otherLoan: FundingItemInput;      // 그 밖의 대출
-  otherLoanType?: string;
-  housingOwnership: 'none' | 'own';
-  housingCount?: number;
+  otherLoanType?: string;           // 공유 (그밖의 대출 종류)
   rentalDeposit: FundingItemInput;  // ⑨ 임대보증금
   companySupport: FundingItemInput; // ⑩ 회사지원금·사채
   otherBorrow: FundingItemInput;    // ⑪ 그 밖의 차입금
-  otherBorrowRelation?: string;
 
-  // 지급방식
-  paymentTransfer: number;
-  paymentDeposit: number;
-  paymentCash: number;
-  paymentCashReason?: string;
+  // 지급방식 (per person)
+  paymentTransfer: FundingItemInput;
+  paymentDeposit: FundingItemInput;
+  paymentCash: FundingItemInput;
+  paymentCashReason?: string;       // 공유
 
-  // 입주계획
-  moveInType: 'self' | 'family' | 'rental' | 'other';
-  moveInYear?: number;
-  moveInMonth?: number;
+  // 부가정보 (per person)
+  person1GiftRelation?: string;
+  person2GiftRelation?: string;
+  person1CashType?: string;
+  person2CashType?: string;
+  person1HousingOwnership: 'none' | 'own';
+  person2HousingOwnership: 'none' | 'own';
+  person1HousingCount?: number;
+  person2HousingCount?: number;
+  person1OtherBorrowRelation?: string;
+  person2OtherBorrowRelation?: string;
+
+  // 입주계획 (per person)
+  person1MoveInType: 'self' | 'family' | 'rental' | 'other';
+  person2MoveInType: 'self' | 'family' | 'rental' | 'other';
+  person1MoveInYear?: number;
+  person2MoveInYear?: number;
+  person1MoveInMonth?: number;
+  person2MoveInMonth?: number;
 }
 
 export interface FundingForm {
@@ -82,6 +92,18 @@ export interface FundingForm {
   paymentTransfer: number;
   paymentDeposit: number;
   paymentCash: number;
+
+  // 부가정보 (per person)
+  giftRelation: string;
+  cashType: string;
+  housingOwnership: 'none' | 'own';
+  housingCount: number;
+  otherBorrowRelation: string;
+
+  // 입주계획 (per person)
+  moveInType: 'self' | 'family' | 'rental' | 'other';
+  moveInYear?: number;
+  moveInMonth?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -116,16 +138,6 @@ function splitItem(
   }
 }
 
-function splitPayment(
-  total: number,
-  ratio: [number, number],
-): [number, number] {
-  const sum = ratio[0] + ratio[1];
-  const p1 = Math.round((total * ratio[0]) / sum);
-  const p2 = total - p1;
-  return [p1, p2];
-}
-
 // ---------------------------------------------------------------------------
 // splitFunding
 // ---------------------------------------------------------------------------
@@ -146,9 +158,9 @@ export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
   const [cs1, cs2] = splitItem(input.companySupport, r);
   const [ob1, ob2] = splitItem(input.otherBorrow, r);
 
-  const [pt1, pt2] = splitPayment(input.paymentTransfer, r);
-  const [pd1, pd2] = splitPayment(input.paymentDeposit, r);
-  const [pc1, pc2] = splitPayment(input.paymentCash, r);
+  const [pt1, pt2] = splitItem(input.paymentTransfer, r);
+  const [pd1, pd2] = splitItem(input.paymentDeposit, r);
+  const [pc1, pc2] = splitItem(input.paymentCash, r);
 
   function buildForm(
     name: string,
@@ -166,6 +178,14 @@ export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
     paymentTransfer: number,
     paymentDeposit: number,
     paymentCash: number,
+    giftRelation: string,
+    cashType: string,
+    housingOwnership: 'none' | 'own',
+    housingCount: number,
+    otherBorrowRelation: string,
+    moveInType: 'self' | 'family' | 'rental' | 'other',
+    moveInYear?: number,
+    moveInMonth?: number,
   ): FundingForm {
     const ownFundsSubtotal = deposit + stockBond + gift + cashEtc + realEstateSale;
     const totalLoan = mortgageLoan + creditLoan + otherLoan;
@@ -191,6 +211,14 @@ export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
       paymentTransfer,
       paymentDeposit,
       paymentCash,
+      giftRelation,
+      cashType,
+      housingOwnership,
+      housingCount,
+      otherBorrowRelation,
+      moveInType,
+      moveInYear,
+      moveInMonth,
     };
   }
 
@@ -199,6 +227,14 @@ export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
     dep1, sb1, gi1, ce1, rs1,
     ml1, cl1, ol1, rd1, cs1, ob1,
     pt1, pd1, pc1,
+    input.person1GiftRelation ?? '',
+    input.person1CashType ?? '보유현금',
+    input.person1HousingOwnership,
+    input.person1HousingCount ?? 0,
+    input.person1OtherBorrowRelation ?? '',
+    input.person1MoveInType,
+    input.person1MoveInYear,
+    input.person1MoveInMonth,
   );
 
   const form2 = buildForm(
@@ -206,6 +242,14 @@ export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
     dep2, sb2, gi2, ce2, rs2,
     ml2, cl2, ol2, rd2, cs2, ob2,
     pt2, pd2, pc2,
+    input.person2GiftRelation ?? '',
+    input.person2CashType ?? '보유현금',
+    input.person2HousingOwnership,
+    input.person2HousingCount ?? 0,
+    input.person2OtherBorrowRelation ?? '',
+    input.person2MoveInType,
+    input.person2MoveInYear,
+    input.person2MoveInMonth,
   );
 
   return [form1, form2];
@@ -228,43 +272,46 @@ export function generateFormHtml(form: FundingForm, input: FundingInput): string
   }
 
   // 증여 체크박스
-  const giftRel = input.giftRelation ?? '';
-  const chkGiftSpouse   = chk(giftRel === '부부');
-  const chkGiftLineal   = chk(giftRel === '직계존비속');
-  const chkGiftOther    = chk(giftRel !== '' && giftRel !== '부부' && giftRel !== '직계존비속');
-  const giftOtherText   = (giftRel !== '' && giftRel !== '부부' && giftRel !== '직계존비속') ? escHtml(giftRel) : '';
+  const giftRel = form.giftRelation ?? '';
+  const giftNone = giftRel === '' || giftRel === '해당없음';
+  const chkGiftSpouse   = chk(!giftNone && giftRel === '부부');
+  const chkGiftLineal   = chk(!giftNone && giftRel === '직계존비속');
+  const chkGiftOther    = chk(!giftNone && giftRel !== '부부' && giftRel !== '직계존비속');
+  const giftOtherText   = (!giftNone && giftRel !== '부부' && giftRel !== '직계존비속') ? escHtml(giftRel) : '';
 
   // 현금 체크박스
-  const cashT = input.cashType ?? '';
-  const chkCashHold  = chk(cashT === '보유현금' || cashT === '');
-  const chkCashAsset = chk(cashT !== '' && cashT !== '보유현금');
-  const cashAssetText = (cashT !== '' && cashT !== '보유현금') ? escHtml(cashT) : '';
+  const cashT = form.cashType ?? '';
+  const cashNone = cashT === '' || cashT === '해당없음';
+  const chkCashHold  = chk(!cashNone && (cashT === '보유현금'));
+  const chkCashAsset = chk(!cashNone && cashT !== '보유현금');
+  const cashAssetText = (!cashNone && cashT !== '보유현금') ? escHtml(cashT) : '';
 
   // 기타대출 종류
   const otherLoanTypeText = input.otherLoanType ? escHtml(input.otherLoanType) : '';
 
   // 기존 주택 보유
-  const chkHouseNone = chk(input.housingOwnership === 'none');
-  const chkHouseOwn  = chk(input.housingOwnership === 'own');
-  const houseCountText = input.housingOwnership === 'own' ? `${input.housingCount ?? 1}건` : '';
+  const chkHouseNone = chk(form.housingOwnership === 'none');
+  const chkHouseOwn  = chk(form.housingOwnership === 'own');
+  const houseCountText = form.housingOwnership === 'own' ? `${form.housingCount ?? 1}건` : '';
 
   // 기타차입 관계
-  const borrowRel = input.otherBorrowRelation ?? '';
-  const chkBorrowSpouse  = chk(borrowRel === '부부');
-  const chkBorrowLineal  = chk(borrowRel === '직계존비속');
-  const chkBorrowOther   = chk(borrowRel !== '' && borrowRel !== '부부' && borrowRel !== '직계존비속');
-  const borrowOtherText  = (borrowRel !== '' && borrowRel !== '부부' && borrowRel !== '직계존비속') ? escHtml(borrowRel) : '';
+  const borrowRel = form.otherBorrowRelation ?? '';
+  const borrowNone = borrowRel === '' || borrowRel === '해당없음';
+  const chkBorrowSpouse  = chk(!borrowNone && borrowRel === '부부');
+  const chkBorrowLineal  = chk(!borrowNone && borrowRel === '직계존비속');
+  const chkBorrowOther   = chk(!borrowNone && borrowRel !== '부부' && borrowRel !== '직계존비속');
+  const borrowOtherText  = (!borrowNone && borrowRel !== '부부' && borrowRel !== '직계존비속') ? escHtml(borrowRel) : '';
 
   // 입주 계획
-  const chkSelf   = chk(input.moveInType === 'self');
-  const chkFamily = chk(input.moveInType === 'family');
-  const chkRental = chk(input.moveInType === 'rental');
-  const chkOther  = chk(input.moveInType === 'other');
+  const chkSelf   = chk(form.moveInType === 'self');
+  const chkFamily = chk(form.moveInType === 'family');
+  const chkRental = chk(form.moveInType === 'rental');
+  const chkOther  = chk(form.moveInType === 'other');
   const moveInSchedule =
-    input.moveInYear && input.moveInMonth
-      ? `${input.moveInYear}년 ${input.moveInMonth}월`
-      : input.moveInYear
-        ? `${input.moveInYear}년`
+    form.moveInYear && form.moveInMonth
+      ? `${form.moveInYear}년 ${form.moveInMonth}월`
+      : form.moveInYear
+        ? `${form.moveInYear}년`
         : '&nbsp;&nbsp;&nbsp;&nbsp;년 &nbsp;&nbsp;&nbsp;&nbsp;월';
 
   // 현금지급사유

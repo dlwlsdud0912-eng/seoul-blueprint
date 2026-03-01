@@ -965,27 +965,38 @@ const DEFAULT_FUNDING: FundingInput = {
   deposit: emptyItem(),
   stockBond: emptyItem(),
   gift: emptyItem(),
-  giftRelation: '직계존비속',
   cashEtc: emptyItem(),
-  cashType: '보유현금',
   realEstateSale: emptyItem(),
   mortgageLoan: emptyItem(),
   creditLoan: emptyItem(),
   otherLoan: emptyItem(),
   otherLoanType: '',
-  housingOwnership: 'none',
-  housingCount: 0,
   rentalDeposit: emptyItem(),
   companySupport: emptyItem(),
   otherBorrow: emptyItem(),
-  otherBorrowRelation: '',
-  paymentTransfer: 0,
-  paymentDeposit: 0,
-  paymentCash: 0,
+  // 부가정보 - per person
+  person1GiftRelation: '해당없음',
+  person2GiftRelation: '해당없음',
+  person1CashType: '해당없음',
+  person2CashType: '해당없음',
+  person1HousingOwnership: 'none',
+  person2HousingOwnership: 'none',
+  person1HousingCount: 0,
+  person2HousingCount: 0,
+  person1OtherBorrowRelation: '해당없음',
+  person2OtherBorrowRelation: '해당없음',
+  // 지급방식 - FundingItemInput
+  paymentTransfer: emptyItem(),
+  paymentDeposit: emptyItem(),
+  paymentCash: emptyItem(),
   paymentCashReason: '',
-  moveInType: 'self',
-  moveInYear: new Date().getFullYear(),
-  moveInMonth: 1,
+  // 입주계획 - per person
+  person1MoveInType: 'self',
+  person2MoveInType: 'self',
+  person1MoveInYear: new Date().getFullYear(),
+  person2MoveInYear: new Date().getFullYear(),
+  person1MoveInMonth: 1,
+  person2MoveInMonth: 1,
 };
 
 function loadFundingInputs(): FundingInput {
@@ -993,7 +1004,51 @@ function loadFundingInputs(): FundingInput {
   try {
     const raw = localStorage.getItem(FUNDING_INPUTS_KEY);
     if (!raw) return DEFAULT_FUNDING;
-    return { ...DEFAULT_FUNDING, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+    // 기존 공유 필드 → per-person 마이그레이션
+    if (parsed.giftRelation && !parsed.person1GiftRelation) {
+      parsed.person1GiftRelation = parsed.giftRelation;
+      parsed.person2GiftRelation = parsed.giftRelation;
+    }
+    if (parsed.cashType && !parsed.person1CashType) {
+      parsed.person1CashType = parsed.cashType;
+      parsed.person2CashType = parsed.cashType;
+    }
+    if (parsed.housingOwnership && !parsed.person1HousingOwnership) {
+      parsed.person1HousingOwnership = parsed.housingOwnership;
+      parsed.person2HousingOwnership = parsed.housingOwnership;
+    }
+    if (parsed.housingCount != null && parsed.person1HousingCount == null) {
+      parsed.person1HousingCount = parsed.housingCount;
+      parsed.person2HousingCount = parsed.housingCount;
+    }
+    if (parsed.otherBorrowRelation && !parsed.person1OtherBorrowRelation) {
+      parsed.person1OtherBorrowRelation = parsed.otherBorrowRelation;
+      parsed.person2OtherBorrowRelation = parsed.otherBorrowRelation;
+    }
+    if (parsed.moveInType && !parsed.person1MoveInType) {
+      parsed.person1MoveInType = parsed.moveInType;
+      parsed.person2MoveInType = parsed.moveInType;
+    }
+    if (parsed.moveInYear && !parsed.person1MoveInYear) {
+      parsed.person1MoveInYear = parsed.moveInYear;
+      parsed.person2MoveInYear = parsed.moveInYear;
+    }
+    if (parsed.moveInMonth && !parsed.person1MoveInMonth) {
+      parsed.person1MoveInMonth = parsed.moveInMonth;
+      parsed.person2MoveInMonth = parsed.moveInMonth;
+    }
+    // 지급방식: number → FundingItemInput 마이그레이션
+    if (typeof parsed.paymentTransfer === 'number') {
+      parsed.paymentTransfer = { amount: parsed.paymentTransfer, distMethod: 'ratio' };
+    }
+    if (typeof parsed.paymentDeposit === 'number') {
+      parsed.paymentDeposit = { amount: parsed.paymentDeposit, distMethod: 'ratio' };
+    }
+    if (typeof parsed.paymentCash === 'number') {
+      parsed.paymentCash = { amount: parsed.paymentCash, distMethod: 'ratio' };
+    }
+    return { ...DEFAULT_FUNDING, ...parsed };
   } catch {
     return DEFAULT_FUNDING;
   }
@@ -1249,6 +1304,7 @@ function FundingPlanTab() {
                 <tr>
                   <td className={tdLabel}>
                     <div>⑥ 부동산 처분대금</div>
+                    <p className="text-[10px] text-[#787774] mt-0.5">좌측 총액 입력 시 지분비율({fi.ratio[0]}:{fi.ratio[1]})로 자동분배</p>
                     <div className="mt-1 flex items-center gap-1">
                       <span className="text-[#787774]">총액</span>
                       <input
@@ -1336,123 +1392,253 @@ function FundingPlanTab() {
         {/* Zone C: 부가정보 */}
         <div className={sectionClass}>
           <h2 className="text-sm font-semibold text-[#37352f] mb-3">부가정보</h2>
-          <div className="space-y-3">
-            <div>
-              <label className={labelClass}>증여 관계</label>
-              <div className="flex gap-1">
-                {(['부부', '직계존비속', '기타'] as const).map((r) => (
-                  <button key={r} type="button" onClick={() => update({ giftRelation: r })} className={btnClass(fi.giftRelation === r)}>{r}</button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>현금 유형</label>
-              <div className="flex gap-1">
-                {(['보유현금', '기타자산'] as const).map((t) => (
-                  <button key={t} type="button" onClick={() => update({ cashType: t })} className={btnClass(fi.cashType === t)}>{t}</button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>기타대출 종류</label>
-              <input type="text" value={fi.otherLoanType ?? ''} onChange={(e) => update({ otherLoanType: e.target.value })} placeholder="예: 전세자금대출" className={inputClass} />
-            </div>
-            <div>
-              <label className={labelClass}>기존주택 보유여부</label>
-              <div className="flex gap-1 mb-2">
-                <button type="button" onClick={() => update({ housingOwnership: 'none' })} className={btnClass(fi.housingOwnership === 'none')}>미보유</button>
-                <button type="button" onClick={() => update({ housingOwnership: 'own' })} className={btnClass(fi.housingOwnership === 'own')}>보유</button>
-              </div>
-              {fi.housingOwnership === 'own' && (
-                <div>
-                  <label className={labelClass}>보유 건수</label>
-                  <input type="number" min={1} value={fi.housingCount ?? 1} onChange={(e) => update({ housingCount: parseInt(e.target.value) || 1 })} className={inputClass} />
-                </div>
-              )}
-            </div>
-            <div>
-              <label className={labelClass}>기타차입 관계</label>
-              <input type="text" value={fi.otherBorrowRelation ?? ''} onChange={(e) => update({ otherBorrowRelation: e.target.value })} placeholder="예: 부모님" className={inputClass} />
-            </div>
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr>
+                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f7f7f5] text-left w-[30%]">항목</th>
+                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f0f7ff] text-center">{fi.person1Name || '매수인1'}</th>
+                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#fff7f0] text-center">{fi.person2Name || '매수인2'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* 증여 관계 */}
+              <tr>
+                <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">증여 관계</td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-0.5 flex-wrap justify-center">
+                    {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
+                      <button key={r} type="button" onClick={() => update({ person1GiftRelation: r })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1GiftRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                    ))}
+                    <button type="button" onClick={() => update({ person1GiftRelation: '' })}
+                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1GiftRelation !== '해당없음' && fi.person1GiftRelation !== '부부' && fi.person1GiftRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                  </div>
+                  {fi.person1GiftRelation !== '해당없음' && fi.person1GiftRelation !== '부부' && fi.person1GiftRelation !== '직계존비속' && (
+                    <input type="text" value={fi.person1GiftRelation} onChange={(e) => update({ person1GiftRelation: e.target.value })}
+                      placeholder="예: 삼촌" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
+                  )}
+                </td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-0.5 flex-wrap justify-center">
+                    {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
+                      <button key={r} type="button" onClick={() => update({ person2GiftRelation: r })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2GiftRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                    ))}
+                    <button type="button" onClick={() => update({ person2GiftRelation: '' })}
+                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2GiftRelation !== '해당없음' && fi.person2GiftRelation !== '부부' && fi.person2GiftRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                  </div>
+                  {fi.person2GiftRelation !== '해당없음' && fi.person2GiftRelation !== '부부' && fi.person2GiftRelation !== '직계존비속' && (
+                    <input type="text" value={fi.person2GiftRelation} onChange={(e) => update({ person2GiftRelation: e.target.value })}
+                      placeholder="예: 삼촌" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
+                  )}
+                </td>
+              </tr>
+              {/* 현금 유형 */}
+              <tr>
+                <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">현금 유형</td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-0.5 justify-center flex-wrap">
+                    {(['해당없음', '보유현금', '기타자산'] as const).map((t) => (
+                      <button key={t} type="button" onClick={() => update({ person1CashType: t })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1CashType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{t}</button>
+                    ))}
+                  </div>
+                </td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-0.5 justify-center flex-wrap">
+                    {(['해당없음', '보유현금', '기타자산'] as const).map((t) => (
+                      <button key={t} type="button" onClick={() => update({ person2CashType: t })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2CashType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{t}</button>
+                    ))}
+                  </div>
+                </td>
+              </tr>
+              {/* 기존주택 보유여부 */}
+              <tr>
+                <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">기존주택 보유</td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-0.5 justify-center">
+                    <button type="button" onClick={() => update({ person1HousingOwnership: 'none' })}
+                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1HousingOwnership === 'none' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>미보유</button>
+                    <button type="button" onClick={() => update({ person1HousingOwnership: 'own' })}
+                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1HousingOwnership === 'own' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>보유</button>
+                  </div>
+                  {fi.person1HousingOwnership === 'own' && (
+                    <input type="number" min={1} value={fi.person1HousingCount ?? 1}
+                      onChange={(e) => update({ person1HousingCount: parseInt(e.target.value) || 1 })}
+                      className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px] text-center" placeholder="건수" />
+                  )}
+                </td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-0.5 justify-center">
+                    <button type="button" onClick={() => update({ person2HousingOwnership: 'none' })}
+                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2HousingOwnership === 'none' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>미보유</button>
+                    <button type="button" onClick={() => update({ person2HousingOwnership: 'own' })}
+                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2HousingOwnership === 'own' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>보유</button>
+                  </div>
+                  {fi.person2HousingOwnership === 'own' && (
+                    <input type="number" min={1} value={fi.person2HousingCount ?? 1}
+                      onChange={(e) => update({ person2HousingCount: parseInt(e.target.value) || 1 })}
+                      className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px] text-center" placeholder="건수" />
+                  )}
+                </td>
+              </tr>
+              {/* 차용 관계 */}
+              <tr>
+                <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">차용 관계</td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-0.5 flex-wrap justify-center">
+                    {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
+                      <button key={r} type="button" onClick={() => update({ person1OtherBorrowRelation: r })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1OtherBorrowRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                    ))}
+                    <button type="button" onClick={() => update({ person1OtherBorrowRelation: '' })}
+                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1OtherBorrowRelation !== '해당없음' && fi.person1OtherBorrowRelation !== '부부' && fi.person1OtherBorrowRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                  </div>
+                  {fi.person1OtherBorrowRelation !== '해당없음' && fi.person1OtherBorrowRelation !== '부부' && fi.person1OtherBorrowRelation !== '직계존비속' && (
+                    <input type="text" value={fi.person1OtherBorrowRelation ?? ''} onChange={(e) => update({ person1OtherBorrowRelation: e.target.value })}
+                      placeholder="예: 부모님" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
+                  )}
+                </td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-0.5 flex-wrap justify-center">
+                    {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
+                      <button key={r} type="button" onClick={() => update({ person2OtherBorrowRelation: r })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2OtherBorrowRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                    ))}
+                    <button type="button" onClick={() => update({ person2OtherBorrowRelation: '' })}
+                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2OtherBorrowRelation !== '해당없음' && fi.person2OtherBorrowRelation !== '부부' && fi.person2OtherBorrowRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                  </div>
+                  {fi.person2OtherBorrowRelation !== '해당없음' && fi.person2OtherBorrowRelation !== '부부' && fi.person2OtherBorrowRelation !== '직계존비속' && (
+                    <input type="text" value={fi.person2OtherBorrowRelation ?? ''} onChange={(e) => update({ person2OtherBorrowRelation: e.target.value })}
+                      placeholder="예: 부모님" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          {/* 기타대출 종류는 공유 */}
+          <div className="mt-3">
+            <label className="block text-xs text-[#787774] mb-1">기타대출 종류</label>
+            <input type="text" value={fi.otherLoanType ?? ''} onChange={(e) => update({ otherLoanType: e.target.value })} placeholder="예: 전세자금대출" className="w-full border border-[#e8e5e0] rounded px-3 py-2 text-sm text-[#37352f] focus:outline-none focus:border-[#2383e2]" />
           </div>
         </div>
 
         {/* Zone D: 지급방식 */}
         <div className={sectionClass}>
           <h2 className="text-sm font-semibold text-[#37352f] mb-3">지급방식</h2>
-          <div className="space-y-3">
-            <div>
-              <label className={labelClass}>⑮ 계좌이체 금액</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text" inputMode="numeric"
-                  value={fi.paymentTransfer ? toComma(String(fi.paymentTransfer)) : ''}
-                  onChange={(e) => update({ paymentTransfer: parseInt(stripComma(e.target.value) || '0', 10) })}
-                  placeholder="0"
-                  className="flex-1 border border-[#e8e5e0] rounded px-3 py-2 text-sm text-right focus:outline-none focus:border-[#2383e2]"
-                />
-                <span className="text-xs text-[#787774] shrink-0">원</span>
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>⑯ 보증금·대출 승계 금액</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text" inputMode="numeric"
-                  value={fi.paymentDeposit ? toComma(String(fi.paymentDeposit)) : ''}
-                  onChange={(e) => update({ paymentDeposit: parseInt(stripComma(e.target.value) || '0', 10) })}
-                  placeholder="0"
-                  className="flex-1 border border-[#e8e5e0] rounded px-3 py-2 text-sm text-right focus:outline-none focus:border-[#2383e2]"
-                />
-                <span className="text-xs text-[#787774] shrink-0">원</span>
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>⑰ 현금 및 그 밖의 지급방식 금액</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text" inputMode="numeric"
-                  value={fi.paymentCash ? toComma(String(fi.paymentCash)) : ''}
-                  onChange={(e) => update({ paymentCash: parseInt(stripComma(e.target.value) || '0', 10) })}
-                  placeholder="0"
-                  className="flex-1 border border-[#e8e5e0] rounded px-3 py-2 text-sm text-right focus:outline-none focus:border-[#2383e2]"
-                />
-                <span className="text-xs text-[#787774] shrink-0">원</span>
-              </div>
-              <div className="mt-1">
-                <label className={labelClass}>사유</label>
-                <input type="text" value={fi.paymentCashReason ?? ''} onChange={(e) => update({ paymentCashReason: e.target.value })} placeholder="예: 현장 직접 지급" className={inputClass} />
-              </div>
-            </div>
+          <p className="text-xs text-[#787774] mb-2">총액 입력 시 지분비율({fi.ratio[0]}:{fi.ratio[1]})로 자동 분배. 직접입력도 가능.</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr>
+                  <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f7f7f5] text-left w-[30%]">항목</th>
+                  <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f0f7ff] text-center">{fi.person1Name || '매수인1'}</th>
+                  <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#fff7f0] text-center">{fi.person2Name || '매수인2'}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* ⑮ 계좌이체 */}
+                {(() => {
+                  const [pt1, pt2] = resolveAmounts(fi.paymentTransfer);
+                  return (
+                    <tr>
+                      <td className={tdLabel}>⑮ 계좌이체</td>
+                      <td className={tdInput}>{cellInput(pt1, (v) => updateItemDirect('paymentTransfer', v, pt2))}</td>
+                      <td className={tdInput}>{cellInput(pt2, (v) => updateItemDirect('paymentTransfer', pt1, v))}</td>
+                    </tr>
+                  );
+                })()}
+                {/* ⑯ 보증금승계 */}
+                {(() => {
+                  const [pd1, pd2] = resolveAmounts(fi.paymentDeposit);
+                  return (
+                    <tr>
+                      <td className={tdLabel}>⑯ 보증금승계</td>
+                      <td className={tdInput}>{cellInput(pd1, (v) => updateItemDirect('paymentDeposit', v, pd2))}</td>
+                      <td className={tdInput}>{cellInput(pd2, (v) => updateItemDirect('paymentDeposit', pd1, v))}</td>
+                    </tr>
+                  );
+                })()}
+                {/* ⑰ 현금 */}
+                {(() => {
+                  const [pc1, pc2] = resolveAmounts(fi.paymentCash);
+                  return (
+                    <tr>
+                      <td className={tdLabel}>⑰ 현금</td>
+                      <td className={tdInput}>{cellInput(pc1, (v) => updateItemDirect('paymentCash', v, pc2))}</td>
+                      <td className={tdInput}>{cellInput(pc2, (v) => updateItemDirect('paymentCash', pc1, v))}</td>
+                    </tr>
+                  );
+                })()}
+              </tbody>
+            </table>
+          </div>
+          {/* 현금 사유 (공유) */}
+          <div className="mt-2">
+            <label className="block text-xs text-[#787774] mb-1">현금 지급 사유</label>
+            <input type="text" value={fi.paymentCashReason ?? ''} onChange={(e) => update({ paymentCashReason: e.target.value })} placeholder="예: 현장 직접 지급" className="w-full border border-[#e8e5e0] rounded px-3 py-2 text-sm text-[#37352f] focus:outline-none focus:border-[#2383e2]" />
           </div>
         </div>
 
         {/* Zone E: 입주계획 */}
         <div className={sectionClass}>
           <h2 className="text-sm font-semibold text-[#37352f] mb-3">입주계획</h2>
-          <div className="space-y-3">
-            <div>
-              <label className={labelClass}>입주 형태</label>
-              <div className="flex gap-1 flex-wrap">
-                {(['self', 'family', 'rental', 'other'] as const).map((t) => {
-                  const labels = { self: '본인입주', family: '가족입주', rental: '임대', other: '기타' };
-                  return (
-                    <button key={t} type="button" onClick={() => update({ moveInType: t })} className={btnClass(fi.moveInType === t)}>{labels[t]}</button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelClass}>입주 예정 연도</label>
-                <input type="number" value={fi.moveInYear ?? ''} onChange={(e) => update({ moveInYear: parseInt(e.target.value) || undefined })} placeholder="2025" className={inputClass} />
-              </div>
-              <div>
-                <label className={labelClass}>월</label>
-                <input type="number" min={1} max={12} value={fi.moveInMonth ?? ''} onChange={(e) => update({ moveInMonth: parseInt(e.target.value) || undefined })} placeholder="1" className={inputClass} />
-              </div>
-            </div>
-          </div>
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr>
+                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f7f7f5] text-left w-[30%]">항목</th>
+                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f0f7ff] text-center">{fi.person1Name || '매수인1'}</th>
+                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#fff7f0] text-center">{fi.person2Name || '매수인2'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">입주 형태</td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-0.5 flex-wrap justify-center">
+                    {(['self', 'family', 'rental', 'other'] as const).map((t) => {
+                      const labels: Record<string, string> = { self: '본인', family: '가족', rental: '임대', other: '기타' };
+                      return <button key={t} type="button" onClick={() => update({ person1MoveInType: t })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1MoveInType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{labels[t]}</button>;
+                    })}
+                  </div>
+                </td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-0.5 flex-wrap justify-center">
+                    {(['self', 'family', 'rental', 'other'] as const).map((t) => {
+                      const labels: Record<string, string> = { self: '본인', family: '가족', rental: '임대', other: '기타' };
+                      return <button key={t} type="button" onClick={() => update({ person2MoveInType: t })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2MoveInType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{labels[t]}</button>;
+                    })}
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">입주 예정</td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-1 items-center justify-center">
+                    <input type="number" value={fi.person1MoveInYear ?? ''} onChange={(e) => update({ person1MoveInYear: parseInt(e.target.value) || undefined })}
+                      className="w-14 border border-[#e8e5e0] rounded px-1 py-0.5 text-[10px] text-center" placeholder="년" />
+                    <span className="text-[10px]">년</span>
+                    <input type="number" min={1} max={12} value={fi.person1MoveInMonth ?? ''} onChange={(e) => update({ person1MoveInMonth: parseInt(e.target.value) || undefined })}
+                      className="w-10 border border-[#e8e5e0] rounded px-1 py-0.5 text-[10px] text-center" placeholder="월" />
+                    <span className="text-[10px]">월</span>
+                  </div>
+                </td>
+                <td className="border border-[#e8e5e0] px-1 py-1">
+                  <div className="flex gap-1 items-center justify-center">
+                    <input type="number" value={fi.person2MoveInYear ?? ''} onChange={(e) => update({ person2MoveInYear: parseInt(e.target.value) || undefined })}
+                      className="w-14 border border-[#e8e5e0] rounded px-1 py-0.5 text-[10px] text-center" placeholder="년" />
+                    <span className="text-[10px]">년</span>
+                    <input type="number" min={1} max={12} value={fi.person2MoveInMonth ?? ''} onChange={(e) => update({ person2MoveInMonth: parseInt(e.target.value) || undefined })}
+                      className="w-10 border border-[#e8e5e0] rounded px-1 py-0.5 text-[10px] text-center" placeholder="월" />
+                    <span className="text-[10px]">월</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         {/* Zone F: 하단 버튼 */}
