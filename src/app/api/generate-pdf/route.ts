@@ -16,8 +16,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error('PDF generation failed:', err);
+    const detail = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: 'PDF 생성 실패' },
+      { error: 'PDF 생성 실패', detail },
       { status: 500 },
     );
   }

@@ -1075,24 +1075,10 @@ function FundingPlanTab() {
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
-  useEffect(() => {
-    const loaded = loadFundingInputs();
-    setFi(loaded);
-    const r = loaded.ratio;
-    if (r[0] === 5 && r[1] === 5) setRatioPreset('5:5');
-    else if (r[0] === 6 && r[1] === 4) setRatioPreset('6:4');
-    else if (r[0] === 7 && r[1] === 3) setRatioPreset('7:3');
-    else setRatioPreset('custom');
-    // 부동산 처분대금 초기값
-    if (loaded.realEstateSale.amount > 0) {
-      setRealEstateTotalInput(toComma(String(loaded.realEstateSale.amount)));
-    }
-  }, []);
 
   function update(partial: Partial<FundingInput>) {
     setFi((prev) => {
       const next = { ...prev, ...partial };
-      saveFundingInputs(next);
       return next;
     });
   }
@@ -1164,7 +1150,10 @@ function FundingPlanTab() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(fi),
       });
-      if (!resp.ok) throw new Error('PDF 생성 실패: ' + resp.status);
+      if (!resp.ok) {
+        const errBody = await resp.json().catch(() => null);
+        throw new Error(errBody?.detail || 'HTTP ' + resp.status);
+      }
 
       const arrayBuffer = await resp.arrayBuffer();
 
@@ -1193,10 +1182,18 @@ function FundingPlanTab() {
       setShowPreview(true);
     } catch (err) {
       console.error('PDF 생성 실패:', err);
-      alert('PDF 생성에 실패했습니다.');
+      const msg = err instanceof Error ? err.message : String(err);
+      alert('PDF 생성에 실패했습니다.\n\n원인: ' + msg);
     } finally {
       setPdfLoading(false);
     }
+  }
+
+  function handleReset() {
+    if (!confirm('모든 입력을 초기화하시겠습니까?')) return;
+    setFi(DEFAULT_FUNDING);
+    setRealEstateTotalInput('');
+    setRatioPreset('5:5');
   }
 
   function downloadImage(dataUrl: string, pageNum: number) {
@@ -1360,15 +1357,15 @@ function FundingPlanTab() {
                   {!isSingle && <td className={tdInput}>{cellInput(gi2, (v) => updateItemDirect('gift', gi1, v))}</td>}
                 </tr>
                 <tr>
-                  <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 증여 관계</td>
+                  <td className="border border-[#e8e5e0] px-2 py-1 text-[11px] text-[#787774] bg-[#fafaf8]">└ 증여 관계</td>
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
-                    <div className="flex gap-0.5 flex-wrap justify-center">
+                    <div className="flex gap-1 flex-wrap justify-center">
                       {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
                         <button key={r} type="button" onClick={() => update({ person1GiftRelation: r })}
-                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1GiftRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                          className={`px-2 py-1 text-[11px] rounded ${fi.person1GiftRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
                       ))}
                       <button type="button" onClick={() => update({ person1GiftRelation: '' })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1GiftRelation !== '해당없음' && fi.person1GiftRelation !== '부부' && fi.person1GiftRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                        className={`px-2 py-1 text-[11px] rounded ${fi.person1GiftRelation !== '해당없음' && fi.person1GiftRelation !== '부부' && fi.person1GiftRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
                     </div>
                     {fi.person1GiftRelation !== '해당없음' && fi.person1GiftRelation !== '부부' && fi.person1GiftRelation !== '직계존비속' && (
                       <input type="text" value={fi.person1GiftRelation} onChange={(e) => update({ person1GiftRelation: e.target.value })}
@@ -1377,13 +1374,13 @@ function FundingPlanTab() {
                   </td>
                   {!isSingle && (
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
-                    <div className="flex gap-0.5 flex-wrap justify-center">
+                    <div className="flex gap-1 flex-wrap justify-center">
                       {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
                         <button key={r} type="button" onClick={() => update({ person2GiftRelation: r })}
-                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2GiftRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                          className={`px-2 py-1 text-[11px] rounded ${fi.person2GiftRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
                       ))}
                       <button type="button" onClick={() => update({ person2GiftRelation: '' })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2GiftRelation !== '해당없음' && fi.person2GiftRelation !== '부부' && fi.person2GiftRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                        className={`px-2 py-1 text-[11px] rounded ${fi.person2GiftRelation !== '해당없음' && fi.person2GiftRelation !== '부부' && fi.person2GiftRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
                     </div>
                     {fi.person2GiftRelation !== '해당없음' && fi.person2GiftRelation !== '부부' && fi.person2GiftRelation !== '직계존비속' && (
                       <input type="text" value={fi.person2GiftRelation} onChange={(e) => update({ person2GiftRelation: e.target.value })}
@@ -1398,21 +1395,21 @@ function FundingPlanTab() {
                   {!isSingle && <td className={tdInput}>{cellInput(ce2, (v) => updateItemDirect('cashEtc', ce1, v))}</td>}
                 </tr>
                 <tr>
-                  <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 현금 유형</td>
+                  <td className="border border-[#e8e5e0] px-2 py-1 text-[11px] text-[#787774] bg-[#fafaf8]">└ 현금 유형</td>
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
-                    <div className="flex gap-0.5 justify-center flex-wrap">
+                    <div className="flex gap-1 justify-center flex-wrap">
                       {(['해당없음', '보유현금', '기타자산'] as const).map((t) => (
                         <button key={t} type="button" onClick={() => update({ person1CashType: t })}
-                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1CashType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{t}</button>
+                          className={`px-2 py-1 text-[11px] rounded ${fi.person1CashType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{t}</button>
                       ))}
                     </div>
                   </td>
                   {!isSingle && (
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
-                    <div className="flex gap-0.5 justify-center flex-wrap">
+                    <div className="flex gap-1 justify-center flex-wrap">
                       {(['해당없음', '보유현금', '기타자산'] as const).map((t) => (
                         <button key={t} type="button" onClick={() => update({ person2CashType: t })}
-                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2CashType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{t}</button>
+                          className={`px-2 py-1 text-[11px] rounded ${fi.person2CashType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{t}</button>
                       ))}
                     </div>
                   </td>
@@ -1421,9 +1418,8 @@ function FundingPlanTab() {
                 <tr>
                   <td className={tdLabel}>
                     <div>⑥ 부동산 처분대금</div>
-                    {!isSingle && <p className="text-[10px] text-[#787774] mt-0.5">좌측 총액 입력 시 지분비율({fi.ratio[0]}:{fi.ratio[1]})로 자동분배</p>}
                     <div className="mt-1 flex items-center gap-1">
-                      <span className="text-[#787774]">총액</span>
+                      <span className="text-[11px] text-[#787774]">총액</span>
                       <input
                         type="text" inputMode="numeric"
                         value={realEstateTotalInput}
@@ -1453,13 +1449,13 @@ function FundingPlanTab() {
                   {!isSingle && <td className={tdInput}>{cellInput(ml2, (v) => updateItemDirect('mortgageLoan', ml1, v))}</td>}
                 </tr>
                 <tr>
-                  <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 기존주택 보유</td>
+                  <td className="border border-[#e8e5e0] px-2 py-1 text-[11px] text-[#787774] bg-[#fafaf8]">└ 기존주택 보유</td>
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
-                    <div className="flex gap-0.5 justify-center">
+                    <div className="flex gap-1 justify-center">
                       <button type="button" onClick={() => update({ person1HousingOwnership: 'none' })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1HousingOwnership === 'none' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>미보유</button>
+                        className={`px-2 py-1 text-[11px] rounded ${fi.person1HousingOwnership === 'none' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>미보유</button>
                       <button type="button" onClick={() => update({ person1HousingOwnership: 'own' })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1HousingOwnership === 'own' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>보유</button>
+                        className={`px-2 py-1 text-[11px] rounded ${fi.person1HousingOwnership === 'own' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>보유</button>
                     </div>
                     {fi.person1HousingOwnership === 'own' && (
                       <input type="number" min={1} value={fi.person1HousingCount ?? 1}
@@ -1469,11 +1465,11 @@ function FundingPlanTab() {
                   </td>
                   {!isSingle && (
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
-                    <div className="flex gap-0.5 justify-center">
+                    <div className="flex gap-1 justify-center">
                       <button type="button" onClick={() => update({ person2HousingOwnership: 'none' })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2HousingOwnership === 'none' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>미보유</button>
+                        className={`px-2 py-1 text-[11px] rounded ${fi.person2HousingOwnership === 'none' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>미보유</button>
                       <button type="button" onClick={() => update({ person2HousingOwnership: 'own' })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2HousingOwnership === 'own' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>보유</button>
+                        className={`px-2 py-1 text-[11px] rounded ${fi.person2HousingOwnership === 'own' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>보유</button>
                     </div>
                     {fi.person2HousingOwnership === 'own' && (
                       <input type="number" min={1} value={fi.person2HousingCount ?? 1}
@@ -1494,7 +1490,7 @@ function FundingPlanTab() {
                   {!isSingle && <td className={tdInput}>{cellInput(ol2, (v) => updateItemDirect('otherLoan', ol1, v))}</td>}
                 </tr>
                 <tr>
-                  <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 대출 종류</td>
+                  <td className="border border-[#e8e5e0] px-2 py-1 text-[11px] text-[#787774] bg-[#fafaf8]">└ 대출 종류</td>
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
                     <input type="text" value={fi.person1OtherLoanType ?? ''} onChange={(e) => update({ person1OtherLoanType: e.target.value })}
                       placeholder="예: 전세자금대출" className="w-full border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
@@ -1522,15 +1518,15 @@ function FundingPlanTab() {
                   {!isSingle && <td className={tdInput}>{cellInput(ob2, (v) => updateItemDirect('otherBorrow', ob1, v))}</td>}
                 </tr>
                 <tr>
-                  <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 차용 관계</td>
+                  <td className="border border-[#e8e5e0] px-2 py-1 text-[11px] text-[#787774] bg-[#fafaf8]">└ 차용 관계</td>
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
-                    <div className="flex gap-0.5 flex-wrap justify-center">
+                    <div className="flex gap-1 flex-wrap justify-center">
                       {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
                         <button key={r} type="button" onClick={() => update({ person1OtherBorrowRelation: r })}
-                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1OtherBorrowRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                          className={`px-2 py-1 text-[11px] rounded ${fi.person1OtherBorrowRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
                       ))}
                       <button type="button" onClick={() => update({ person1OtherBorrowRelation: '' })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1OtherBorrowRelation !== '해당없음' && fi.person1OtherBorrowRelation !== '부부' && fi.person1OtherBorrowRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                        className={`px-2 py-1 text-[11px] rounded ${fi.person1OtherBorrowRelation !== '해당없음' && fi.person1OtherBorrowRelation !== '부부' && fi.person1OtherBorrowRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
                     </div>
                     {fi.person1OtherBorrowRelation !== '해당없음' && fi.person1OtherBorrowRelation !== '부부' && fi.person1OtherBorrowRelation !== '직계존비속' && (
                       <input type="text" value={fi.person1OtherBorrowRelation ?? ''} onChange={(e) => update({ person1OtherBorrowRelation: e.target.value })}
@@ -1539,13 +1535,13 @@ function FundingPlanTab() {
                   </td>
                   {!isSingle && (
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
-                    <div className="flex gap-0.5 flex-wrap justify-center">
+                    <div className="flex gap-1 flex-wrap justify-center">
                       {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
                         <button key={r} type="button" onClick={() => update({ person2OtherBorrowRelation: r })}
-                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2OtherBorrowRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                          className={`px-2 py-1 text-[11px] rounded ${fi.person2OtherBorrowRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
                       ))}
                       <button type="button" onClick={() => update({ person2OtherBorrowRelation: '' })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2OtherBorrowRelation !== '해당없음' && fi.person2OtherBorrowRelation !== '부부' && fi.person2OtherBorrowRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                        className={`px-2 py-1 text-[11px] rounded ${fi.person2OtherBorrowRelation !== '해당없음' && fi.person2OtherBorrowRelation !== '부부' && fi.person2OtherBorrowRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
                     </div>
                     {fi.person2OtherBorrowRelation !== '해당없음' && fi.person2OtherBorrowRelation !== '부부' && fi.person2OtherBorrowRelation !== '직계존비속' && (
                       <input type="text" value={fi.person2OtherBorrowRelation ?? ''} onChange={(e) => update({ person2OtherBorrowRelation: e.target.value })}
@@ -1652,21 +1648,21 @@ function FundingPlanTab() {
               <tr>
                 <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">입주 형태</td>
                 <td className="border border-[#e8e5e0] px-1 py-1">
-                  <div className="flex gap-0.5 flex-wrap justify-center">
+                  <div className="flex gap-1 flex-wrap justify-center">
                     {(['self', 'family', 'rental', 'other'] as const).map((t) => {
                       const labels: Record<string, string> = { self: '본인', family: '가족', rental: '임대', other: '기타' };
                       return <button key={t} type="button" onClick={() => update({ person1MoveInType: t })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1MoveInType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{labels[t]}</button>;
+                        className={`px-2 py-1 text-[11px] rounded ${fi.person1MoveInType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{labels[t]}</button>;
                     })}
                   </div>
                 </td>
                 {!isSingle && (
                 <td className="border border-[#e8e5e0] px-1 py-1">
-                  <div className="flex gap-0.5 flex-wrap justify-center">
+                  <div className="flex gap-1 flex-wrap justify-center">
                     {(['self', 'family', 'rental', 'other'] as const).map((t) => {
                       const labels: Record<string, string> = { self: '본인', family: '가족', rental: '임대', other: '기타' };
                       return <button key={t} type="button" onClick={() => update({ person2MoveInType: t })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2MoveInType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{labels[t]}</button>;
+                        className={`px-2 py-1 text-[11px] rounded ${fi.person2MoveInType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{labels[t]}</button>;
                     })}
                   </div>
                 </td>
@@ -1677,22 +1673,22 @@ function FundingPlanTab() {
                 <td className="border border-[#e8e5e0] px-1 py-1">
                   <div className="flex gap-1 items-center justify-center">
                     <input type="number" value={fi.person1MoveInYear ?? ''} onChange={(e) => update({ person1MoveInYear: parseInt(e.target.value) || undefined })}
-                      className="w-14 border border-[#e8e5e0] rounded px-1 py-0.5 text-[10px] text-center" placeholder="년" />
-                    <span className="text-[10px]">년</span>
+                      className="w-14 border border-[#e8e5e0] rounded px-1 py-0.5 text-xs text-center" placeholder="년" />
+                    <span className="text-xs">년</span>
                     <input type="number" min={1} max={12} value={fi.person1MoveInMonth ?? ''} onChange={(e) => update({ person1MoveInMonth: parseInt(e.target.value) || undefined })}
-                      className="w-10 border border-[#e8e5e0] rounded px-1 py-0.5 text-[10px] text-center" placeholder="월" />
-                    <span className="text-[10px]">월</span>
+                      className="w-10 border border-[#e8e5e0] rounded px-1 py-0.5 text-xs text-center" placeholder="월" />
+                    <span className="text-xs">월</span>
                   </div>
                 </td>
                 {!isSingle && (
                 <td className="border border-[#e8e5e0] px-1 py-1">
                   <div className="flex gap-1 items-center justify-center">
                     <input type="number" value={fi.person2MoveInYear ?? ''} onChange={(e) => update({ person2MoveInYear: parseInt(e.target.value) || undefined })}
-                      className="w-14 border border-[#e8e5e0] rounded px-1 py-0.5 text-[10px] text-center" placeholder="년" />
-                    <span className="text-[10px]">년</span>
+                      className="w-14 border border-[#e8e5e0] rounded px-1 py-0.5 text-xs text-center" placeholder="년" />
+                    <span className="text-xs">년</span>
                     <input type="number" min={1} max={12} value={fi.person2MoveInMonth ?? ''} onChange={(e) => update({ person2MoveInMonth: parseInt(e.target.value) || undefined })}
-                      className="w-10 border border-[#e8e5e0] rounded px-1 py-0.5 text-[10px] text-center" placeholder="월" />
-                    <span className="text-[10px]">월</span>
+                      className="w-10 border border-[#e8e5e0] rounded px-1 py-0.5 text-xs text-center" placeholder="월" />
+                    <span className="text-xs">월</span>
                   </div>
                 </td>
                 )}
@@ -1704,6 +1700,13 @@ function FundingPlanTab() {
         {/* Zone F: 하단 버튼 */}
         <div className={sectionClass}>
           <div className="flex gap-3 items-center">
+            <button
+              type="button"
+              onClick={handleReset}
+              className="px-4 py-2 text-xs border border-[#eb5757] rounded text-[#eb5757] hover:bg-[#fbe4e4] transition-colors"
+            >
+              초기화
+            </button>
             <a
               href="/funding-manual.pdf"
               download
@@ -1732,44 +1735,46 @@ function FundingPlanTab() {
 
     {/* 이미지 미리보기 모달 */}
     {showPreview && previewImages.length > 0 && (
-      <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-        {/* 상단 바 */}
-        <div className="sticky top-0 z-10 bg-white border-b border-[#e8e5e0] px-4 py-3 flex items-center justify-between">
-          <button
-            onClick={() => setShowPreview(false)}
-            className="text-[#37352f] text-sm font-medium flex items-center gap-1"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-            닫기
-          </button>
-          <span className="text-xs text-[#787774]">이미지를 길게 눌러 저장</span>
-          <button
-            onClick={() => previewImages.forEach((img, i) => downloadImage(img, i + 1))}
-            className="px-3 py-1.5 text-xs bg-[#2383e2] text-white rounded hover:bg-[#1a6fba]"
-          >
-            전체 저장
-          </button>
-        </div>
-        {/* 이미지 목록 */}
-        <div className="px-2 py-4 space-y-4">
-          {previewImages.map((src, i) => (
-            <div key={i} className="flex flex-col items-center">
-              <img
-                src={src}
-                alt={`자금조달계획서 ${i + 1}페이지`}
-                className="w-full border border-[#e8e5e0] shadow-sm"
-                style={{ imageRendering: 'auto' }}
-              />
-              <button
-                onClick={() => downloadImage(src, i + 1)}
-                className="mt-2 px-4 py-2 text-xs border border-[#e8e5e0] rounded text-[#787774] hover:bg-[#f7f7f5]"
-              >
-                {i + 1}페이지 다운로드
-              </button>
-            </div>
-          ))}
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowPreview(false)}>
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+          {/* 상단 바 */}
+          <div className="sticky top-0 z-10 bg-white border-b border-[#e8e5e0] px-4 py-3 flex items-center justify-between rounded-t-lg shrink-0">
+            <button
+              onClick={() => setShowPreview(false)}
+              className="text-[#37352f] text-sm font-medium flex items-center gap-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+              닫기
+            </button>
+            <span className="text-xs text-[#787774]">이미지를 길게 눌러 저장</span>
+            <button
+              onClick={() => previewImages.forEach((img, i) => downloadImage(img, i + 1))}
+              className="px-3 py-1.5 text-xs bg-[#2383e2] text-white rounded hover:bg-[#1a6fba]"
+            >
+              전체 저장
+            </button>
+          </div>
+          {/* 이미지 목록 */}
+          <div className="px-2 py-4 space-y-4 overflow-y-auto">
+            {previewImages.map((src, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <img
+                  src={src}
+                  alt={`자금조달계획서 ${i + 1}페이지`}
+                  className="w-full border border-[#e8e5e0] shadow-sm"
+                  style={{ imageRendering: 'auto' }}
+                />
+                <button
+                  onClick={() => downloadImage(src, i + 1)}
+                  className="mt-2 px-4 py-2 text-xs border border-[#e8e5e0] rounded text-[#787774] hover:bg-[#f7f7f5]"
+                >
+                  {i + 1}페이지 다운로드
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     )}
