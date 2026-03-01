@@ -32,7 +32,9 @@ export interface FundingInput {
   mortgageLoan: FundingItemInput;   // 주택담보대출
   creditLoan: FundingItemInput;     // 신용대출
   otherLoan: FundingItemInput;      // 그 밖의 대출
-  otherLoanType?: string;           // 공유 (그밖의 대출 종류)
+  otherLoanType?: string;           // 하위호환용 (마이그레이션)
+  person1OtherLoanType?: string;    // 그밖의 대출 종류
+  person2OtherLoanType?: string;
   rentalDeposit: FundingItemInput;  // ⑨ 임대보증금
   companySupport: FundingItemInput; // ⑩ 회사지원금·사채
   otherBorrow: FundingItemInput;    // ⑪ 그 밖의 차입금
@@ -99,6 +101,7 @@ export interface FundingForm {
   housingOwnership: 'none' | 'own';
   housingCount: number;
   otherBorrowRelation: string;
+  otherLoanType: string;
 
   // 입주계획 (per person)
   moveInType: 'self' | 'family' | 'rental' | 'other';
@@ -183,6 +186,7 @@ export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
     housingOwnership: 'none' | 'own',
     housingCount: number,
     otherBorrowRelation: string,
+    otherLoanType: string,
     moveInType: 'self' | 'family' | 'rental' | 'other',
     moveInYear?: number,
     moveInMonth?: number,
@@ -216,6 +220,7 @@ export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
       housingOwnership,
       housingCount,
       otherBorrowRelation,
+      otherLoanType,
       moveInType,
       moveInYear,
       moveInMonth,
@@ -232,6 +237,7 @@ export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
     input.person1HousingOwnership,
     input.person1HousingCount ?? 0,
     input.person1OtherBorrowRelation ?? '',
+    input.person1OtherLoanType ?? input.otherLoanType ?? '',
     input.person1MoveInType,
     input.person1MoveInYear,
     input.person1MoveInMonth,
@@ -247,6 +253,7 @@ export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
     input.person2HousingOwnership,
     input.person2HousingCount ?? 0,
     input.person2OtherBorrowRelation ?? '',
+    input.person2OtherLoanType ?? input.otherLoanType ?? '',
     input.person2MoveInType,
     input.person2MoveInYear,
     input.person2MoveInMonth,
@@ -287,7 +294,7 @@ export function generateFormHtml(form: FundingForm, input: FundingInput): string
   const cashAssetText = (!cashNone && cashT !== '보유현금') ? escHtml(cashT) : '';
 
   // 기타대출 종류
-  const otherLoanTypeText = input.otherLoanType ? escHtml(input.otherLoanType) : '';
+  const otherLoanTypeText = form.otherLoanType ? escHtml(form.otherLoanType) : '';
 
   // 기존 주택 보유
   const chkHouseNone = chk(form.housingOwnership === 'none');

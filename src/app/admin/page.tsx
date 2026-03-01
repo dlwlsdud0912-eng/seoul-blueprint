@@ -971,6 +971,8 @@ const DEFAULT_FUNDING: FundingInput = {
   creditLoan: emptyItem(),
   otherLoan: emptyItem(),
   otherLoanType: '',
+  person1OtherLoanType: '',
+  person2OtherLoanType: '',
   rentalDeposit: emptyItem(),
   companySupport: emptyItem(),
   otherBorrow: emptyItem(),
@@ -1026,6 +1028,10 @@ function loadFundingInputs(): FundingInput {
       parsed.person1OtherBorrowRelation = parsed.otherBorrowRelation;
       parsed.person2OtherBorrowRelation = parsed.otherBorrowRelation;
     }
+    if (parsed.otherLoanType && !parsed.person1OtherLoanType) {
+      parsed.person1OtherLoanType = parsed.otherLoanType;
+      parsed.person2OtherLoanType = parsed.otherLoanType;
+    }
     if (parsed.moveInType && !parsed.person1MoveInType) {
       parsed.person1MoveInType = parsed.moveInType;
       parsed.person2MoveInType = parsed.moveInType;
@@ -1064,6 +1070,7 @@ function FundingPlanTab() {
   const [ratioPreset, setRatioPreset] = useState<'5:5' | '6:4' | '7:3' | 'custom'>('5:5');
   // 부동산 처분대금 총액 입력 (ratio 모드용 별도 state)
   const [realEstateTotalInput, setRealEstateTotalInput] = useState('');
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
     const loaded = loadFundingInputs();
@@ -1146,6 +1153,7 @@ function FundingPlanTab() {
   const grandTotal2 = forms2 ? forms2.grandTotal : 0;
 
   async function handlePrint() {
+    setPdfLoading(true);
     try {
       const resp = await fetch('/api/generate-pdf', {
         method: 'POST',
@@ -1159,6 +1167,8 @@ function FundingPlanTab() {
     } catch (err) {
       console.error('PDF 생성 실패:', err);
       alert('PDF 생성에 실패했습니다.');
+    } finally {
+      setPdfLoading(false);
     }
   }
 
@@ -1297,9 +1307,59 @@ function FundingPlanTab() {
                   <td className={tdInput}>{cellInput(gi2, (v) => updateItemDirect('gift', gi1, v))}</td>
                 </tr>
                 <tr>
+                  <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 증여 관계</td>
+                  <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
+                    <div className="flex gap-0.5 flex-wrap justify-center">
+                      {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
+                        <button key={r} type="button" onClick={() => update({ person1GiftRelation: r })}
+                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1GiftRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                      ))}
+                      <button type="button" onClick={() => update({ person1GiftRelation: '' })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1GiftRelation !== '해당없음' && fi.person1GiftRelation !== '부부' && fi.person1GiftRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                    </div>
+                    {fi.person1GiftRelation !== '해당없음' && fi.person1GiftRelation !== '부부' && fi.person1GiftRelation !== '직계존비속' && (
+                      <input type="text" value={fi.person1GiftRelation} onChange={(e) => update({ person1GiftRelation: e.target.value })}
+                        placeholder="예: 삼촌" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
+                    )}
+                  </td>
+                  <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
+                    <div className="flex gap-0.5 flex-wrap justify-center">
+                      {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
+                        <button key={r} type="button" onClick={() => update({ person2GiftRelation: r })}
+                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2GiftRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                      ))}
+                      <button type="button" onClick={() => update({ person2GiftRelation: '' })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2GiftRelation !== '해당없음' && fi.person2GiftRelation !== '부부' && fi.person2GiftRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                    </div>
+                    {fi.person2GiftRelation !== '해당없음' && fi.person2GiftRelation !== '부부' && fi.person2GiftRelation !== '직계존비속' && (
+                      <input type="text" value={fi.person2GiftRelation} onChange={(e) => update({ person2GiftRelation: e.target.value })}
+                        placeholder="예: 삼촌" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
+                    )}
+                  </td>
+                </tr>
+                <tr>
                   <td className={tdLabel}>⑤ 현금 등</td>
                   <td className={tdInput}>{cellInput(ce1, (v) => updateItemDirect('cashEtc', v, ce2))}</td>
                   <td className={tdInput}>{cellInput(ce2, (v) => updateItemDirect('cashEtc', ce1, v))}</td>
+                </tr>
+                <tr>
+                  <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 현금 유형</td>
+                  <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
+                    <div className="flex gap-0.5 justify-center flex-wrap">
+                      {(['해당없음', '보유현금', '기타자산'] as const).map((t) => (
+                        <button key={t} type="button" onClick={() => update({ person1CashType: t })}
+                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1CashType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{t}</button>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
+                    <div className="flex gap-0.5 justify-center flex-wrap">
+                      {(['해당없음', '보유현금', '기타자산'] as const).map((t) => (
+                        <button key={t} type="button" onClick={() => update({ person2CashType: t })}
+                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2CashType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{t}</button>
+                      ))}
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <td className={tdLabel}>
@@ -1336,6 +1396,35 @@ function FundingPlanTab() {
                   <td className={tdInput}>{cellInput(ml2, (v) => updateItemDirect('mortgageLoan', ml1, v))}</td>
                 </tr>
                 <tr>
+                  <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 기존주택 보유</td>
+                  <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
+                    <div className="flex gap-0.5 justify-center">
+                      <button type="button" onClick={() => update({ person1HousingOwnership: 'none' })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1HousingOwnership === 'none' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>미보유</button>
+                      <button type="button" onClick={() => update({ person1HousingOwnership: 'own' })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1HousingOwnership === 'own' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>보유</button>
+                    </div>
+                    {fi.person1HousingOwnership === 'own' && (
+                      <input type="number" min={1} value={fi.person1HousingCount ?? 1}
+                        onChange={(e) => update({ person1HousingCount: parseInt(e.target.value) || 1 })}
+                        className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px] text-center" placeholder="건수" />
+                    )}
+                  </td>
+                  <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
+                    <div className="flex gap-0.5 justify-center">
+                      <button type="button" onClick={() => update({ person2HousingOwnership: 'none' })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2HousingOwnership === 'none' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>미보유</button>
+                      <button type="button" onClick={() => update({ person2HousingOwnership: 'own' })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2HousingOwnership === 'own' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>보유</button>
+                    </div>
+                    {fi.person2HousingOwnership === 'own' && (
+                      <input type="number" min={1} value={fi.person2HousingCount ?? 1}
+                        onChange={(e) => update({ person2HousingCount: parseInt(e.target.value) || 1 })}
+                        className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px] text-center" placeholder="건수" />
+                    )}
+                  </td>
+                </tr>
+                <tr>
                   <td className={tdLabel}>신용대출</td>
                   <td className={tdInput}>{cellInput(cl1, (v) => updateItemDirect('creditLoan', v, cl2))}</td>
                   <td className={tdInput}>{cellInput(cl2, (v) => updateItemDirect('creditLoan', cl1, v))}</td>
@@ -1344,6 +1433,17 @@ function FundingPlanTab() {
                   <td className={tdLabel}>그 밖의 대출</td>
                   <td className={tdInput}>{cellInput(ol1, (v) => updateItemDirect('otherLoan', v, ol2))}</td>
                   <td className={tdInput}>{cellInput(ol2, (v) => updateItemDirect('otherLoan', ol1, v))}</td>
+                </tr>
+                <tr>
+                  <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 대출 종류</td>
+                  <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
+                    <input type="text" value={fi.person1OtherLoanType ?? ''} onChange={(e) => update({ person1OtherLoanType: e.target.value })}
+                      placeholder="예: 전세자금대출" className="w-full border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
+                  </td>
+                  <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
+                    <input type="text" value={fi.person2OtherLoanType ?? ''} onChange={(e) => update({ person2OtherLoanType: e.target.value })}
+                      placeholder="예: 전세자금대출" className="w-full border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
+                  </td>
                 </tr>
                 <tr>
                   <td className={tdLabel}>⑨ 임대보증금</td>
@@ -1359,6 +1459,37 @@ function FundingPlanTab() {
                   <td className={tdLabel}>⑪ 그 밖의 차입금</td>
                   <td className={tdInput}>{cellInput(ob1, (v) => updateItemDirect('otherBorrow', v, ob2))}</td>
                   <td className={tdInput}>{cellInput(ob2, (v) => updateItemDirect('otherBorrow', ob1, v))}</td>
+                </tr>
+                <tr>
+                  <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 차용 관계</td>
+                  <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
+                    <div className="flex gap-0.5 flex-wrap justify-center">
+                      {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
+                        <button key={r} type="button" onClick={() => update({ person1OtherBorrowRelation: r })}
+                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1OtherBorrowRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                      ))}
+                      <button type="button" onClick={() => update({ person1OtherBorrowRelation: '' })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1OtherBorrowRelation !== '해당없음' && fi.person1OtherBorrowRelation !== '부부' && fi.person1OtherBorrowRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                    </div>
+                    {fi.person1OtherBorrowRelation !== '해당없음' && fi.person1OtherBorrowRelation !== '부부' && fi.person1OtherBorrowRelation !== '직계존비속' && (
+                      <input type="text" value={fi.person1OtherBorrowRelation ?? ''} onChange={(e) => update({ person1OtherBorrowRelation: e.target.value })}
+                        placeholder="예: 부모님" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
+                    )}
+                  </td>
+                  <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
+                    <div className="flex gap-0.5 flex-wrap justify-center">
+                      {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
+                        <button key={r} type="button" onClick={() => update({ person2OtherBorrowRelation: r })}
+                          className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2OtherBorrowRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
+                      ))}
+                      <button type="button" onClick={() => update({ person2OtherBorrowRelation: '' })}
+                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2OtherBorrowRelation !== '해당없음' && fi.person2OtherBorrowRelation !== '부부' && fi.person2OtherBorrowRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
+                    </div>
+                    {fi.person2OtherBorrowRelation !== '해당없음' && fi.person2OtherBorrowRelation !== '부부' && fi.person2OtherBorrowRelation !== '직계존비속' && (
+                      <input type="text" value={fi.person2OtherBorrowRelation ?? ''} onChange={(e) => update({ person2OtherBorrowRelation: e.target.value })}
+                        placeholder="예: 부모님" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
+                    )}
+                  </td>
                 </tr>
                 <tr>
                   <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">차입금 소계</td>
@@ -1386,141 +1517,6 @@ function FundingPlanTab() {
                 </tr>
               </tbody>
             </table>
-          </div>
-        </div>
-
-        {/* Zone C: 부가정보 */}
-        <div className={sectionClass}>
-          <h2 className="text-sm font-semibold text-[#37352f] mb-3">부가정보</h2>
-          <table className="w-full text-xs border-collapse">
-            <thead>
-              <tr>
-                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f7f7f5] text-left w-[30%]">항목</th>
-                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f0f7ff] text-center">{fi.person1Name || '매수인1'}</th>
-                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#fff7f0] text-center">{fi.person2Name || '매수인2'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* 증여 관계 */}
-              <tr>
-                <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">증여 관계</td>
-                <td className="border border-[#e8e5e0] px-1 py-1">
-                  <div className="flex gap-0.5 flex-wrap justify-center">
-                    {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
-                      <button key={r} type="button" onClick={() => update({ person1GiftRelation: r })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1GiftRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
-                    ))}
-                    <button type="button" onClick={() => update({ person1GiftRelation: '' })}
-                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1GiftRelation !== '해당없음' && fi.person1GiftRelation !== '부부' && fi.person1GiftRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
-                  </div>
-                  {fi.person1GiftRelation !== '해당없음' && fi.person1GiftRelation !== '부부' && fi.person1GiftRelation !== '직계존비속' && (
-                    <input type="text" value={fi.person1GiftRelation} onChange={(e) => update({ person1GiftRelation: e.target.value })}
-                      placeholder="예: 삼촌" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
-                  )}
-                </td>
-                <td className="border border-[#e8e5e0] px-1 py-1">
-                  <div className="flex gap-0.5 flex-wrap justify-center">
-                    {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
-                      <button key={r} type="button" onClick={() => update({ person2GiftRelation: r })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2GiftRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
-                    ))}
-                    <button type="button" onClick={() => update({ person2GiftRelation: '' })}
-                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2GiftRelation !== '해당없음' && fi.person2GiftRelation !== '부부' && fi.person2GiftRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
-                  </div>
-                  {fi.person2GiftRelation !== '해당없음' && fi.person2GiftRelation !== '부부' && fi.person2GiftRelation !== '직계존비속' && (
-                    <input type="text" value={fi.person2GiftRelation} onChange={(e) => update({ person2GiftRelation: e.target.value })}
-                      placeholder="예: 삼촌" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
-                  )}
-                </td>
-              </tr>
-              {/* 현금 유형 */}
-              <tr>
-                <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">현금 유형</td>
-                <td className="border border-[#e8e5e0] px-1 py-1">
-                  <div className="flex gap-0.5 justify-center flex-wrap">
-                    {(['해당없음', '보유현금', '기타자산'] as const).map((t) => (
-                      <button key={t} type="button" onClick={() => update({ person1CashType: t })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1CashType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{t}</button>
-                    ))}
-                  </div>
-                </td>
-                <td className="border border-[#e8e5e0] px-1 py-1">
-                  <div className="flex gap-0.5 justify-center flex-wrap">
-                    {(['해당없음', '보유현금', '기타자산'] as const).map((t) => (
-                      <button key={t} type="button" onClick={() => update({ person2CashType: t })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2CashType === t ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{t}</button>
-                    ))}
-                  </div>
-                </td>
-              </tr>
-              {/* 기존주택 보유여부 */}
-              <tr>
-                <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">기존주택 보유</td>
-                <td className="border border-[#e8e5e0] px-1 py-1">
-                  <div className="flex gap-0.5 justify-center">
-                    <button type="button" onClick={() => update({ person1HousingOwnership: 'none' })}
-                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1HousingOwnership === 'none' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>미보유</button>
-                    <button type="button" onClick={() => update({ person1HousingOwnership: 'own' })}
-                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1HousingOwnership === 'own' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>보유</button>
-                  </div>
-                  {fi.person1HousingOwnership === 'own' && (
-                    <input type="number" min={1} value={fi.person1HousingCount ?? 1}
-                      onChange={(e) => update({ person1HousingCount: parseInt(e.target.value) || 1 })}
-                      className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px] text-center" placeholder="건수" />
-                  )}
-                </td>
-                <td className="border border-[#e8e5e0] px-1 py-1">
-                  <div className="flex gap-0.5 justify-center">
-                    <button type="button" onClick={() => update({ person2HousingOwnership: 'none' })}
-                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2HousingOwnership === 'none' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>미보유</button>
-                    <button type="button" onClick={() => update({ person2HousingOwnership: 'own' })}
-                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2HousingOwnership === 'own' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>보유</button>
-                  </div>
-                  {fi.person2HousingOwnership === 'own' && (
-                    <input type="number" min={1} value={fi.person2HousingCount ?? 1}
-                      onChange={(e) => update({ person2HousingCount: parseInt(e.target.value) || 1 })}
-                      className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px] text-center" placeholder="건수" />
-                  )}
-                </td>
-              </tr>
-              {/* 차용 관계 */}
-              <tr>
-                <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">차용 관계</td>
-                <td className="border border-[#e8e5e0] px-1 py-1">
-                  <div className="flex gap-0.5 flex-wrap justify-center">
-                    {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
-                      <button key={r} type="button" onClick={() => update({ person1OtherBorrowRelation: r })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1OtherBorrowRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
-                    ))}
-                    <button type="button" onClick={() => update({ person1OtherBorrowRelation: '' })}
-                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person1OtherBorrowRelation !== '해당없음' && fi.person1OtherBorrowRelation !== '부부' && fi.person1OtherBorrowRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
-                  </div>
-                  {fi.person1OtherBorrowRelation !== '해당없음' && fi.person1OtherBorrowRelation !== '부부' && fi.person1OtherBorrowRelation !== '직계존비속' && (
-                    <input type="text" value={fi.person1OtherBorrowRelation ?? ''} onChange={(e) => update({ person1OtherBorrowRelation: e.target.value })}
-                      placeholder="예: 부모님" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
-                  )}
-                </td>
-                <td className="border border-[#e8e5e0] px-1 py-1">
-                  <div className="flex gap-0.5 flex-wrap justify-center">
-                    {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
-                      <button key={r} type="button" onClick={() => update({ person2OtherBorrowRelation: r })}
-                        className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2OtherBorrowRelation === r ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>{r}</button>
-                    ))}
-                    <button type="button" onClick={() => update({ person2OtherBorrowRelation: '' })}
-                      className={`px-1.5 py-0.5 text-[10px] rounded ${fi.person2OtherBorrowRelation !== '해당없음' && fi.person2OtherBorrowRelation !== '부부' && fi.person2OtherBorrowRelation !== '직계존비속' ? 'bg-[#2383e2] text-white' : 'bg-[#f7f7f5] text-[#37352f]'}`}>기타</button>
-                  </div>
-                  {fi.person2OtherBorrowRelation !== '해당없음' && fi.person2OtherBorrowRelation !== '부부' && fi.person2OtherBorrowRelation !== '직계존비속' && (
-                    <input type="text" value={fi.person2OtherBorrowRelation ?? ''} onChange={(e) => update({ person2OtherBorrowRelation: e.target.value })}
-                      placeholder="예: 부모님" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
-                  )}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          {/* 기타대출 종류는 공유 */}
-          <div className="mt-3">
-            <label className="block text-xs text-[#787774] mb-1">기타대출 종류</label>
-            <input type="text" value={fi.otherLoanType ?? ''} onChange={(e) => update({ otherLoanType: e.target.value })} placeholder="예: 전세자금대출" className="w-full border border-[#e8e5e0] rounded px-3 py-2 text-sm text-[#37352f] focus:outline-none focus:border-[#2383e2]" />
           </div>
         </div>
 
@@ -1654,9 +1650,15 @@ function FundingPlanTab() {
             <button
               type="button"
               onClick={handlePrint}
-              className="flex-1 py-2.5 bg-[#2383e2] text-white text-sm font-medium rounded-md hover:bg-[#1a6fba] transition-colors"
+              disabled={pdfLoading}
+              className={`flex-1 py-2.5 text-white text-sm font-medium rounded-md transition-colors ${pdfLoading ? 'bg-[#93bce8] cursor-wait' : 'bg-[#2383e2] hover:bg-[#1a6fba]'}`}
             >
-              양식 생성 / 프린트
+              {pdfLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                  PDF 생성 중...
+                </span>
+              ) : '양식 생성 / 프린트'}
             </button>
           </div>
         </div>

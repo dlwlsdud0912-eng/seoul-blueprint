@@ -219,8 +219,8 @@ async function generateFormPdf(
   }
 
   // 대출 종류
-  if (input.otherLoanType) {
-    drawText(input.otherLoanType, 432, 356, 7.5);
+  if (form.otherLoanType) {
+    drawText(form.otherLoanType, 432, 356, 7.5);
   }
 
   // ⑨ 임대보증금
