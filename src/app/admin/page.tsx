@@ -1388,7 +1388,7 @@ function FundingPlanTab() {
                 <tr>
                   <td className={tdLabel}>
                     <div>⑥ 부동산 처분대금</div>
-                    <p className="text-[10px] text-[#787774] mt-0.5">좌측 총액 입력 시 지분비율({fi.ratio[0]}:{fi.ratio[1]})로 자동분배</p>
+                    {!isSingle && <p className="text-[10px] text-[#787774] mt-0.5">좌측 총액 입력 시 지분비율({fi.ratio[0]}:{fi.ratio[1]})로 자동분배</p>}
                     <div className="mt-1 flex items-center gap-1">
                       <span className="text-[#787774]">총액</span>
                       <input
