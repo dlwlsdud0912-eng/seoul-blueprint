@@ -282,9 +282,9 @@ async function generateFormPdf(
 // ---------------------------------------------------------------------------
 
 /**
- * FundingInput을 받아 두 사람분 자금조달계획서를 하나의 PDF로 만듭니다.
- * - 각 사람분 빈 양식 1페이지에 데이터 삽입
- * - 두 페이지를 새 PDFDocument에 복사해 반환
+ * FundingInput을 받아 자금조달계획서 PDF를 만듭니다.
+ * - 단독명의: 1페이지 (person1만)
+ * - 공동명의: 2페이지 (person1 + person2)
  */
 export async function generateFundingPdf(
   input: FundingInput,
@@ -294,6 +294,13 @@ export async function generateFundingPdf(
   const [form1, form2] = splitFunding(input);
 
   const pdf1Bytes = await generateFormPdf(form1, input);
+
+  if ((input.ownershipType ?? 'joint') === 'single') {
+    // 단독명의: 1페이지만
+    return pdf1Bytes;
+  }
+
+  // 공동명의: 2페이지
   const pdf2Bytes = await generateFormPdf(form2, input);
 
   const finalPdf = await PDFDocument.create();

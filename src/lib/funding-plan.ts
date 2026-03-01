@@ -17,6 +17,7 @@ export interface FundingInput {
   // 기본정보
   person1Name: string;
   person2Name: string;
+  ownershipType: 'joint' | 'single'; // 공동명의 | 단독명의
   ratio: [number, number]; // e.g. [5, 5] or [6, 4]
   apartmentName: string;
   totalPrice: number; // 원
@@ -147,23 +148,28 @@ function splitItem(
 
 export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
   const r = input.ratio;
+  const isSingle = (input.ownershipType ?? 'joint') === 'single';
 
-  const [dep1, dep2] = splitItem(input.deposit, r);
-  const [sb1, sb2] = splitItem(input.stockBond, r);
-  const [gi1, gi2] = splitItem(input.gift, r);
-  const [ce1, ce2] = splitItem(input.cashEtc, r);
-  const [rs1, rs2] = splitItem(input.realEstateSale, r);
+  // 단독명의: person1에게 전액, person2는 0
+  const split = (item: FundingItemInput): [number, number] =>
+    isSingle ? [item.amount, 0] : splitItem(item, r);
 
-  const [ml1, ml2] = splitItem(input.mortgageLoan, r);
-  const [cl1, cl2] = splitItem(input.creditLoan, r);
-  const [ol1, ol2] = splitItem(input.otherLoan, r);
-  const [rd1, rd2] = splitItem(input.rentalDeposit, r);
-  const [cs1, cs2] = splitItem(input.companySupport, r);
-  const [ob1, ob2] = splitItem(input.otherBorrow, r);
+  const [dep1, dep2] = split(input.deposit);
+  const [sb1, sb2] = split(input.stockBond);
+  const [gi1, gi2] = split(input.gift);
+  const [ce1, ce2] = split(input.cashEtc);
+  const [rs1, rs2] = split(input.realEstateSale);
 
-  const [pt1, pt2] = splitItem(input.paymentTransfer, r);
-  const [pd1, pd2] = splitItem(input.paymentDeposit, r);
-  const [pc1, pc2] = splitItem(input.paymentCash, r);
+  const [ml1, ml2] = split(input.mortgageLoan);
+  const [cl1, cl2] = split(input.creditLoan);
+  const [ol1, ol2] = split(input.otherLoan);
+  const [rd1, rd2] = split(input.rentalDeposit);
+  const [cs1, cs2] = split(input.companySupport);
+  const [ob1, ob2] = split(input.otherBorrow);
+
+  const [pt1, pt2] = split(input.paymentTransfer);
+  const [pd1, pd2] = split(input.paymentDeposit);
+  const [pc1, pc2] = split(input.paymentCash);
 
   function buildForm(
     name: string,
@@ -244,7 +250,7 @@ export function splitFunding(input: FundingInput): [FundingForm, FundingForm] {
   );
 
   const form2 = buildForm(
-    input.person2Name,
+    isSingle ? '' : input.person2Name,
     dep2, sb2, gi2, ce2, rs2,
     ml2, cl2, ol2, rd2, cs2, ob2,
     pt2, pd2, pc2,

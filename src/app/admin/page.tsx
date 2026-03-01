@@ -959,6 +959,7 @@ function emptyItem(distMethod: DistMethod = 'ratio'): FundingItemInput {
 const DEFAULT_FUNDING: FundingInput = {
   person1Name: '',
   person2Name: '',
+  ownershipType: 'joint',
   ratio: [5, 5],
   apartmentName: '',
   totalPrice: 0,
@@ -1135,10 +1136,11 @@ function FundingPlanTab() {
         : 'bg-[#f7f7f5] text-[#787774] border-[#e8e5e0] hover:bg-[#eee]'
     }`;
 
+  const isSingle = fi.ownershipType === 'single';
   const totalPrice = fi.totalPrice;
   const rSum = fi.ratio[0] + fi.ratio[1];
-  const share1 = rSum > 0 ? Math.round((totalPrice * fi.ratio[0]) / rSum) : 0;
-  const share2 = totalPrice - share1;
+  const share1 = isSingle ? totalPrice : (rSum > 0 ? Math.round((totalPrice * fi.ratio[0]) / rSum) : 0);
+  const share2 = isSingle ? 0 : totalPrice - share1;
 
   // 자동계산: splitFunding 사용
   const [forms1, forms2] = (() => {
@@ -1220,20 +1222,37 @@ function FundingPlanTab() {
         <div>
           <h2 className="text-sm font-semibold text-[#37352f] mb-3">기본정보</h2>
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            {/* 명의유형 */}
+            <div>
+              <label className={labelClass}>명의유형</label>
+              <div className="flex rounded-md border border-[#e8e5e0] overflow-hidden">
+                <button type="button" onClick={() => update({ ownershipType: 'joint' })}
+                  className={`flex-1 py-2 text-xs transition-colors ${fi.ownershipType !== 'single' ? 'bg-[#2383e2] text-white' : 'bg-white text-[#787774] hover:bg-[#f7f7f5]'}`}>
+                  공동명의
+                </button>
+                <button type="button" onClick={() => update({ ownershipType: 'single' })}
+                  className={`flex-1 py-2 text-xs transition-colors ${fi.ownershipType === 'single' ? 'bg-[#2383e2] text-white' : 'bg-white text-[#787774] hover:bg-[#f7f7f5]'}`}>
+                  단독명의
+                </button>
+              </div>
+            </div>
+            <div className={`grid ${isSingle ? 'grid-cols-1' : 'grid-cols-2'} gap-3`}>
               <div>
-                <label className={labelClass}>매수인1 이름</label>
+                <label className={labelClass}>{isSingle ? '매수인 이름' : '매수인1 이름'}</label>
                 <input type="text" value={fi.person1Name} onChange={(e) => update({ person1Name: e.target.value })} placeholder="홍길동" className={inputClass} />
               </div>
+              {!isSingle && (
               <div>
                 <label className={labelClass}>매수인2 이름</label>
                 <input type="text" value={fi.person2Name} onChange={(e) => update({ person2Name: e.target.value })} placeholder="김영희" className={inputClass} />
               </div>
+              )}
             </div>
             <div>
               <label className={labelClass}>취득 물건 (아파트명)</label>
               <input type="text" value={fi.apartmentName} onChange={(e) => update({ apartmentName: e.target.value })} placeholder="○○아파트 ○○동 ○○호" className={inputClass} />
             </div>
+            {!isSingle && (
             <div>
               <label className={labelClass}>지분비율</label>
               <div className="flex gap-1 flex-wrap">
@@ -1256,6 +1275,7 @@ function FundingPlanTab() {
                 </div>
               )}
             </div>
+            )}
             <div>
               <label className={labelClass}>매수 총액</label>
               <div className="flex items-center gap-2">
@@ -1268,7 +1288,7 @@ function FundingPlanTab() {
                 />
                 <span className="text-xs text-[#787774] shrink-0">원</span>
               </div>
-              {fi.totalPrice > 0 && (
+              {fi.totalPrice > 0 && !isSingle && (
                 <div className="mt-1 text-xs text-[#787774]">
                   {p1Label}: {formatAmount(share1)}원 &nbsp;/&nbsp; {p2Label}: {formatAmount(share2)}원
                 </div>
@@ -1285,8 +1305,8 @@ function FundingPlanTab() {
               <thead>
                 <tr>
                   <th className="border border-[#e8e5e0] px-2 py-2 bg-[#f0ede8] text-left text-[#37352f] font-semibold">항목</th>
-                  <th className="border border-[#e8e5e0] px-2 py-2 bg-[#f0ede8] text-center text-[#37352f] font-semibold min-w-[110px]">{p1Label}</th>
-                  <th className="border border-[#e8e5e0] px-2 py-2 bg-[#f0ede8] text-center text-[#37352f] font-semibold min-w-[110px]">{p2Label}</th>
+                  <th className="border border-[#e8e5e0] px-2 py-2 bg-[#f0ede8] text-center text-[#37352f] font-semibold min-w-[110px]">{isSingle ? '금액' : p1Label}</th>
+                  {!isSingle && <th className="border border-[#e8e5e0] px-2 py-2 bg-[#f0ede8] text-center text-[#37352f] font-semibold min-w-[110px]">{p2Label}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -1294,17 +1314,17 @@ function FundingPlanTab() {
                 <tr>
                   <td className={tdLabel}>② 금융기관 예금</td>
                   <td className={tdInput}>{cellInput(dep1, (v) => updateItemDirect('deposit', v, dep2))}</td>
-                  <td className={tdInput}>{cellInput(dep2, (v) => updateItemDirect('deposit', dep1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(dep2, (v) => updateItemDirect('deposit', dep1, v))}</td>}
                 </tr>
                 <tr>
                   <td className={tdLabel}>③ 주식·채권</td>
                   <td className={tdInput}>{cellInput(sb1, (v) => updateItemDirect('stockBond', v, sb2))}</td>
-                  <td className={tdInput}>{cellInput(sb2, (v) => updateItemDirect('stockBond', sb1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(sb2, (v) => updateItemDirect('stockBond', sb1, v))}</td>}
                 </tr>
                 <tr>
                   <td className={tdLabel}>④ 증여·상속</td>
                   <td className={tdInput}>{cellInput(gi1, (v) => updateItemDirect('gift', v, gi2))}</td>
-                  <td className={tdInput}>{cellInput(gi2, (v) => updateItemDirect('gift', gi1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(gi2, (v) => updateItemDirect('gift', gi1, v))}</td>}
                 </tr>
                 <tr>
                   <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 증여 관계</td>
@@ -1322,6 +1342,7 @@ function FundingPlanTab() {
                         placeholder="예: 삼촌" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
                     )}
                   </td>
+                  {!isSingle && (
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
                     <div className="flex gap-0.5 flex-wrap justify-center">
                       {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
@@ -1336,11 +1357,12 @@ function FundingPlanTab() {
                         placeholder="예: 삼촌" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
                     )}
                   </td>
+                  )}
                 </tr>
                 <tr>
                   <td className={tdLabel}>⑤ 현금 등</td>
                   <td className={tdInput}>{cellInput(ce1, (v) => updateItemDirect('cashEtc', v, ce2))}</td>
-                  <td className={tdInput}>{cellInput(ce2, (v) => updateItemDirect('cashEtc', ce1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(ce2, (v) => updateItemDirect('cashEtc', ce1, v))}</td>}
                 </tr>
                 <tr>
                   <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 현금 유형</td>
@@ -1352,6 +1374,7 @@ function FundingPlanTab() {
                       ))}
                     </div>
                   </td>
+                  {!isSingle && (
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
                     <div className="flex gap-0.5 justify-center flex-wrap">
                       {(['해당없음', '보유현금', '기타자산'] as const).map((t) => (
@@ -1360,6 +1383,7 @@ function FundingPlanTab() {
                       ))}
                     </div>
                   </td>
+                  )}
                 </tr>
                 <tr>
                   <td className={tdLabel}>
@@ -1382,18 +1406,18 @@ function FundingPlanTab() {
                     </div>
                   </td>
                   <td className={tdInput}>{cellInput(rs1, (v) => updateItemDirect('realEstateSale', v, rs2))}</td>
-                  <td className={tdInput}>{cellInput(rs2, (v) => updateItemDirect('realEstateSale', rs1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(rs2, (v) => updateItemDirect('realEstateSale', rs1, v))}</td>}
                 </tr>
                 <tr>
                   <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">자기자금 소계</td>
                   <td className={tdSubtotal}>{ownSubtotal1 ? formatAmount(ownSubtotal1) : ''}</td>
-                  <td className={tdSubtotal}>{ownSubtotal2 ? formatAmount(ownSubtotal2) : ''}</td>
+                  {!isSingle && <td className={tdSubtotal}>{ownSubtotal2 ? formatAmount(ownSubtotal2) : ''}</td>}
                 </tr>
                 {/* 차입금 */}
                 <tr>
                   <td className={tdLabel}>주택담보대출</td>
                   <td className={tdInput}>{cellInput(ml1, (v) => updateItemDirect('mortgageLoan', v, ml2))}</td>
-                  <td className={tdInput}>{cellInput(ml2, (v) => updateItemDirect('mortgageLoan', ml1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(ml2, (v) => updateItemDirect('mortgageLoan', ml1, v))}</td>}
                 </tr>
                 <tr>
                   <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 기존주택 보유</td>
@@ -1410,6 +1434,7 @@ function FundingPlanTab() {
                         className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px] text-center" placeholder="건수" />
                     )}
                   </td>
+                  {!isSingle && (
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
                     <div className="flex gap-0.5 justify-center">
                       <button type="button" onClick={() => update({ person2HousingOwnership: 'none' })}
@@ -1423,16 +1448,17 @@ function FundingPlanTab() {
                         className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px] text-center" placeholder="건수" />
                     )}
                   </td>
+                  )}
                 </tr>
                 <tr>
                   <td className={tdLabel}>신용대출</td>
                   <td className={tdInput}>{cellInput(cl1, (v) => updateItemDirect('creditLoan', v, cl2))}</td>
-                  <td className={tdInput}>{cellInput(cl2, (v) => updateItemDirect('creditLoan', cl1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(cl2, (v) => updateItemDirect('creditLoan', cl1, v))}</td>}
                 </tr>
                 <tr>
                   <td className={tdLabel}>그 밖의 대출</td>
                   <td className={tdInput}>{cellInput(ol1, (v) => updateItemDirect('otherLoan', v, ol2))}</td>
-                  <td className={tdInput}>{cellInput(ol2, (v) => updateItemDirect('otherLoan', ol1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(ol2, (v) => updateItemDirect('otherLoan', ol1, v))}</td>}
                 </tr>
                 <tr>
                   <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 대출 종류</td>
@@ -1440,25 +1466,27 @@ function FundingPlanTab() {
                     <input type="text" value={fi.person1OtherLoanType ?? ''} onChange={(e) => update({ person1OtherLoanType: e.target.value })}
                       placeholder="예: 전세자금대출" className="w-full border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
                   </td>
+                  {!isSingle && (
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
                     <input type="text" value={fi.person2OtherLoanType ?? ''} onChange={(e) => update({ person2OtherLoanType: e.target.value })}
                       placeholder="예: 전세자금대출" className="w-full border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
                   </td>
+                  )}
                 </tr>
                 <tr>
                   <td className={tdLabel}>⑨ 임대보증금</td>
                   <td className={tdInput}>{cellInput(rd1, (v) => updateItemDirect('rentalDeposit', v, rd2))}</td>
-                  <td className={tdInput}>{cellInput(rd2, (v) => updateItemDirect('rentalDeposit', rd1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(rd2, (v) => updateItemDirect('rentalDeposit', rd1, v))}</td>}
                 </tr>
                 <tr>
                   <td className={tdLabel}>⑩ 회사지원금·사채</td>
                   <td className={tdInput}>{cellInput(cs1, (v) => updateItemDirect('companySupport', v, cs2))}</td>
-                  <td className={tdInput}>{cellInput(cs2, (v) => updateItemDirect('companySupport', cs1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(cs2, (v) => updateItemDirect('companySupport', cs1, v))}</td>}
                 </tr>
                 <tr>
                   <td className={tdLabel}>⑪ 그 밖의 차입금</td>
                   <td className={tdInput}>{cellInput(ob1, (v) => updateItemDirect('otherBorrow', v, ob2))}</td>
-                  <td className={tdInput}>{cellInput(ob2, (v) => updateItemDirect('otherBorrow', ob1, v))}</td>
+                  {!isSingle && <td className={tdInput}>{cellInput(ob2, (v) => updateItemDirect('otherBorrow', ob1, v))}</td>}
                 </tr>
                 <tr>
                   <td className="border border-[#e8e5e0] px-2 py-1 text-[10px] text-[#787774] bg-[#fafaf8]">└ 차용 관계</td>
@@ -1476,6 +1504,7 @@ function FundingPlanTab() {
                         placeholder="예: 부모님" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
                     )}
                   </td>
+                  {!isSingle && (
                   <td className="border border-[#e8e5e0] px-1 py-1 bg-[#fafaf8]">
                     <div className="flex gap-0.5 flex-wrap justify-center">
                       {(['해당없음', '부부', '직계존비속'] as const).map((r) => (
@@ -1490,30 +1519,28 @@ function FundingPlanTab() {
                         placeholder="예: 부모님" className="w-full mt-1 border border-[#e8e5e0] rounded px-2 py-0.5 text-[10px]" />
                     )}
                   </td>
+                  )}
                 </tr>
                 <tr>
                   <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">차입금 소계</td>
                   <td className={tdSubtotal}>{borrowSubtotal1 ? formatAmount(borrowSubtotal1) : ''}</td>
-                  <td className={tdSubtotal}>{borrowSubtotal2 ? formatAmount(borrowSubtotal2) : ''}</td>
+                  {!isSingle && <td className={tdSubtotal}>{borrowSubtotal2 ? formatAmount(borrowSubtotal2) : ''}</td>}
                 </tr>
                 <tr>
                   <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">합계</td>
                   <td className={tdSubtotal}>{grandTotal1 ? formatAmount(grandTotal1) : ''}</td>
-                  <td className={tdSubtotal}>{grandTotal2 ? formatAmount(grandTotal2) : ''}</td>
-                </tr>
-                <tr>
-                  <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">분담금</td>
-                  <td className={tdAuto}>{share1 ? formatAmount(share1) : ''}</td>
-                  <td className={tdAuto}>{share2 ? formatAmount(share2) : ''}</td>
+                  {!isSingle && <td className={tdSubtotal}>{grandTotal2 ? formatAmount(grandTotal2) : ''}</td>}
                 </tr>
                 <tr>
                   <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">검증</td>
                   <td className={`border border-[#e8e5e0] px-2 py-1.5 text-xs text-center ${grandTotal1 > 0 ? (ok1 ? 'text-[#0f7b6c] bg-[#edfaf6]' : 'text-[#eb5757] bg-[#fbe4e4]') : 'bg-[#f7f7f5]'}`}>
-                    {grandTotal1 > 0 ? (ok1 ? '일치' : `차이 ${formatAmount(Math.abs(grandTotal1 - share1))}`) : '-'}
+                    {grandTotal1 > 0 ? (ok1 ? '\u2713 일치' : `${grandTotal1 > share1 ? '+' : '-'}${formatAmount(Math.abs(grandTotal1 - share1))}`) : '-'}
                   </td>
+                  {!isSingle && (
                   <td className={`border border-[#e8e5e0] px-2 py-1.5 text-xs text-center ${grandTotal2 > 0 ? (ok2 ? 'text-[#0f7b6c] bg-[#edfaf6]' : 'text-[#eb5757] bg-[#fbe4e4]') : 'bg-[#f7f7f5]'}`}>
-                    {grandTotal2 > 0 ? (ok2 ? '일치' : `차이 ${formatAmount(Math.abs(grandTotal2 - share2))}`) : '-'}
+                    {grandTotal2 > 0 ? (ok2 ? '\u2713 일치' : `${grandTotal2 > share2 ? '+' : '-'}${formatAmount(Math.abs(grandTotal2 - share2))}`) : '-'}
                   </td>
+                  )}
                 </tr>
               </tbody>
             </table>
@@ -1523,14 +1550,14 @@ function FundingPlanTab() {
         {/* Zone D: 지급방식 */}
         <div className={sectionClass}>
           <h2 className="text-sm font-semibold text-[#37352f] mb-3">지급방식</h2>
-          <p className="text-xs text-[#787774] mb-2">총액 입력 시 지분비율({fi.ratio[0]}:{fi.ratio[1]})로 자동 분배. 직접입력도 가능.</p>
+          {!isSingle && <p className="text-xs text-[#787774] mb-2">총액 입력 시 지분비율({fi.ratio[0]}:{fi.ratio[1]})로 자동 분배. 직접입력도 가능.</p>}
           <div className="overflow-x-auto">
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr>
                   <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f7f7f5] text-left w-[30%]">항목</th>
-                  <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f0f7ff] text-center">{fi.person1Name || '매수인1'}</th>
-                  <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#fff7f0] text-center">{fi.person2Name || '매수인2'}</th>
+                  <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f0f7ff] text-center">{isSingle ? '금액' : (fi.person1Name || '매수인1')}</th>
+                  {!isSingle && <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#fff7f0] text-center">{fi.person2Name || '매수인2'}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -1541,7 +1568,7 @@ function FundingPlanTab() {
                     <tr>
                       <td className={tdLabel}>⑮ 계좌이체</td>
                       <td className={tdInput}>{cellInput(pt1, (v) => updateItemDirect('paymentTransfer', v, pt2))}</td>
-                      <td className={tdInput}>{cellInput(pt2, (v) => updateItemDirect('paymentTransfer', pt1, v))}</td>
+                      {!isSingle && <td className={tdInput}>{cellInput(pt2, (v) => updateItemDirect('paymentTransfer', pt1, v))}</td>}
                     </tr>
                   );
                 })()}
@@ -1552,7 +1579,7 @@ function FundingPlanTab() {
                     <tr>
                       <td className={tdLabel}>⑯ 보증금승계</td>
                       <td className={tdInput}>{cellInput(pd1, (v) => updateItemDirect('paymentDeposit', v, pd2))}</td>
-                      <td className={tdInput}>{cellInput(pd2, (v) => updateItemDirect('paymentDeposit', pd1, v))}</td>
+                      {!isSingle && <td className={tdInput}>{cellInput(pd2, (v) => updateItemDirect('paymentDeposit', pd1, v))}</td>}
                     </tr>
                   );
                 })()}
@@ -1563,7 +1590,7 @@ function FundingPlanTab() {
                     <tr>
                       <td className={tdLabel}>⑰ 현금</td>
                       <td className={tdInput}>{cellInput(pc1, (v) => updateItemDirect('paymentCash', v, pc2))}</td>
-                      <td className={tdInput}>{cellInput(pc2, (v) => updateItemDirect('paymentCash', pc1, v))}</td>
+                      {!isSingle && <td className={tdInput}>{cellInput(pc2, (v) => updateItemDirect('paymentCash', pc1, v))}</td>}
                     </tr>
                   );
                 })()}
@@ -1584,8 +1611,8 @@ function FundingPlanTab() {
             <thead>
               <tr>
                 <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f7f7f5] text-left w-[30%]">항목</th>
-                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f0f7ff] text-center">{fi.person1Name || '매수인1'}</th>
-                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#fff7f0] text-center">{fi.person2Name || '매수인2'}</th>
+                <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#f0f7ff] text-center">{isSingle ? (fi.person1Name || '매수인') : (fi.person1Name || '매수인1')}</th>
+                {!isSingle && <th className="border border-[#e8e5e0] px-2 py-1.5 bg-[#fff7f0] text-center">{fi.person2Name || '매수인2'}</th>}
               </tr>
             </thead>
             <tbody>
@@ -1600,6 +1627,7 @@ function FundingPlanTab() {
                     })}
                   </div>
                 </td>
+                {!isSingle && (
                 <td className="border border-[#e8e5e0] px-1 py-1">
                   <div className="flex gap-0.5 flex-wrap justify-center">
                     {(['self', 'family', 'rental', 'other'] as const).map((t) => {
@@ -1609,6 +1637,7 @@ function FundingPlanTab() {
                     })}
                   </div>
                 </td>
+                )}
               </tr>
               <tr>
                 <td className="border border-[#e8e5e0] px-2 py-1.5 font-semibold bg-[#eee]">입주 예정</td>
@@ -1622,6 +1651,7 @@ function FundingPlanTab() {
                     <span className="text-[10px]">월</span>
                   </div>
                 </td>
+                {!isSingle && (
                 <td className="border border-[#e8e5e0] px-1 py-1">
                   <div className="flex gap-1 items-center justify-center">
                     <input type="number" value={fi.person2MoveInYear ?? ''} onChange={(e) => update({ person2MoveInYear: parseInt(e.target.value) || undefined })}
@@ -1632,6 +1662,7 @@ function FundingPlanTab() {
                     <span className="text-[10px]">월</span>
                   </div>
                 </td>
+                )}
               </tr>
             </tbody>
           </table>
