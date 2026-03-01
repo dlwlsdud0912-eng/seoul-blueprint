@@ -21,6 +21,13 @@ import {
   formatEok,
   formatFullWon,
 } from '@/lib/dsr-calculator';
+import {
+  type FundingInput,
+  type FundingItemInput,
+  type DistMethod,
+  splitFunding,
+  formatAmount,
+} from '@/lib/funding-plan';
 import { APARTMENTS } from '@/data/apartments';
 import type { PriceMap } from '@/types';
 
@@ -32,6 +39,7 @@ const FAIL_COUNT_KEY = 'seoul-blueprint-admin-fail-count';
 const LOCKOUT_KEY = 'seoul-blueprint-admin-lockout-until';
 const CUSTOM_HASH_KEY = 'seoul-blueprint-admin-custom-hash';
 const DSR_INPUTS_KEY = 'seoul-blueprint-admin-dsr-inputs';
+const FUNDING_INPUTS_KEY = 'seoul-blueprint-admin-funding-inputs';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 인증 헬퍼
@@ -377,7 +385,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 // DSR 계산기 (인증 후 메인)
 // ─────────────────────────────────────────────────────────────────────────────
 
-type AdminTab = 'dsr' | 'guide';
+type AdminTab = 'dsr' | 'funding' | 'guide';
 
 function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState<AdminTab>('dsr');
@@ -495,38 +503,39 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       {/* 헤더 */}
       <header className="bg-white border-b border-[#e8e5e0] sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-sm text-[#787774] hover:text-[#37352f]">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Link href="/" className="text-xs sm:text-sm text-[#787774] hover:text-[#37352f] shrink-0">
               ← 메인
             </Link>
             <span className="text-[#e8e5e0]">|</span>
-            <span className="text-base font-semibold text-[#37352f]">관리자</span>
+            <span className="text-sm sm:text-base font-semibold text-[#37352f] truncate">관리자</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <button
               onClick={() => setShowPasswordModal(true)}
-              className="px-3 py-1.5 text-sm border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
+              className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
             >
-              비밀번호 변경
+              비번변경
             </button>
             <button
               onClick={handleLogout}
-              className="px-3 py-1.5 text-sm border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
+              className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
             >
               로그아웃
             </button>
           </div>
         </div>
         {/* 탭 */}
-        <div className="max-w-6xl mx-auto px-4 flex gap-0">
+        <div className="max-w-6xl mx-auto px-4 flex gap-0 overflow-x-auto">
           {([
             { key: 'dsr' as AdminTab, label: 'DSR 계산기' },
+            { key: 'funding' as AdminTab, label: '자금조달' },
             { key: 'guide' as AdminTab, label: '가이드' },
           ]).map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
                 activeTab === tab.key
                   ? 'border-[#2383e2] text-[#2383e2]'
                   : 'border-transparent text-[#787774] hover:text-[#37352f]'
@@ -541,6 +550,8 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       <main className="max-w-6xl mx-auto px-4 py-6">
       {activeTab === 'guide' ? (
         <GuideContent />
+      ) : activeTab === 'funding' ? (
+        <FundingPlanTab />
       ) : (
         <div className="lg:grid lg:grid-cols-2 lg:gap-6">
           {/* ── 왼쪽: 입력 폼 ── */}
@@ -933,6 +944,538 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
         </div>
       )}
       </main>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 자금조달 탭
+// ─────────────────────────────────────────────────────────────────────────────
+
+function emptyItem(distMethod: DistMethod = 'ratio'): FundingItemInput {
+  return { amount: 0, distMethod };
+}
+
+const DEFAULT_FUNDING: FundingInput = {
+  person1Name: '',
+  person2Name: '',
+  ratio: [5, 5],
+  apartmentName: '',
+  totalPrice: 0,
+  deposit: emptyItem(),
+  stockBond: emptyItem(),
+  gift: emptyItem(),
+  giftRelation: '직계존비속',
+  cashEtc: emptyItem(),
+  cashType: '보유현금',
+  realEstateSale: emptyItem(),
+  mortgageLoan: emptyItem(),
+  creditLoan: emptyItem(),
+  otherLoan: emptyItem(),
+  otherLoanType: '',
+  housingOwnership: 'none',
+  housingCount: 0,
+  rentalDeposit: emptyItem(),
+  companySupport: emptyItem(),
+  otherBorrow: emptyItem(),
+  otherBorrowRelation: '',
+  paymentTransfer: 0,
+  paymentDeposit: 0,
+  paymentCash: 0,
+  paymentCashReason: '',
+  moveInType: 'self',
+  moveInYear: new Date().getFullYear(),
+  moveInMonth: 1,
+};
+
+function loadFundingInputs(): FundingInput {
+  if (typeof window === 'undefined') return DEFAULT_FUNDING;
+  try {
+    const raw = localStorage.getItem(FUNDING_INPUTS_KEY);
+    if (!raw) return DEFAULT_FUNDING;
+    return { ...DEFAULT_FUNDING, ...JSON.parse(raw) };
+  } catch {
+    return DEFAULT_FUNDING;
+  }
+}
+
+function saveFundingInputs(inputs: FundingInput): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(FUNDING_INPUTS_KEY, JSON.stringify(inputs));
+}
+
+function FundingPlanTab() {
+  const [fi, setFi] = useState<FundingInput>(DEFAULT_FUNDING);
+  const [ratioPreset, setRatioPreset] = useState<'5:5' | '6:4' | '7:3' | 'custom'>('5:5');
+  // 부동산 처분대금 총액 입력 (ratio 모드용 별도 state)
+  const [realEstateTotalInput, setRealEstateTotalInput] = useState('');
+
+  useEffect(() => {
+    const loaded = loadFundingInputs();
+    setFi(loaded);
+    const r = loaded.ratio;
+    if (r[0] === 5 && r[1] === 5) setRatioPreset('5:5');
+    else if (r[0] === 6 && r[1] === 4) setRatioPreset('6:4');
+    else if (r[0] === 7 && r[1] === 3) setRatioPreset('7:3');
+    else setRatioPreset('custom');
+    // 부동산 처분대금 초기값
+    if (loaded.realEstateSale.amount > 0) {
+      setRealEstateTotalInput(toComma(String(loaded.realEstateSale.amount)));
+    }
+  }, []);
+
+  function update(partial: Partial<FundingInput>) {
+    setFi((prev) => {
+      const next = { ...prev, ...partial };
+      saveFundingInputs(next);
+      return next;
+    });
+  }
+
+  // person1/person2 금액 직접 입력 → custom 모드
+  function updateItemDirect(key: keyof FundingInput, p1: number, p2: number) {
+    const item: FundingItemInput = {
+      amount: p1 + p2,
+      distMethod: 'custom',
+      person1Amount: p1,
+      person2Amount: p2,
+    };
+    update({ [key]: item });
+  }
+
+  // 현재 item에서 person1/person2 금액 계산 (splitFunding 로직 인라인)
+  function resolveAmounts(item: FundingItemInput): [number, number] {
+    const { amount, distMethod, person1Amount, person2Amount } = item;
+    const rSum = fi.ratio[0] + fi.ratio[1];
+    switch (distMethod) {
+      case 'ratio': {
+        if (rSum === 0) return [0, 0];
+        const p1 = Math.round((amount * fi.ratio[0]) / rSum);
+        return [p1, amount - p1];
+      }
+      case 'person1': return [amount, 0];
+      case 'person2': return [0, amount];
+      case 'custom': return [person1Amount ?? 0, person2Amount ?? 0];
+      default: return [0, 0];
+    }
+  }
+
+  const ratioPresets = [
+    { label: '5:5', r: [5, 5] as [number, number] },
+    { label: '6:4', r: [6, 4] as [number, number] },
+    { label: '7:3', r: [7, 3] as [number, number] },
+  ];
+
+  const btnClass = (active: boolean) =>
+    `px-3 py-1.5 text-xs rounded border ${
+      active
+        ? 'bg-[#2383e2] text-white border-[#2383e2]'
+        : 'bg-[#f7f7f5] text-[#787774] border-[#e8e5e0] hover:bg-[#eee]'
+    }`;
+
+  const totalPrice = fi.totalPrice;
+  const rSum = fi.ratio[0] + fi.ratio[1];
+  const share1 = rSum > 0 ? Math.round((totalPrice * fi.ratio[0]) / rSum) : 0;
+  const share2 = totalPrice - share1;
+
+  // 자동계산: splitFunding 사용
+  const [forms1, forms2] = (() => {
+    try { return splitFunding(fi); } catch { return [null, null]; }
+  })();
+
+  const ownSubtotal1 = forms1 ? forms1.ownFundsSubtotal : 0;
+  const ownSubtotal2 = forms2 ? forms2.ownFundsSubtotal : 0;
+  const borrowSubtotal1 = forms1 ? forms1.borrowSubtotal : 0;
+  const borrowSubtotal2 = forms2 ? forms2.borrowSubtotal : 0;
+  const grandTotal1 = forms1 ? forms1.grandTotal : 0;
+  const grandTotal2 = forms2 ? forms2.grandTotal : 0;
+
+  async function handlePrint() {
+    try {
+      const resp = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fi),
+      });
+      if (!resp.ok) throw new Error('PDF 생성 실패: ' + resp.status);
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (err) {
+      console.error('PDF 생성 실패:', err);
+      alert('PDF 생성에 실패했습니다.');
+    }
+  }
+
+  const inputClass = 'w-full border border-[#e8e5e0] rounded px-3 py-2 text-sm text-[#37352f] focus:outline-none focus:border-[#2383e2]';
+  const labelClass = 'text-xs text-[#787774] mb-1 block';
+  const sectionClass = 'pt-4 border-t border-[#e8e5e0]';
+
+  // 테이블 셀 스타일
+  const tdLabel = 'border border-[#e8e5e0] px-2 py-1.5 text-xs text-[#37352f] bg-[#f7f7f5] whitespace-nowrap';
+  const tdInput = 'border border-[#e8e5e0] px-1 py-0.5';
+  const tdAuto = 'border border-[#e8e5e0] px-2 py-1.5 text-xs text-right text-[#37352f] bg-[#f7f7f5]';
+  const tdSubtotal = 'border border-[#e8e5e0] px-2 py-1.5 text-xs text-right font-semibold text-[#37352f] bg-[#eee]';
+  const cellInput = (val: number, onChange: (v: number) => void) => (
+    <input
+      type="text"
+      inputMode="numeric"
+      value={val ? toComma(String(val)) : ''}
+      onChange={(e) => onChange(parseInt(stripComma(e.target.value) || '0', 10))}
+      placeholder="0"
+      className="w-full text-right text-xs px-1 py-1 focus:outline-none focus:border-[#2383e2] border border-transparent focus:border rounded"
+    />
+  );
+
+  // 항목별 person1/person2 현재값
+  const [dep1, dep2] = resolveAmounts(fi.deposit);
+  const [sb1, sb2] = resolveAmounts(fi.stockBond);
+  const [gi1, gi2] = resolveAmounts(fi.gift);
+  const [ce1, ce2] = resolveAmounts(fi.cashEtc);
+  const [rs1, rs2] = resolveAmounts(fi.realEstateSale);
+  const [ml1, ml2] = resolveAmounts(fi.mortgageLoan);
+  const [cl1, cl2] = resolveAmounts(fi.creditLoan);
+  const [ol1, ol2] = resolveAmounts(fi.otherLoan);
+  const [rd1, rd2] = resolveAmounts(fi.rentalDeposit);
+  const [cs1, cs2] = resolveAmounts(fi.companySupport);
+  const [ob1, ob2] = resolveAmounts(fi.otherBorrow);
+
+  const p1Label = fi.person1Name || '인1';
+  const p2Label = fi.person2Name || '인2';
+
+  // 검증
+  const ok1 = Math.abs(grandTotal1 - share1) < 1;
+  const ok2 = Math.abs(grandTotal2 - share2) < 1;
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-4">
+      <div className="bg-white border border-[#e8e5e0] rounded-lg p-5 space-y-5">
+
+        {/* Zone A: 기본정보 */}
+        <div>
+          <h2 className="text-sm font-semibold text-[#37352f] mb-3">기본정보</h2>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass}>매수인1 이름</label>
+                <input type="text" value={fi.person1Name} onChange={(e) => update({ person1Name: e.target.value })} placeholder="홍길동" className={inputClass} />
+              </div>
+              <div>
+                <label className={labelClass}>매수인2 이름</label>
+                <input type="text" value={fi.person2Name} onChange={(e) => update({ person2Name: e.target.value })} placeholder="김영희" className={inputClass} />
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>취득 물건 (아파트명)</label>
+              <input type="text" value={fi.apartmentName} onChange={(e) => update({ apartmentName: e.target.value })} placeholder="○○아파트 ○○동 ○○호" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>지분비율</label>
+              <div className="flex gap-1 flex-wrap">
+                {ratioPresets.map((p) => (
+                  <button key={p.label} type="button" onClick={() => { setRatioPreset(p.label as typeof ratioPreset); update({ ratio: p.r }); }} className={btnClass(ratioPreset === p.label)}>{p.label}</button>
+                ))}
+                <button type="button" onClick={() => setRatioPreset('custom')} className={btnClass(ratioPreset === 'custom')}>직접입력</button>
+              </div>
+              {ratioPreset === 'custom' && (
+                <div className="flex gap-2 mt-2">
+                  <div className="flex-1">
+                    <label className={labelClass}>{p1Label} 지분</label>
+                    <input type="number" value={fi.ratio[0]} onChange={(e) => update({ ratio: [parseInt(e.target.value) || 0, fi.ratio[1]] })} className={inputClass} />
+                  </div>
+                  <div className="flex items-end pb-2 text-[#787774]">:</div>
+                  <div className="flex-1">
+                    <label className={labelClass}>{p2Label} 지분</label>
+                    <input type="number" value={fi.ratio[1]} onChange={(e) => update({ ratio: [fi.ratio[0], parseInt(e.target.value) || 0] })} className={inputClass} />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div>
+              <label className={labelClass}>매수 총액</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text" inputMode="numeric"
+                  value={fi.totalPrice ? toComma(String(fi.totalPrice)) : ''}
+                  onChange={(e) => update({ totalPrice: parseInt(stripComma(e.target.value) || '0', 10) })}
+                  placeholder="0"
+                  className="flex-1 border border-[#e8e5e0] rounded px-3 py-2 text-sm text-right focus:outline-none focus:border-[#2383e2]"
+                />
+                <span className="text-xs text-[#787774] shrink-0">원</span>
+              </div>
+              {fi.totalPrice > 0 && (
+                <div className="mt-1 text-xs text-[#787774]">
+                  {p1Label}: {formatAmount(share1)}원 &nbsp;/&nbsp; {p2Label}: {formatAmount(share2)}원
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Zone B: 자금 테이블 */}
+        <div className={sectionClass}>
+          <h2 className="text-sm font-semibold text-[#37352f] mb-3">자금조달계획</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr>
+                  <th className="border border-[#e8e5e0] px-2 py-2 bg-[#f0ede8] text-left text-[#37352f] font-semibold">항목</th>
+                  <th className="border border-[#e8e5e0] px-2 py-2 bg-[#f0ede8] text-center text-[#37352f] font-semibold min-w-[110px]">{p1Label}</th>
+                  <th className="border border-[#e8e5e0] px-2 py-2 bg-[#f0ede8] text-center text-[#37352f] font-semibold min-w-[110px]">{p2Label}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* 자기자금 */}
+                <tr>
+                  <td className={tdLabel}>② 금융기관 예금</td>
+                  <td className={tdInput}>{cellInput(dep1, (v) => updateItemDirect('deposit', v, dep2))}</td>
+                  <td className={tdInput}>{cellInput(dep2, (v) => updateItemDirect('deposit', dep1, v))}</td>
+                </tr>
+                <tr>
+                  <td className={tdLabel}>③ 주식·채권</td>
+                  <td className={tdInput}>{cellInput(sb1, (v) => updateItemDirect('stockBond', v, sb2))}</td>
+                  <td className={tdInput}>{cellInput(sb2, (v) => updateItemDirect('stockBond', sb1, v))}</td>
+                </tr>
+                <tr>
+                  <td className={tdLabel}>④ 증여·상속</td>
+                  <td className={tdInput}>{cellInput(gi1, (v) => updateItemDirect('gift', v, gi2))}</td>
+                  <td className={tdInput}>{cellInput(gi2, (v) => updateItemDirect('gift', gi1, v))}</td>
+                </tr>
+                <tr>
+                  <td className={tdLabel}>⑤ 현금 등</td>
+                  <td className={tdInput}>{cellInput(ce1, (v) => updateItemDirect('cashEtc', v, ce2))}</td>
+                  <td className={tdInput}>{cellInput(ce2, (v) => updateItemDirect('cashEtc', ce1, v))}</td>
+                </tr>
+                <tr>
+                  <td className={tdLabel}>
+                    <div>⑥ 부동산 처분대금</div>
+                    <div className="mt-1 flex items-center gap-1">
+                      <span className="text-[#787774]">총액</span>
+                      <input
+                        type="text" inputMode="numeric"
+                        value={realEstateTotalInput}
+                        onChange={(e) => {
+                          const raw = stripComma(e.target.value);
+                          setRealEstateTotalInput(raw ? toComma(raw) : '');
+                          const amt = parseInt(raw || '0', 10);
+                          update({ realEstateSale: { amount: amt, distMethod: 'ratio' } });
+                        }}
+                        placeholder="0"
+                        className="w-20 border border-[#e8e5e0] rounded px-1 py-0.5 text-right text-xs focus:outline-none focus:border-[#2383e2]"
+                      />
+                    </div>
+                  </td>
+                  <td className={tdInput}>{cellInput(rs1, (v) => updateItemDirect('realEstateSale', v, rs2))}</td>
+                  <td className={tdInput}>{cellInput(rs2, (v) => updateItemDirect('realEstateSale', rs1, v))}</td>
+                </tr>
+                <tr>
+                  <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">자기자금 소계</td>
+                  <td className={tdSubtotal}>{ownSubtotal1 ? formatAmount(ownSubtotal1) : ''}</td>
+                  <td className={tdSubtotal}>{ownSubtotal2 ? formatAmount(ownSubtotal2) : ''}</td>
+                </tr>
+                {/* 차입금 */}
+                <tr>
+                  <td className={tdLabel}>주택담보대출</td>
+                  <td className={tdInput}>{cellInput(ml1, (v) => updateItemDirect('mortgageLoan', v, ml2))}</td>
+                  <td className={tdInput}>{cellInput(ml2, (v) => updateItemDirect('mortgageLoan', ml1, v))}</td>
+                </tr>
+                <tr>
+                  <td className={tdLabel}>신용대출</td>
+                  <td className={tdInput}>{cellInput(cl1, (v) => updateItemDirect('creditLoan', v, cl2))}</td>
+                  <td className={tdInput}>{cellInput(cl2, (v) => updateItemDirect('creditLoan', cl1, v))}</td>
+                </tr>
+                <tr>
+                  <td className={tdLabel}>그 밖의 대출</td>
+                  <td className={tdInput}>{cellInput(ol1, (v) => updateItemDirect('otherLoan', v, ol2))}</td>
+                  <td className={tdInput}>{cellInput(ol2, (v) => updateItemDirect('otherLoan', ol1, v))}</td>
+                </tr>
+                <tr>
+                  <td className={tdLabel}>⑨ 임대보증금</td>
+                  <td className={tdInput}>{cellInput(rd1, (v) => updateItemDirect('rentalDeposit', v, rd2))}</td>
+                  <td className={tdInput}>{cellInput(rd2, (v) => updateItemDirect('rentalDeposit', rd1, v))}</td>
+                </tr>
+                <tr>
+                  <td className={tdLabel}>⑩ 회사지원금·사채</td>
+                  <td className={tdInput}>{cellInput(cs1, (v) => updateItemDirect('companySupport', v, cs2))}</td>
+                  <td className={tdInput}>{cellInput(cs2, (v) => updateItemDirect('companySupport', cs1, v))}</td>
+                </tr>
+                <tr>
+                  <td className={tdLabel}>⑪ 그 밖의 차입금</td>
+                  <td className={tdInput}>{cellInput(ob1, (v) => updateItemDirect('otherBorrow', v, ob2))}</td>
+                  <td className={tdInput}>{cellInput(ob2, (v) => updateItemDirect('otherBorrow', ob1, v))}</td>
+                </tr>
+                <tr>
+                  <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">차입금 소계</td>
+                  <td className={tdSubtotal}>{borrowSubtotal1 ? formatAmount(borrowSubtotal1) : ''}</td>
+                  <td className={tdSubtotal}>{borrowSubtotal2 ? formatAmount(borrowSubtotal2) : ''}</td>
+                </tr>
+                <tr>
+                  <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">합계</td>
+                  <td className={tdSubtotal}>{grandTotal1 ? formatAmount(grandTotal1) : ''}</td>
+                  <td className={tdSubtotal}>{grandTotal2 ? formatAmount(grandTotal2) : ''}</td>
+                </tr>
+                <tr>
+                  <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">분담금</td>
+                  <td className={tdAuto}>{share1 ? formatAmount(share1) : ''}</td>
+                  <td className={tdAuto}>{share2 ? formatAmount(share2) : ''}</td>
+                </tr>
+                <tr>
+                  <td className="border border-[#e8e5e0] px-2 py-1.5 text-xs font-semibold text-[#37352f] bg-[#eee]">검증</td>
+                  <td className={`border border-[#e8e5e0] px-2 py-1.5 text-xs text-center ${grandTotal1 > 0 ? (ok1 ? 'text-[#0f7b6c] bg-[#edfaf6]' : 'text-[#eb5757] bg-[#fbe4e4]') : 'bg-[#f7f7f5]'}`}>
+                    {grandTotal1 > 0 ? (ok1 ? '일치' : `차이 ${formatAmount(Math.abs(grandTotal1 - share1))}`) : '-'}
+                  </td>
+                  <td className={`border border-[#e8e5e0] px-2 py-1.5 text-xs text-center ${grandTotal2 > 0 ? (ok2 ? 'text-[#0f7b6c] bg-[#edfaf6]' : 'text-[#eb5757] bg-[#fbe4e4]') : 'bg-[#f7f7f5]'}`}>
+                    {grandTotal2 > 0 ? (ok2 ? '일치' : `차이 ${formatAmount(Math.abs(grandTotal2 - share2))}`) : '-'}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Zone C: 부가정보 */}
+        <div className={sectionClass}>
+          <h2 className="text-sm font-semibold text-[#37352f] mb-3">부가정보</h2>
+          <div className="space-y-3">
+            <div>
+              <label className={labelClass}>증여 관계</label>
+              <div className="flex gap-1">
+                {(['부부', '직계존비속', '기타'] as const).map((r) => (
+                  <button key={r} type="button" onClick={() => update({ giftRelation: r })} className={btnClass(fi.giftRelation === r)}>{r}</button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>현금 유형</label>
+              <div className="flex gap-1">
+                {(['보유현금', '기타자산'] as const).map((t) => (
+                  <button key={t} type="button" onClick={() => update({ cashType: t })} className={btnClass(fi.cashType === t)}>{t}</button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>기타대출 종류</label>
+              <input type="text" value={fi.otherLoanType ?? ''} onChange={(e) => update({ otherLoanType: e.target.value })} placeholder="예: 전세자금대출" className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>기존주택 보유여부</label>
+              <div className="flex gap-1 mb-2">
+                <button type="button" onClick={() => update({ housingOwnership: 'none' })} className={btnClass(fi.housingOwnership === 'none')}>미보유</button>
+                <button type="button" onClick={() => update({ housingOwnership: 'own' })} className={btnClass(fi.housingOwnership === 'own')}>보유</button>
+              </div>
+              {fi.housingOwnership === 'own' && (
+                <div>
+                  <label className={labelClass}>보유 건수</label>
+                  <input type="number" min={1} value={fi.housingCount ?? 1} onChange={(e) => update({ housingCount: parseInt(e.target.value) || 1 })} className={inputClass} />
+                </div>
+              )}
+            </div>
+            <div>
+              <label className={labelClass}>기타차입 관계</label>
+              <input type="text" value={fi.otherBorrowRelation ?? ''} onChange={(e) => update({ otherBorrowRelation: e.target.value })} placeholder="예: 부모님" className={inputClass} />
+            </div>
+          </div>
+        </div>
+
+        {/* Zone D: 지급방식 */}
+        <div className={sectionClass}>
+          <h2 className="text-sm font-semibold text-[#37352f] mb-3">지급방식</h2>
+          <div className="space-y-3">
+            <div>
+              <label className={labelClass}>⑮ 계좌이체 금액</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text" inputMode="numeric"
+                  value={fi.paymentTransfer ? toComma(String(fi.paymentTransfer)) : ''}
+                  onChange={(e) => update({ paymentTransfer: parseInt(stripComma(e.target.value) || '0', 10) })}
+                  placeholder="0"
+                  className="flex-1 border border-[#e8e5e0] rounded px-3 py-2 text-sm text-right focus:outline-none focus:border-[#2383e2]"
+                />
+                <span className="text-xs text-[#787774] shrink-0">원</span>
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>⑯ 보증금·대출 승계 금액</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text" inputMode="numeric"
+                  value={fi.paymentDeposit ? toComma(String(fi.paymentDeposit)) : ''}
+                  onChange={(e) => update({ paymentDeposit: parseInt(stripComma(e.target.value) || '0', 10) })}
+                  placeholder="0"
+                  className="flex-1 border border-[#e8e5e0] rounded px-3 py-2 text-sm text-right focus:outline-none focus:border-[#2383e2]"
+                />
+                <span className="text-xs text-[#787774] shrink-0">원</span>
+              </div>
+            </div>
+            <div>
+              <label className={labelClass}>⑰ 현금 및 그 밖의 지급방식 금액</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text" inputMode="numeric"
+                  value={fi.paymentCash ? toComma(String(fi.paymentCash)) : ''}
+                  onChange={(e) => update({ paymentCash: parseInt(stripComma(e.target.value) || '0', 10) })}
+                  placeholder="0"
+                  className="flex-1 border border-[#e8e5e0] rounded px-3 py-2 text-sm text-right focus:outline-none focus:border-[#2383e2]"
+                />
+                <span className="text-xs text-[#787774] shrink-0">원</span>
+              </div>
+              <div className="mt-1">
+                <label className={labelClass}>사유</label>
+                <input type="text" value={fi.paymentCashReason ?? ''} onChange={(e) => update({ paymentCashReason: e.target.value })} placeholder="예: 현장 직접 지급" className={inputClass} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Zone E: 입주계획 */}
+        <div className={sectionClass}>
+          <h2 className="text-sm font-semibold text-[#37352f] mb-3">입주계획</h2>
+          <div className="space-y-3">
+            <div>
+              <label className={labelClass}>입주 형태</label>
+              <div className="flex gap-1 flex-wrap">
+                {(['self', 'family', 'rental', 'other'] as const).map((t) => {
+                  const labels = { self: '본인입주', family: '가족입주', rental: '임대', other: '기타' };
+                  return (
+                    <button key={t} type="button" onClick={() => update({ moveInType: t })} className={btnClass(fi.moveInType === t)}>{labels[t]}</button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass}>입주 예정 연도</label>
+                <input type="number" value={fi.moveInYear ?? ''} onChange={(e) => update({ moveInYear: parseInt(e.target.value) || undefined })} placeholder="2025" className={inputClass} />
+              </div>
+              <div>
+                <label className={labelClass}>월</label>
+                <input type="number" min={1} max={12} value={fi.moveInMonth ?? ''} onChange={(e) => update({ moveInMonth: parseInt(e.target.value) || undefined })} placeholder="1" className={inputClass} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Zone F: 하단 버튼 */}
+        <div className={sectionClass}>
+          <div className="flex gap-3 items-center">
+            <a
+              href="/funding-manual.pdf"
+              download
+              className="px-4 py-2 text-xs border border-[#e8e5e0] rounded text-[#787774] hover:bg-[#f7f7f5] transition-colors"
+            >
+              매뉴얼 다운로드
+            </a>
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="flex-1 py-2.5 bg-[#2383e2] text-white text-sm font-medium rounded-md hover:bg-[#1a6fba] transition-colors"
+            >
+              양식 생성 / 프린트
+            </button>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

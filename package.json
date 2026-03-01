@@ -12,7 +12,11 @@
     "crawl:search": "node scripts/crawl-prices-browser.mjs --search"
   },
   "dependencies": {
+    "@fontsource/noto-sans-kr": "^5.2.9",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "buffer": "^6.0.3",
     "next": "16.1.6",
+    "pdf-lib": "^1.17.1",
     "puppeteer": "^24.37.5",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
@@ -26,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "pdfjs-dist": "^5.4.624",
     "playwright": "^1.58.2",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
