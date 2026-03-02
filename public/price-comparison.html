@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서울 아파트 가격 변동 비교</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', '맑은 고딕', sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.6; }
+
+.container { max-width: 1400px; margin: 0 auto; padding: 16px; }
+
+header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 24px 0; margin-bottom: 24px; }
+header .container { display: flex; flex-direction: column; gap: 8px; }
+header h1 { font-size: 1.6rem; font-weight: 700; }
+header .date-info { font-size: 0.85rem; color: #a0aec0; }
+header .date-info span { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; margin-right: 4px; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: white; border-radius: 10px; padding: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.stat-card .label { font-size: 0.75rem; color: #718096; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card .value { font-size: 1.5rem; font-weight: 700; }
+.stat-card .value.up { color: #e53e3e; }
+.stat-card .value.down { color: #3182ce; }
+.stat-card .value.same { color: #718096; }
+.stat-card .value.avg { color: #2d3748; }
+
+.top-section { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.top-card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.top-card h3 { font-size: 0.9rem; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #edf2f7; }
+.top-card h3.up-title { color: #e53e3e; border-color: #fed7d7; }
+.top-card h3.down-title { color: #3182ce; border-color: #bee3f8; }
+.top-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 0.85rem; border-bottom: 1px solid #f7fafc; }
+.top-item:last-child { border-bottom: none; }
+.top-item .rank { font-weight: 700; color: #a0aec0; width: 24px; }
+.top-item .apt-name { flex: 1; margin: 0 8px; }
+.top-item .apt-district { color: #718096; font-size: 0.75rem; margin-right: 8px; }
+.top-item .change-rate { font-weight: 600; min-width: 70px; text-align: right; }
+.top-item .change-rate.up { color: #e53e3e; }
+.top-item .change-rate.down { color: #3182ce; }
+
+.controls { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.controls select, .controls input { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.85rem; background: white; color: #2d3748; }
+.controls select:focus, .controls input:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 2px rgba(49,130,206,0.2); }
+.controls input { flex: 1; min-width: 180px; max-width: 300px; }
+.controls label { font-size: 0.8rem; color: #718096; }
+.result-count { font-size: 0.8rem; color: #718096; margin-left: auto; }
+
+.table-wrap { background: white; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead { background: #f7fafc; position: sticky; top: 0; z-index: 1; }
+th { padding: 10px 12px; text-align: left; font-weight: 600; color: #4a5568; border-bottom: 2px solid #e2e8f0; white-space: nowrap; cursor: pointer; user-select: none; }
+th:hover { background: #edf2f7; }
+th .sort-icon { margin-left: 4px; font-size: 0.7rem; color: #a0aec0; }
+th.sorted .sort-icon { color: #3182ce; }
+td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+tr:hover { background: #f7fafc; }
+tr.row-up { }
+tr.row-down { }
+tr.row-same { }
+tr.row-nodata { color: #a0aec0; }
+
+.price { text-align: right; font-variant-numeric: tabular-nums; }
+.change-cell { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.change-cell.up { color: #e53e3e; }
+.change-cell.down { color: #3182ce; }
+.change-cell.same { color: #a0aec0; }
+.change-cell.nodata { color: #cbd5e0; font-weight: 400; font-style: italic; }
+
+.tier-badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; background: #edf2f7; color: #4a5568; }
+
+.district-badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; background: #ebf4ff; color: #2b6cb0; }
+
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  .top-section { grid-template-columns: 1fr; }
+  header h1 { font-size: 1.2rem; }
+  .controls { flex-direction: column; }
+  .controls input { max-width: 100%; }
+  .result-count { margin-left: 0; }
+  td, th { padding: 6px 8px; font-size: 0.78rem; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .container { padding: 8px; }
+}
+
+.note { font-size: 0.75rem; color: #a0aec0; margin-top: 16px; text-align: center; padding: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>서울 아파트 가격 변동 비교</h1>
+    <div class="date-info">
+      <span>원래 가격: 2026년 1월 초 (CSV 기준)</span>
+      <span>현재 가격: 2026년 3월 2일 (크롤링 기준)</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <!-- Stats -->
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <!-- Top 5 -->
+  <div class="top-section" id="top-section"></div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div>
+      <label for="district-filter">구 필터</label><br>
+      <select id="district-filter"><option value="all">전체</option></select>
+    </div>
+    <div>
+      <label for="sort-select">정렬</label><br>
+      <select id="sort-select">
+        <option value="changeRate-desc">변동률 높은순</option>
+        <option value="changeRate-asc">변동률 낮은순</option>
+        <option value="change-desc">변동액 높은순</option>
+        <option value="change-asc">변동액 낮은순</option>
+        <option value="currentPrice-desc">현재가 높은순</option>
+        <option value="currentPrice-asc">현재가 낮은순</option>
+        <option value="basePrice-desc">원래가 높은순</option>
+        <option value="basePrice-asc">원래가 낮은순</option>
+        <option value="name-asc">이름순</option>
+      </select>
+    </div>
+    <div>
+      <label for="direction-filter">변동</label><br>
+      <select id="direction-filter">
+        <option value="all">전체</option>
+        <option value="up">상승만</option>
+        <option value="down">하락만</option>
+        <option value="same">보합만</option>
+        <option value="nodata">데이터없음</option>
+      </select>
+    </div>
+    <div>
+      <label for="search-input">검색</label><br>
+      <input type="text" id="search-input" placeholder="아파트명 검색...">
+    </div>
+    <div class="result-count" id="result-count"></div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-col="index">#</th>
+          <th data-col="name">아파트명</th>
+          <th data-col="district">구</th>
+          <th data-col="size">평형</th>
+          <th data-col="tier">티어</th>
+          <th data-col="basePrice" class="price">원래가격(억)</th>
+          <th data-col="currentPrice" class="price">현재가격(억)</th>
+          <th data-col="change" class="price">변동액(억)</th>
+          <th data-col="changeRate" class="price">변동률(%)</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    * 가격 데이터는 네이버 부동산 크롤링 기준 최저 호가입니다. 실거래가와 다를 수 있습니다.<br>
+    * "데이터 없음"은 크롤링 시점에 매물이 없거나 데이터 수집에 실패한 경우입니다.
+  </div>
+</div>
+
+<script>
+const DATA = [{"id":"seongbuk-jangwi-ipk","name":"장위 꿈의숲아이파크","district":"성북구","size":"24평","tier":"12","basePrice":11.6,"currentPrice":12,"change":0.4,"changeRate":3.45},{"id":"seongbuk-raemian-jangwi","name":"래미안장위포레카운티","district":"성북구","size":"24평","tier":"12","basePrice":11,"currentPrice":12.5,"change":1.5,"changeRate":13.64},{"id":"seongbuk-raemian-areum","name":"래미안아름숲","district":"성북구","size":"24평","tier":"12","basePrice":11,"currentPrice":12,"change":1,"changeRate":9.09},{"id":"seongbuk-gileum2-prugio","name":"길음2단지푸르지오","district":"성북구","size":"43평","tier":"12","basePrice":11.2,"currentPrice":9.05,"change":-2.15,"changeRate":-19.2},{"id":"seongbuk-gileum-raemian8-back","name":"길음래미안8단지 뒷동","district":"성북구","size":"24평","tier":"12","basePrice":11.5,"currentPrice":12,"change":0.5,"changeRate":4.35},{"id":"dongdaemun-dapsimni-donga","name":"답십리동아","district":"동대문구","size":"38평","tier":"12","basePrice":9.5,"currentPrice":9.5,"change":0,"changeRate":0},{"id":"dongdaemun-imun-epyeon","name":"이문e편한세상","district":"동대문구","size":"32평","tier":"12","basePrice":10.8,"currentPrice":9.3,"change":-1.5,"changeRate":-13.89},{"id":"dongdaemun-jeonnong-sk","name":"전농SK","district":"동대문구","size":"42평","tier":"12","basePrice":12,"currentPrice":10,"change":-2,"changeRate":-16.67},{"id":"dongdaemun-imun-raemian2","name":"이문래미안2차","district":"동대문구","size":"34평","tier":"12","basePrice":12,"currentPrice":10.5,"change":-1.5,"changeRate":-12.5},{"id":"dongdaemun-jegi-hanshin","name":"제기동 한신","district":"동대문구","size":"34평","tier":"12","basePrice":11.5,"currentPrice":10,"change":-1.5,"changeRate":-13.04},{"id":"dongdaemun-jangan-hyundai","name":"장안 현대홈타운","district":"동대문구","size":"24평","tier":"12","basePrice":9,"currentPrice":10,"change":1,"changeRate":11.11},{"id":"dongdaemun-jeonnong-woosung","name":"전농우성","district":"동대문구","size":"28평","tier":"12","basePrice":8.5,"currentPrice":5.8,"change":-2.7,"changeRate":-31.76},{"id":"dongdaemun-jeonnong-donga","name":"전농동아","district":"동대문구","size":"24평","tier":"12","basePrice":8.3,"currentPrice":9.6,"change":1.3,"changeRate":15.66},{"id":"gangseo-gayang2","name":"가양2단지","district":"강서구","size":"17평","tier":"12","basePrice":7.7,"currentPrice":6.7,"change":-1,"changeRate":-12.99},{"id":"gangseo-gayang6","name":"가양6단지","district":"강서구","size":"19평","tier":"12","basePrice":10,"currentPrice":7.9,"change":-2.1,"changeRate":-21},{"id":"gangseo-deungchon-ipk","name":"등촌아이파크","district":"강서구","size":"34평","tier":"12","basePrice":11,"currentPrice":11,"change":0,"changeRate":0},{"id":"gangseo-gayang-woosung","name":"가양우성","district":"강서구","size":"27평","tier":"12","basePrice":10,"currentPrice":11,"change":1,"changeRate":10},{"id":"gangseo-yeomchang-donga1","name":"염창동아1차","district":"강서구","size":"34평","tier":"12","basePrice":11.5,"currentPrice":9.5,"change":-2,"changeRate":-17.39},{"id":"gangdong-gangil3","name":"강일리버파크3단지","district":"강동구","size":"24평","tier":"12","basePrice":11.5,"currentPrice":11.9,"change":0.4,"changeRate":3.48},{"id":"gangdong-gangil5","name":"강일리버파크5단지","district":"강동구","size":"24평","tier":"12","basePrice":12,"currentPrice":12,"change":0,"changeRate":0},{"id":"gangdong-godeok-rien3","name":"고덕리엔파크3단지","district":"강동구","size":"34평","tier":"12","basePrice":12.5,"currentPrice":12.5,"change":0,"changeRate":0},{"id":"gangdong-godeok-rien2","name":"고덕리엔파크2단지","district":"강동구","size":"24평","tier":"12","basePrice":12,"currentPrice":11.8,"change":-0.2,"changeRate":-1.67},{"id":"gangdong-myungil-gs","name":"명일GS","district":"강동구","size":"24평","tier":"12","basePrice":11.5,"currentPrice":11.4,"change":-0.1,"changeRate":-0.87},{"id":"yeongdeungpo-singil-samsung","name":"신길삼성","district":"영등포구","size":"24평","tier":"12","basePrice":10,"currentPrice":11.8,"change":1.8,"changeRate":18},{"id":"yeongdeungpo-dangsan-hangang","name":"당산동 한강","district":"영등포구","size":"24평","tier":"12","basePrice":12.2,"currentPrice":13,"change":0.8,"changeRate":6.56},{"id":"yangcheon-mokdong-samsung2","name":"목동 삼성래미안2차","district":"양천구","size":"24평","tier":"12","basePrice":11.7,"currentPrice":14.5,"change":2.8,"changeRate":23.93},{"id":"yangcheon-mokdong-woosung2","name":"목동우성2차","district":"양천구","size":"34평","tier":"12","basePrice":11.3,"currentPrice":13,"change":1.7,"changeRate":15.04},{"id":"yangcheon-sinjeong-lotte","name":"신정뉴타운롯데캐슬","district":"양천구","size":"34평","tier":"12","basePrice":11.5,"currentPrice":10.5,"change":-1,"changeRate":-8.7},{"id":"yangcheon-mokdong-central-ipk","name":"목동센트럴아이파크위브","district":"양천구","size":"24평","tier":"12","basePrice":11.7,"currentPrice":9.5,"change":-2.2,"changeRate":-18.8},{"id":"yangcheon-mokdong-lotte-winner","name":"목동롯데캐슬위너","district":"양천구","size":"24평","tier":"12","basePrice":11.8,"currentPrice":13.9,"change":2.1,"changeRate":17.8},{"id":"gwanak-dreamtown","name":"관악드림타운","district":"관악구","size":"24평","tier":"12","basePrice":10,"currentPrice":10.2,"change":0.2,"changeRate":2},{"id":"gwanak-dongbu","name":"관악동부센트레빌","district":"관악구","size":"24평","tier":"12","basePrice":11,"currentPrice":11.5,"change":0.5,"changeRate":4.55},{"id":"gwanak-hyundai","name":"관악현대","district":"관악구","size":"23평","tier":"12","basePrice":8.3,"currentPrice":null,"change":null,"changeRate":null},{"id":"gwanak-woosung","name":"관악우성","district":"관악구","size":"24평","tier":"12","basePrice":8.4,"currentPrice":10,"change":1.6,"changeRate":19.05},{"id":"gwanak-prugio","name":"관악푸르지오","district":"관악구","size":"24평","tier":"12","basePrice":11,"currentPrice":11.3,"change":0.3,"changeRate":2.73},{"id":"gwanak-boramae-samsung","name":"보라매삼성","district":"관악구","size":"34평","tier":"12","basePrice":10.5,"currentPrice":10.5,"change":0,"changeRate":0},{"id":"gwanak-sillim-prugio1","name":"신림푸르지오1차","district":"관악구","size":"34평","tier":"12","basePrice":9.8,"currentPrice":9,"change":-0.8,"changeRate":-8.16},{"id":"gwanak-naksungdae-hyundai","name":"낙성대현대홈타운","district":"관악구","size":"43평","tier":"12","basePrice":11.5,"currentPrice":12,"change":0.5,"changeRate":4.35},{"id":"yongsan-hangangtown","name":"한강타운","district":"용산구","size":"24평","tier":"14","basePrice":12.8,"currentPrice":13.8,"change":1,"changeRate":7.81},{"id":"seongdong-seongsu-woobang2","name":"성수우방2차","district":"성동구","size":"24평","tier":"14","basePrice":13.5,"currentPrice":14.8,"change":1.3,"changeRate":9.63},{"id":"yeongdeungpo-yangpyung-hanshin","name":"양평한신","district":"영등포구","size":"34평","tier":"14","basePrice":14.8,"currentPrice":13.5,"change":-1.3,"changeRate":-8.78},{"id":"yeongdeungpo-prugio","name":"영등포푸르지오","district":"영등포구","size":"24평","tier":"14","basePrice":14,"currentPrice":14.6,"change":0.6,"changeRate":4.29},{"id":"seongbuk-gileum-raemian8-front","name":"길음래미안8단지 815(앞동)","district":"성북구","size":"24평","tier":"14","basePrice":13.5,"currentPrice":12,"change":-1.5,"changeRate":-11.11},{"id":"seongbuk-gileum-centerpiece","name":"길음 센터피스","district":"성북구","size":"24평","tier":"14","basePrice":14,"currentPrice":14.8,"change":0.8,"changeRate":5.71},{"id":"seongbuk-gileum-raemian1","name":"길음래미안 1단지","district":"성북구","size":"34평","tier":"14","basePrice":12,"currentPrice":11.5,"change":-0.5,"changeRate":-4.17},{"id":"songpa-parkdale2","name":"파크데일2단지","district":"비잠실송파","size":"44평","tier":"14","basePrice":14,"currentPrice":14.5,"change":0.5,"changeRate":3.57},{"id":"songpa-pungnap-donga","name":"풍납동 동아한가람","district":"비잠실송파","size":"34평","tier":"14","basePrice":15,"currentPrice":12.5,"change":-2.5,"changeRate":-16.67},{"id":"songpa-samsung-gwangnaru","name":"삼성광나루","district":"비잠실송파","size":"24평","tier":"14","basePrice":13,"currentPrice":null,"change":null,"changeRate":null},{"id":"songpa-dunchon-misojieum","name":"둔촌신성미소지움","district":"비잠실송파","size":"24평","tier":"14","basePrice":13,"currentPrice":13.5,"change":0.5,"changeRate":3.85},{"id":"songpa-the-platinum","name":"송파더플래티넘","district":"비잠실송파","size":"21평","tier":"14","basePrice":12,"currentPrice":14.7,"change":2.7,"changeRate":22.5},{"id":"mapo-coolong","name":"코오롱하늘채","district":"마포구","size":"34평","tier":"14","basePrice":12.5,"currentPrice":2.5,"change":-10,"changeRate":-80},{"id":"mapo-singongdeok-samsung2","name":"신공덕삼성래미안2차","district":"마포구","size":"24평","tier":"14","basePrice":14.9,"currentPrice":16.5,"change":1.6,"changeRate":10.74},{"id":"mapo-hangang-ipk","name":"마포한강아이파크","district":"마포구","size":"24평","tier":"14","basePrice":13.7,"currentPrice":16,"change":2.3,"changeRate":16.79},{"id":"dongjak-sindaebang-woosung1","name":"신대방우성1차","district":"동작구","size":"24평","tier":"14","basePrice":13,"currentPrice":12,"change":-1,"changeRate":-7.69},{"id":"dongjak-daebang-daelim","name":"대방대림","district":"동작구","size":"24평","tier":"14","basePrice":14,"currentPrice":14.3,"change":0.3,"changeRate":2.14},{"id":"gangseo-gangnaru-hyundai","name":"강나루현대","district":"강서구","size":"34평","tier":"14","basePrice":13.5,"currentPrice":11,"change":-2.5,"changeRate":-18.52},{"id":"gangseo-woojangsan-lotte","name":"우장산롯데캐슬","district":"강서구","size":"34평","tier":"14","basePrice":13.5,"currentPrice":13,"change":-0.5,"changeRate":-3.7},{"id":"gangseo-hangang-zai","name":"강서한강자이","district":"강서구","size":"24평","tier":"14","basePrice":15,"currentPrice":14.5,"change":-0.5,"changeRate":-3.33},{"id":"gwanak-epyeon-snu","name":"e편한세상서울대입구","district":"관악구","size":"24평","tier":"14","basePrice":13.7,"currentPrice":13.5,"change":-0.2,"changeRate":-1.46},{"id":"gangdong-seongnae-samsung","name":"성내삼성","district":"강동구","size":"24평","tier":"14","basePrice":12.5,"currentPrice":14,"change":1.5,"changeRate":12},{"id":"gangdong-seonsa-hyundai","name":"선사현대","district":"강동구","size":"24평","tier":"14","basePrice":14.5,"currentPrice":null,"change":null,"changeRate":null},{"id":"dongdaemun-dapsimni-parkzai-59","name":"답십리 파크자이 59타입","district":"동대문구","size":"59타입","tier":"14","basePrice":14,"currentPrice":13,"change":-1,"changeRate":-7.14},{"id":"dongdaemun-raemian-weave","name":"래미안위브","district":"동대문구","size":"59타입","tier":"14","basePrice":15.5,"currentPrice":15.4,"change":-0.1,"changeRate":-0.65},{"id":"dongdaemun-dapsimni-parkzai","name":"답십리 파크자이","district":"동대문구","size":"24평","tier":"16","basePrice":14,"currentPrice":13,"change":-1,"changeRate":-7.14},{"id":"dongdaemun-raemian-crecity","name":"래미안크레시티","district":"동대문구","size":"24평","tier":"16","basePrice":15.6,"currentPrice":15.3,"change":-0.3,"changeRate":-1.92},{"id":"dongdaemun-hwegyeong-zai","name":"휘경자이디센시아","district":"동대문구","size":"24평","tier":"16","basePrice":15.5,"currentPrice":null,"change":null,"changeRate":null},{"id":"dongdaemun-imun-ipk-zai","name":"이문아이파크자이","district":"동대문구","size":"24평","tier":"16","basePrice":16.5,"currentPrice":null,"change":null,"changeRate":null},{"id":"seongbuk-gileum-lotte-clasia","name":"길음 롯데캐슬클라시아","district":"성북구","size":"24평","tier":"16","basePrice":14.5,"currentPrice":14.7,"change":0.2,"changeRate":1.38},{"id":"mapo-dangsan-jinro","name":"당산 진로","district":"마포구","size":"34평","tier":"16","basePrice":15,"currentPrice":13,"change":-2,"changeRate":-13.33},{"id":"mapo-sangam-worldcup4","name":"상암월드컵4단지","district":"마포구","size":"34평","tier":"16","basePrice":16,"currentPrice":15.9,"change":-0.1,"changeRate":-0.62},{"id":"dongjak-sangdo-prugio","name":"상도푸르지오클라베뉴","district":"동작구","size":"24평","tier":"16","basePrice":16,"currentPrice":16,"change":0,"changeRate":0},{"id":"dongjak-boramae-zai","name":"보라매자이더포레스트","district":"동작구","size":"24평","tier":"16","basePrice":16,"currentPrice":16,"change":0,"changeRate":0},{"id":"songpa-thesharp-prestige","name":"더샵파크프레스티지","district":"비잠실송파","size":"24평","tier":"16","basePrice":15,"currentPrice":15,"change":0,"changeRate":0},{"id":"songpa-raemian-ellinity","name":"래미안엘리니티","district":"비잠실송파","size":"24평","tier":"16","basePrice":15,"currentPrice":14.8,"change":-0.2,"changeRate":-1.33},{"id":"gangdong-raemian-palace","name":"래미안강동팰리스","district":"강동구","size":"24평","tier":"16","basePrice":15.5,"currentPrice":14.9,"change":-0.6,"changeRate":-3.87},{"id":"yeongdeungpo-dangsan-samsung2","name":"당산삼성2차","district":"영등포구","size":"34평","tier":"16","basePrice":15.5,"currentPrice":null,"change":null,"changeRate":null},{"id":"yeongdeungpo-art-zai","name":"영등포 아트자이","district":"영등포구","size":"24평","tier":"16","basePrice":15,"currentPrice":15.5,"change":0.5,"changeRate":3.33},{"id":"gangseo-hangang-zai-16","name":"강서한강자이","district":"강서구","size":"24평","tier":"16","basePrice":15,"currentPrice":14.5,"change":-0.5,"changeRate":-3.33},{"id":"dongdaemun-cheongnyangni-l65","name":"청량리 L65","district":"동대문구","size":"34평","tier":"20","basePrice":18,"currentPrice":18,"change":0,"changeRate":0},{"id":"seongdong-wangsimni-zai","name":"왕십리자이","district":"성동구","size":"24평","tier":"20","basePrice":17.6,"currentPrice":14.6,"change":-3,"changeRate":-17.05},{"id":"gangseo-epyeon-yeomchang","name":"e편한세상 염창","district":"강서구","size":"34평","tier":"20","basePrice":17,"currentPrice":16,"change":-1,"changeRate":-5.88},{"id":"gangseo-magok14","name":"마곡엠벨리14단지","district":"강서구","size":"34평","tier":"20","basePrice":17.5,"currentPrice":17.1,"change":-0.4,"changeRate":-2.29},{"id":"yeongdeungpo-dongbu-centrevil","name":"동부센트레빌","district":"영등포구","size":"40평대","tier":"20","basePrice":17,"currentPrice":10.2,"change":-6.8,"changeRate":-40},{"id":"yeongdeungpo-raemian-prevenu","name":"래미안프레비뉴","district":"영등포구","size":"24평","tier":"20","basePrice":16.3,"currentPrice":16.3,"change":0,"changeRate":0},{"id":"yeongdeungpo-munrae-zai","name":"문래자이","district":"영등포구","size":"34평","tier":"20","basePrice":16.5,"currentPrice":18.5,"change":2,"changeRate":12.12},{"id":"yeongdeungpo-prior-palace","name":"프라이어팰리스","district":"영등포구","size":"24평","tier":"20","basePrice":16.5,"currentPrice":16.3,"change":-0.2,"changeRate":-1.21},{"id":"yeongdeungpo-singil-parkzai","name":"신길파크자이","district":"영등포구","size":"24평","tier":"20","basePrice":17,"currentPrice":16.9,"change":-0.1,"changeRate":-0.59},{"id":"gangdong-raemian-palace-20","name":"래미안강동팰리스","district":"강동구","size":"24평","tier":"20","basePrice":15.5,"currentPrice":14.9,"change":-0.6,"changeRate":-3.87},{"id":"gangdong-raemian-solvenu","name":"래미안솔베뉴","district":"강동구","size":"24평","tier":"20","basePrice":18.5,"currentPrice":16.5,"change":-2,"changeRate":-10.81},{"id":"gangdong-godeok-raemian-hs","name":"고덕래미안힐스테이트","district":"강동구","size":"24평","tier":"20","basePrice":17.9,"currentPrice":18.7,"change":0.8,"changeRate":4.47},{"id":"gwanak-hillstate-centciel","name":"힐스테이트관악센트씨엘","district":"관악구","size":"34평","tier":"20","basePrice":18,"currentPrice":null,"change":null,"changeRate":null},{"id":"mapo-sangam-worldcup4-20","name":"상암월드컵4단지","district":"마포구","size":"34평","tier":"20","basePrice":16,"currentPrice":15.9,"change":-0.1,"changeRate":-0.62},{"id":"mapo-sungsan-siyoung","name":"성산시영","district":"마포구","size":"23평","tier":"20","basePrice":17,"currentPrice":15,"change":-2,"changeRate":-11.76},{"id":"mapo-hangang-prugio","name":"마포한강푸르지오","district":"마포구","size":"34평","tier":"20","basePrice":19,"currentPrice":20,"change":1,"changeRate":5.26},{"id":"mapo-samsung","name":"마포 삼성","district":"마포구","size":"27평","tier":"20","basePrice":19,"currentPrice":17.5,"change":-1.5,"changeRate":-7.89},{"id":"dongjak-sadang-lotte","name":"사당롯데캐슬골든포레","district":"동작구","size":"24평","tier":"20","basePrice":16.5,"currentPrice":13.7,"change":-2.8,"changeRate":-16.97},{"id":"dongjak-hillstate-sangdo-cp","name":"힐스테이트상도센트럴파크","district":"동작구","size":"34평","tier":"20","basePrice":18.5,"currentPrice":18,"change":-0.5,"changeRate":-2.7},{"id":"dongjak-raemian-sangdo3","name":"래미안상도3차","district":"동작구","size":"42평","tier":"20","basePrice":18.3,"currentPrice":null,"change":null,"changeRate":null},{"id":"dongjak-hillstate-sangdo-pres","name":"힐스테이트상도프레스티지","district":"동작구","size":"34평","tier":"20","basePrice":17,"currentPrice":17.8,"change":0.8,"changeRate":4.71},{"id":"songpa-garak-kumho","name":"가락금호","district":"송파구","size":"24평","tier":"20","basePrice":17.8,"currentPrice":18.5,"change":0.7,"changeRate":3.93},{"id":"songpa-signature-lotte","name":"송파시그니처롯데캐슬","district":"송파구","size":"24평","tier":"20","basePrice":17.9,"currentPrice":17.8,"change":-0.1,"changeRate":-0.56},{"id":"seongdong-seoulforest-hs","name":"서울숲힐스테이트","district":"성동구","size":"24평","tier":"24","basePrice":25,"currentPrice":25,"change":0,"changeRate":0},{"id":"seongdong-seoulforest-prugio2","name":"서울숲푸르지오2차","district":"성동구","size":"24평","tier":"24","basePrice":23,"currentPrice":22,"change":-1,"changeRate":-4.35},{"id":"seongdong-seoulforest-prugio1","name":"서울숲푸르지오1차","district":"성동구","size":"24평","tier":"24","basePrice":21,"currentPrice":21.7,"change":0.7,"changeRate":3.33},{"id":"seongdong-singumho-parkzai","name":"신금호파크자이","district":"성동구","size":"24평","tier":"24","basePrice":21,"currentPrice":20.4,"change":-0.6,"changeRate":-2.86},{"id":"seongdong-kumho-parkhills","name":"금호파크힐스","district":"성동구","size":"24평","tier":"24","basePrice":22,"currentPrice":20.5,"change":-1.5,"changeRate":-6.82},{"id":"seongdong-raemian-wellstream","name":"래미안웰스트림","district":"성동구","size":"24평","tier":"24","basePrice":21,"currentPrice":21,"change":0,"changeRate":0},{"id":"gangseo-magok7","name":"마곡엠벨리7단지","district":"강서구","size":"34평","tier":"24","basePrice":22,"currentPrice":22,"change":0,"changeRate":0},{"id":"yeongdeungpo-dangsan-central-ipk","name":"당산센트럴아이파크","district":"영등포구","size":"24평","tier":"24","basePrice":23,"currentPrice":16,"change":-7,"changeRate":-30.43},{"id":"yeongdeungpo-dangsan-samsung-raemian","name":"당산삼성래미안","district":"영등포구","size":"34평","tier":"24","basePrice":22,"currentPrice":20.5,"change":-1.5,"changeRate":-6.82},{"id":"gangdong-godeok-gracium","name":"고덕 그라시움","district":"강동구","size":"24평","tier":"24","basePrice":22,"currentPrice":19,"change":-3,"changeRate":-13.64},{"id":"yongsan-epyeon","name":"용산e편한세상","district":"용산구","size":"24평","tier":"24","basePrice":22,"currentPrice":25.5,"change":3.5,"changeRate":15.91},{"id":"yongsan-lotte-centerfore","name":"용산롯데캐슬센터포레","district":"용산구","size":"34평","tier":"24","basePrice":23,"currentPrice":20.1,"change":-2.9,"changeRate":-12.61},{"id":"yongsan-ichon-daelim","name":"이촌 대림 조망굿","district":"용산구","size":"34평","tier":"24","basePrice":21,"currentPrice":22.5,"change":1.5,"changeRate":7.14},{"id":"yongsan-sanho","name":"용산 산호","district":"용산구","size":"34평","tier":"24","basePrice":23.5,"currentPrice":23.4,"change":-0.1,"changeRate":-0.43},{"id":"mapo-raemian-bamsem2","name":"래미안밤섬리베뉴2","district":"마포구","size":"34평","tier":"24","basePrice":21.5,"currentPrice":19,"change":-2.5,"changeRate":-11.63},{"id":"mapo-grand-zai","name":"마포그랑자이","district":"마포구","size":"24평","tier":"24","basePrice":22,"currentPrice":22,"change":0,"changeRate":0},{"id":"mapo-raemian-prugio","name":"마포래미안푸르지오","district":"마포구","size":"24평","tier":"24","basePrice":23.7,"currentPrice":22,"change":-1.7,"changeRate":-7.17},{"id":"mapo-prestige-zai","name":"마포프레스티지자이","district":"마포구","size":"24평","tier":"24","basePrice":24,"currentPrice":23,"change":-1,"changeRate":-4.17},{"id":"dongjak-epyeon-sangdo","name":"e편한세상상도노빌리티","district":"동작구","size":"34평","tier":"24","basePrice":21.8,"currentPrice":20.5,"change":-1.3,"changeRate":-5.96},{"id":"dongjak-raemian-roipark","name":"래미안로이파크","district":"동작구","size":"34평","tier":"24","basePrice":21,"currentPrice":20,"change":-1,"changeRate":-4.76},{"id":"dongjak-raemian-twinpark","name":"래미안 트윈파크","district":"동작구","size":"24평","tier":"24","basePrice":19,"currentPrice":19,"change":0,"changeRate":0},{"id":"songpa-munjeong-raemian","name":"문정래미안","district":"송파구","size":"48평","tier":"24","basePrice":23,"currentPrice":22,"change":-1,"changeRate":-4.35},{"id":"songpa-raemian-estium","name":"래미안에스티움","district":"송파구","size":"34평","tier":"24","basePrice":18,"currentPrice":18.5,"change":0.5,"changeRate":2.78},{"id":"songpa-raemian-parkpalace","name":"송파 래미안파크팰리스","district":"송파구","size":"24평","tier":"24","basePrice":20.5,"currentPrice":20.5,"change":0,"changeRate":0},{"id":"songpa-jamsil-olympic-ipk","name":"잠실올림픽공원아이파크","district":"송파구","size":"24평","tier":"24","basePrice":22.9,"currentPrice":21,"change":-1.9,"changeRate":-8.3},{"id":"songpa-hillstate-epyeon-munjeong","name":"힐스테이트e편한세상 문정","district":"송파구","size":"24평","tier":"24","basePrice":22,"currentPrice":17.5,"change":-4.5,"changeRate":-20.45},{"id":"songpa-arteon","name":"아르테온","district":"송파구","size":"24평","tier":"24","basePrice":20,"currentPrice":18.5,"change":-1.5,"changeRate":-7.5},{"id":"songpa-centras","name":"센트라스","district":"송파구","size":"24평","tier":"24","basePrice":20,"currentPrice":14,"change":-6,"changeRate":-30},{"id":"songpa-hanyang1","name":"송파동 한양1차","district":"송파구","size":"40평대","tier":"28","basePrice":28,"currentPrice":30,"change":2,"changeRate":7.14},{"id":"seodaemun-dmc-hanyang","name":"DMC한양수자인","district":"서대문구","size":"34평","tier":"12","basePrice":9.6,"currentPrice":8.5,"change":-1.1,"changeRate":-11.46},{"id":"seodaemun-namgajwa-hyundai","name":"남가좌현대","district":"서대문구","size":"24평","tier":"12","basePrice":8.3,"currentPrice":9,"change":0.7,"changeRate":8.43},{"id":"seodaemun-central-ipk","name":"서대문센트럴아이파크","district":"서대문구","size":"24평","tier":"12","basePrice":8.7,"currentPrice":null,"change":null,"changeRate":null},{"id":"gangbuk-raemian-tribera","name":"래미안트리베라","district":"강북구","size":"24평","tier":"12","basePrice":9.3,"currentPrice":9.2,"change":-0.1,"changeRate":-1.08},{"id":"dongdaemun-imun-hyundai","name":"이문현대","district":"동대문구","size":"34평","tier":"12","basePrice":8.5,"currentPrice":10,"change":1.5,"changeRate":17.65},{"id":"dongdaemun-imun-daewoo","name":"이문대우","district":"동대문구","size":"34평","tier":"12","basePrice":9.5,"currentPrice":9.1,"change":-0.4,"changeRate":-4.21},{"id":"dongdaemun-cheongsol-woosung","name":"청솔우성","district":"동대문구","size":"24평","tier":"12","basePrice":9.2,"currentPrice":9.7,"change":0.5,"changeRate":5.43},{"id":"dongdaemun-cheonggye-hyundai","name":"청계현대","district":"동대문구","size":"24평","tier":"12","basePrice":10,"currentPrice":13,"change":3,"changeRate":30},{"id":"guro-sindorim-lotte","name":"신도림롯데","district":"구로구","size":"24평","tier":"12","basePrice":9.5,"currentPrice":10.3,"change":0.8,"changeRate":8.42},{"id":"guro-gaebong-hyundai1","name":"개봉현대1차","district":"구로구","size":"34평","tier":"12","basePrice":8.3,"currentPrice":8.5,"change":0.2,"changeRate":2.41},{"id":"guro-gaebong-prugio","name":"개봉푸르지오","district":"구로구","size":"29평","tier":"12","basePrice":8.7,"currentPrice":8.7,"change":0,"changeRate":0},{"id":"guro-gaebong-hanmaeul","name":"개봉한마을","district":"구로구","size":"34평","tier":"12","basePrice":9,"currentPrice":8.6,"change":-0.4,"changeRate":-4.44},{"id":"eunpyeong-bulgwang-misung","name":"불광미성","district":"은평구","size":"26평","tier":"12","basePrice":7.3,"currentPrice":7.35,"change":0.05,"changeRate":0.68},{"id":"eunpyeong-bulgwang-lotte","name":"불광롯데캐슬","district":"은평구","size":"24평","tier":"12","basePrice":9.9,"currentPrice":9.9,"change":0,"changeRate":0},{"id":"eunpyeong-bukhansan-hyundai","name":"북한산현대홈타운","district":"은평구","size":"34평","tier":"12","basePrice":9.7,"currentPrice":9.7,"change":0,"changeRate":0},{"id":"eunpyeong-nokbeon-daelim","name":"녹번대림이편한","district":"은평구","size":"34평","tier":"12","basePrice":7.5,"currentPrice":7.7,"change":0.2,"changeRate":2.67},{"id":"eunpyeong-hongeun-byuksan","name":"홍은벽산","district":"은평구","size":"34평","tier":"12","basePrice":7.5,"currentPrice":6.2,"change":-1.3,"changeRate":-17.33},{"id":"eunpyeong-hongjewon-hs","name":"홍제원힐스테이트","district":"은평구","size":"24평","tier":"12","basePrice":9.5,"currentPrice":10.2,"change":0.7,"changeRate":7.37},{"id":"eunpyeong-baekryunsan-hills","name":"백련산힐스테이트","district":"은평구","size":"24평","tier":"12","basePrice":8,"currentPrice":8,"change":0,"changeRate":0},{"id":"eunpyeong-baekryunsan-sk-ipk","name":"백련산SK뷰아이파크","district":"은평구","size":"24평","tier":"12","basePrice":9.9,"currentPrice":10,"change":0.1,"changeRate":1.01},{"id":"eunpyeong-susaek-epyeon","name":"이편한수색에코","district":"은평구","size":"24평","tier":"12","basePrice":6.4,"currentPrice":7.1,"change":0.7,"changeRate":10.94},{"id":"eunpyeong-dmc-lotte","name":"DMC롯데캐슬더퍼스트","district":"은평구","size":"22평","tier":"12","basePrice":9,"currentPrice":6.5,"change":-2.5,"changeRate":-27.78},{"id":"mapo-sangam-worldcup9","name":"상암월드컵파크9단지","district":"마포구","size":"34평","tier":"12","basePrice":9.8,"currentPrice":10.5,"change":0.7,"changeRate":7.14},{"id":"mapo-sangam-worldcup11","name":"상암월드컵파크11단지","district":"마포구","size":"34평","tier":"12","basePrice":10,"currentPrice":12,"change":2,"changeRate":20},{"id":"mapo-sangam-worldcup12","name":"상암월드컵파크12단지","district":"마포구","size":"34평","tier":"12","basePrice":10.5,"currentPrice":9.3,"change":-1.2,"changeRate":-11.43},{"id":"nowon-mimisam","name":"미륭미성삼호3차","district":"노원구","size":"13평","tier":"12","basePrice":8,"currentPrice":7.3,"change":-0.7,"changeRate":-8.75},{"id":"nowon-wolgye-central-ipk","name":"월계센트럴아이파크","district":"노원구","size":"24평","tier":"12","basePrice":9.8,"currentPrice":10.5,"change":0.7,"changeRate":7.14},{"id":"nowon-sanggye3","name":"상계주공3단지","district":"노원구","size":"17평","tier":"12","basePrice":5.8,"currentPrice":4.5,"change":-1.3,"changeRate":-22.41},{"id":"nowon-sanggye5","name":"상계주공5단지","district":"노원구","size":"17평","tier":"12","basePrice":5.8,"currentPrice":7.3,"change":1.5,"changeRate":25.86},{"id":"nowon-hanjin-granvil","name":"한진한화그랑빌","district":"노원구","size":"24평","tier":"12","basePrice":9.5,"currentPrice":10,"change":0.5,"changeRate":5.26},{"id":"gangseo-deungchon3","name":"등촌주공3단지","district":"강서구","size":"16평","tier":"12","basePrice":9,"currentPrice":9,"change":0,"changeRate":0},{"id":"gangseo-deungchon5","name":"등촌주공5단지","district":"강서구","size":"23평","tier":"12","basePrice":9.2,"currentPrice":6.6,"change":-2.6,"changeRate":-28.26},{"id":"gangseo-hwagok-prugio","name":"화곡푸르지오","district":"강서구","size":"24평","tier":"12","basePrice":10,"currentPrice":11.2,"change":1.2,"changeRate":12},{"id":"yangcheon-mokdong-lotte-maestro","name":"목동롯데캐슬마에스트로","district":"양천구","size":"24평","tier":"14","basePrice":12.6,"currentPrice":13.5,"change":0.9,"changeRate":7.14},{"id":"yangcheon-mokdong-woosung2-42","name":"목동우성2차 42평","district":"양천구","size":"42평","tier":"14","basePrice":13.5,"currentPrice":13,"change":-0.5,"changeRate":-3.7},{"id":"songpa-sanga2","name":"상아2차","district":"송파구","size":"19평","tier":"14","basePrice":13.5,"currentPrice":13.5,"change":0,"changeRate":0},{"id":"guro-sindorim-taeyoung","name":"신도림태영","district":"구로구","size":"34평","tier":"14","basePrice":13,"currentPrice":11.3,"change":-1.7,"changeRate":-13.08},{"id":"guro-sindorim-daelim","name":"신도림대림","district":"구로구","size":"34평","tier":"14","basePrice":14,"currentPrice":11.5,"change":-2.5,"changeRate":-17.86},{"id":"guro-sindorim-donga","name":"신도림동아","district":"구로구","size":"34평","tier":"14","basePrice":14,"currentPrice":13.7,"change":-0.3,"changeRate":-2.14},{"id":"dongjak-boramae-epyeon","name":"보라매이편한세상","district":"동작구","size":"34평","tier":"14","basePrice":14,"currentPrice":13,"change":-1,"changeRate":-7.14},{"id":"gangdong-godeok-central-prugio","name":"고덕센트럴푸르지오","district":"강동구","size":"24평","tier":"16","basePrice":15.3,"currentPrice":15.4,"change":0.1,"changeRate":0.65},{"id":"gangdong-godeok-lotte-bene","name":"고덕롯데캐슬베네루체","district":"강동구","size":"24평","tier":"16","basePrice":16,"currentPrice":15.9,"change":-0.1,"changeRate":-0.62},{"id":"yeongdeungpo-epyeon-adelfore","name":"이편한영등포아델포레","district":"영등포구","size":"34평","tier":"16","basePrice":15.4,"currentPrice":14,"change":-1.4,"changeRate":-9.09},{"id":"gangseo-yeomchang-donga3","name":"염창동아3차","district":"강서구","size":"34평","tier":"16","basePrice":15,"currentPrice":11.5,"change":-3.5,"changeRate":-23.33},{"id":"gangseo-woojangsan-hs","name":"우장산힐스테이트","district":"강서구","size":"34평","tier":"16","basePrice":15.3,"currentPrice":12.8,"change":-2.5,"changeRate":-16.34},{"id":"yangcheon-raemian-adeliche","name":"래미안목동아델리체","district":"양천구","size":"24평","tier":"16","basePrice":16,"currentPrice":16,"change":0,"changeRate":0},{"id":"yangcheon-mokdong-samsung2-34","name":"목동삼성래미안2차 34평","district":"양천구","size":"34평","tier":"16","basePrice":16,"currentPrice":14.5,"change":-1.5,"changeRate":-9.37},{"id":"seocho-hoban-summit","name":"호반써밋서초파크","district":"서초구","size":"21평","tier":"16","basePrice":16,"currentPrice":14.8,"change":-1.2,"changeRate":-7.5},{"id":"gangnam-jagok-hs","name":"강남자곡힐스테이트","district":"강남구","size":"24평","tier":"16","basePrice":16,"currentPrice":13.8,"change":-2.2,"changeRate":-13.75},{"id":"gangnam-suseo-12","name":"수서1~2단지","district":"강남구","size":"17평","tier":"16","basePrice":15.5,"currentPrice":15.5,"change":0,"changeRate":0},{"id":"gangnam-daechi2","name":"대치2단지","district":"강남구","size":"14평","tier":"16","basePrice":16,"currentPrice":15.4,"change":-0.6,"changeRate":-3.75},{"id":"songpa-garak-woosung1","name":"가락우성1차","district":"송파구","size":"18평","tier":"16","basePrice":16,"currentPrice":15.9,"change":-0.1,"changeRate":-0.62},{"id":"dongdaemun-cheongnyangni-hanyang","name":"청량리역한양수자인","district":"동대문구","size":"24평","tier":"16","basePrice":16,"currentPrice":16.5,"change":0.5,"changeRate":3.13},{"id":"dongdaemun-lotte-noblesse","name":"롯데캐슬노블레스","district":"동대문구","size":"24평","tier":"16","basePrice":16,"currentPrice":15.8,"change":-0.2,"changeRate":-1.25},{"id":"dongdaemun-hs-cheonggye","name":"힐스테이트청계","district":"동대문구","size":"24평","tier":"16","basePrice":16,"currentPrice":13,"change":-3,"changeRate":-18.75},{"id":"dongdaemun-epyeon-cheonggye","name":"이편한세상청계센트럴포레","district":"동대문구","size":"24평","tier":"16","basePrice":15,"currentPrice":16.8,"change":1.8,"changeRate":12},{"id":"dongdaemun-raemian-artrich","name":"래미안아트리치","district":"동대문구","size":"24평","tier":"16","basePrice":16,"currentPrice":11.5,"change":-4.5,"changeRate":-28.12},{"id":"seongbuk-bomun-ipk-zai","name":"보문아이파크자이","district":"성북구","size":"24평","tier":"16","basePrice":15,"currentPrice":10,"change":-5,"changeRate":-33.33},{"id":"junggu-namsan-town","name":"남산타운","district":"중구","size":"24평","tier":"16","basePrice":15,"currentPrice":15.2,"change":0.2,"changeRate":1.33},{"id":"junggu-yaksu-heights","name":"약수하이츠","district":"중구","size":"24평","tier":"16","basePrice":15,"currentPrice":13.7,"change":-1.3,"changeRate":-8.67},{"id":"dongdaemun-raemian-lagrande","name":"래미안라그란데","district":"동대문구","size":"24평","tier":"20","basePrice":17,"currentPrice":null,"change":null,"changeRate":null},{"id":"seongdong-raemian-midcounty","name":"래미안미드카운티","district":"성동구","size":"24평","tier":"20","basePrice":19,"currentPrice":14.5,"change":-4.5,"changeRate":-23.68},{"id":"seongdong-kumho-daewoo","name":"금호대우","district":"성동구","size":"24평","tier":"20","basePrice":19,"currentPrice":17.8,"change":-1.2,"changeRate":-6.32},{"id":"seongdong-haengdang-hanjin","name":"행당한진대림","district":"성동구","size":"24평","tier":"20","basePrice":19,"currentPrice":17.2,"change":-1.8,"changeRate":-9.47},{"id":"seongdong-seoulforest-hanshin","name":"서울숲한신더휴대림강변","district":"성동구","size":"24평","tier":"20","basePrice":19,"currentPrice":16.8,"change":-2.2,"changeRate":-11.58},{"id":"seongdong-hyundai-prime","name":"현대프라임","district":"성동구","size":"24평","tier":"20","basePrice":19,"currentPrice":21,"change":2,"changeRate":10.53},{"id":"seocho-hills","name":"서초힐스","district":"서초구","size":"24평","tier":"20","basePrice":19,"currentPrice":19.4,"change":0.4,"changeRate":2.11},{"id":"gangnam-desiang-park","name":"강남데시앙파크","district":"강남구","size":"34평","tier":"20","basePrice":17,"currentPrice":16.5,"change":-0.5,"changeRate":-2.94},{"id":"gangnam-sindonga-famile","name":"강남신동아파밀리에","district":"강남구","size":"24평","tier":"20","basePrice":16.5,"currentPrice":17,"change":0.5,"changeRate":3.03},{"id":"gangnam-segok-prugio","name":"세곡푸르지오","district":"강남구","size":"24평","tier":"20","basePrice":18,"currentPrice":18,"change":0,"changeRate":0},{"id":"gangnam-jagok-ipk","name":"강남자곡아이파크","district":"강남구","size":"24평","tier":"20","basePrice":20,"currentPrice":20,"change":0,"changeRate":0},{"id":"gangnam-suseo-kkachi","name":"수서까치마을","district":"강남구","size":"17평","tier":"20","basePrice":17,"currentPrice":15.8,"change":-1.2,"changeRate":-7.06},{"id":"gangnam-suseo-sindonga","name":"수서신동아","district":"강남구","size":"16평","tier":"20","basePrice":19,"currentPrice":18,"change":-1,"changeRate":-5.26},{"id":"yangcheon-mokdong-hs","name":"목동힐스테이트","district":"양천구","size":"24평","tier":"20","basePrice":18.7,"currentPrice":18,"change":-0.7,"changeRate":-3.74},{"id":"yangcheon-mokdong-park-zai","name":"목동파크자이","district":"양천구","size":"34평","tier":"20","basePrice":19.9,"currentPrice":22,"change":2.1,"changeRate":10.55},{"id":"yangcheon-mokdong-lotte-winner-52","name":"목동롯데캐슬위너 52평","district":"양천구","size":"52평","tier":"20","basePrice":19,"currentPrice":13.9,"change":-5.1,"changeRate":-26.84},{"id":"yeongdeungpo-singil-newtown","name":"신길뉴타운","district":"영등포구","size":"34평","tier":"20","basePrice":19,"currentPrice":16,"change":-3,"changeRate":-15.79},{"id":"yeongdeungpo-munrae-hs","name":"문래힐스테이트","district":"영등포구","size":"45평","tier":"20","basePrice":18.5,"currentPrice":18.1,"change":-0.4,"changeRate":-2.16},{"id":"yeongdeungpo-gangbyun-raemian","name":"강변래미안","district":"영등포구","size":"23평","tier":"20","basePrice":16.1,"currentPrice":17,"change":0.9,"changeRate":5.59},{"id":"yeongdeungpo-dangsan-hyundai5","name":"당산현대5차","district":"영등포구","size":"24평","tier":"20","basePrice":16.5,"currentPrice":15,"change":-1.5,"changeRate":-9.09},{"id":"dongjak-sadang-woosung","name":"사당우성","district":"동작구","size":"23평","tier":"20","basePrice":16.8,"currentPrice":14,"change":-2.8,"changeRate":-16.67},{"id":"dongjak-isu-riga","name":"이수역리가","district":"동작구","size":"34평","tier":"20","basePrice":18.4,"currentPrice":18.2,"change":-0.2,"changeRate":-1.09},{"id":"dongjak-sangdo-thesharp1","name":"상도더샵1차","district":"동작구","size":"24평","tier":"20","basePrice":17.5,"currentPrice":23,"change":5.5,"changeRate":31.43},{"id":"dongjak-sindonga-riverpark","name":"신동아리버파크","district":"동작구","size":"43평","tier":"20","basePrice":18,"currentPrice":16.4,"change":-1.6,"changeRate":-8.89},{"id":"songpa-reminisce","name":"송파레미니스","district":"송파구","size":"24평","tier":"20","basePrice":17.9,"currentPrice":17.9,"change":0,"changeRate":0},{"id":"songpa-epyeon-parkcentral","name":"이편한세상송파파크센트럴","district":"송파구","size":"24평","tier":"20","basePrice":18,"currentPrice":18,"change":0,"changeRate":0},{"id":"songpa-geoyeo2","name":"거여2단지","district":"송파구","size":"37평","tier":"20","basePrice":17,"currentPrice":18,"change":1,"changeRate":5.88},{"id":"songpa-garak-ssangyong1","name":"가락쌍용1차","district":"송파구","size":"24평","tier":"20","basePrice":19.3,"currentPrice":18.3,"change":-1,"changeRate":-5.18},{"id":"songpa-pine","name":"송파파인","district":"송파구","size":"34평","tier":"20","basePrice":19.5,"currentPrice":17,"change":-2.5,"changeRate":-12.82},{"id":"gangdong-godeok-punggyeong","name":"고덕풍경채어바니티","district":"강동구","size":"34평","tier":"20","basePrice":17,"currentPrice":18,"change":1,"changeRate":5.88},{"id":"gangdong-godeok-central-ipk","name":"고덕센트럴아이파크","district":"강동구","size":"24평","tier":"20","basePrice":16.8,"currentPrice":16.8,"change":0,"changeRate":0},{"id":"gangdong-samik-green2","name":"삼익그린맨션2차","district":"강동구","size":"24평","tier":"20","basePrice":18,"currentPrice":15,"change":-3,"changeRate":-16.67},{"id":"gangdong-godeok-jugong9","name":"고덕주공9단지","district":"강동구","size":"31평","tier":"20","basePrice":19,"currentPrice":18.3,"change":-0.7,"changeRate":-3.68},{"id":"gangdong-lotte-first","name":"강동롯데캐슬퍼스트","district":"강동구","size":"24평","tier":"20","basePrice":17,"currentPrice":17,"change":0,"changeRate":0},{"id":"gangdong-heritage-zai","name":"강동헤리티지자이","district":"강동구","size":"24평","tier":"20","basePrice":18,"currentPrice":15.5,"change":-2.5,"changeRate":-13.89},{"id":"gangdong-gs-zai","name":"GS강동자이","district":"강동구","size":"34평","tier":"20","basePrice":16.2,"currentPrice":15.5,"change":-0.7,"changeRate":-4.32},{"id":"gangdong-dunchon-prugio","name":"둔촌푸르지오","district":"강동구","size":"34평","tier":"20","basePrice":16.9,"currentPrice":16.7,"change":-0.2,"changeRate":-1.18},{"id":"gangdong-godeok-arteon","name":"고덕아르테온","district":"강동구","size":"24평","tier":"20","basePrice":19.4,"currentPrice":18.5,"change":-0.9,"changeRate":-4.64},{"id":"gangdong-seonsa-hyundai-31","name":"선사현대 31평","district":"강동구","size":"31평","tier":"20","basePrice":17,"currentPrice":null,"change":null,"changeRate":null},{"id":"yongsan-riverhill-samsung","name":"리버힐삼성","district":"용산구","size":"34평","tier":"20","basePrice":19,"currentPrice":15.3,"change":-3.7,"changeRate":-19.47},{"id":"mapo-dowon-samsung","name":"도원삼성","district":"마포구","size":"34평","tier":"20","basePrice":19,"currentPrice":16,"change":-3,"changeRate":-15.79},{"id":"gangnam-samik-daecheong","name":"삼익대청","district":"강남구","size":"17평","tier":"24","basePrice":20.9,"currentPrice":null,"change":null,"changeRate":null},{"id":"seocho-imgwang3","name":"임광3차","district":"서초구","size":"26평","tier":"24","basePrice":23,"currentPrice":22,"change":-1,"changeRate":-4.35},{"id":"dongjak-sadang-daelim","name":"사당대림","district":"동작구","size":"43평","tier":"24","basePrice":21,"currentPrice":15,"change":-6,"changeRate":-28.57},{"id":"songpa-parkhabio-prugio","name":"송파파크하비오푸르지오","district":"송파구","size":"34평","tier":"24","basePrice":21,"currentPrice":19.3,"change":-1.7,"changeRate":-8.1},{"id":"songpa-samsung-raemian","name":"송파삼성래미안","district":"송파구","size":"43평","tier":"24","basePrice":24,"currentPrice":23.5,"change":-0.5,"changeRate":-2.08},{"id":"gangdong-myungil-sindonga","name":"명일신동아","district":"강동구","size":"30평","tier":"24","basePrice":21,"currentPrice":21,"change":0,"changeRate":0},{"id":"yangcheon-mokdong1","name":"목동신시가지1단지","district":"양천구","size":"24평","tier":"24","basePrice":22,"currentPrice":null,"change":null,"changeRate":null},{"id":"yangcheon-mokdong4","name":"목동신시가지4단지","district":"양천구","size":"24평","tier":"24","basePrice":22,"currentPrice":20,"change":-2,"changeRate":-9.09},{"id":"yangcheon-mokdong8","name":"목동신시가지8단지","district":"양천구","size":"24평","tier":"24","basePrice":22,"currentPrice":21,"change":-1,"changeRate":-4.55},{"id":"yangcheon-mokdong11","name":"목동신시가지11단지","district":"양천구","size":"24평","tier":"24","basePrice":22,"currentPrice":19.5,"change":-2.5,"changeRate":-11.36},{"id":"yangcheon-mokdong12","name":"목동신시가지12단지","district":"양천구","size":"24평","tier":"24","basePrice":22,"currentPrice":19.7,"change":-2.3,"changeRate":-10.45},{"id":"mapo-zai-centridge","name":"마포자이더센트리지","district":"마포구","size":"24평","tier":"24","basePrice":23,"currentPrice":21.5,"change":-1.5,"changeRate":-6.52},{"id":"seongdong-raemian-oksu","name":"래미안옥수리버젠","district":"성동구","size":"24평","tier":"24","basePrice":23,"currentPrice":22.5,"change":-0.5,"changeRate":-2.17},{"id":"gangnam-desiang-fore","name":"강남데시앙포레","district":"강남구","size":"24평","tier":"28","basePrice":25,"currentPrice":24.5,"change":-0.5,"changeRate":-2},{"id":"gangnam-purunmaeul","name":"푸른마을","district":"강남구","size":"24평","tier":"28","basePrice":25,"currentPrice":2.44,"change":-22.56,"changeRate":-90.24},{"id":"gangnam-suseo-samsung","name":"수서삼성","district":"강남구","size":"34평","tier":"28","basePrice":28,"currentPrice":28,"change":0,"changeRate":0},{"id":"gangnam-raemian-blestij","name":"래미안블레스티지","district":"강남구","size":"20평","tier":"28","basePrice":26,"currentPrice":26,"change":0,"changeRate":0},{"id":"gangnam-cheongdam-zai","name":"청담자이","district":"강남구","size":"21평","tier":"28","basePrice":28,"currentPrice":26,"change":-2,"changeRate":-7.14},{"id":"songpa-lake-palace","name":"레이크팰리스","district":"송파구","size":"24평","tier":"28","basePrice":28,"currentPrice":27,"change":-1,"changeRate":-3.57},{"id":"songpa-jamsil-woosung4","name":"잠실우성4차","district":"송파구","size":"31평","tier":"28","basePrice":27,"currentPrice":29,"change":2,"changeRate":7.41},{"id":"songpa-helio-city","name":"헬리오시티","district":"송파구","size":"24평","tier":"28","basePrice":28,"currentPrice":18,"change":-10,"changeRate":-35.71},{"id":"songpa-raemian-pinetop","name":"래미안송파파인탑","district":"송파구","size":"35평","tier":"28","basePrice":26,"currentPrice":null,"change":null,"changeRate":null},{"id":"gangdong-olympic-foreon","name":"올림픽파크포레온","district":"강동구","size":"24평","tier":"28","basePrice":28,"currentPrice":null,"change":null,"changeRate":null},{"id":"yongsan-gangchon","name":"강촌","district":"용산구","size":"24평","tier":"28","basePrice":27,"currentPrice":25,"change":-2,"changeRate":-7.41},{"id":"yongsan-ichon-coolong","name":"이촌코오롱","district":"용산구","size":"34평","tier":"28","basePrice":26,"currentPrice":26,"change":0,"changeRate":0},{"id":"yongsan-hangaram","name":"한가람","district":"용산구","size":"24평","tier":"28","basePrice":26,"currentPrice":26,"change":0,"changeRate":0},{"id":"yongsan-hyundai-hangang","name":"현대한강","district":"용산구","size":"34평","tier":"28","basePrice":27.8,"currentPrice":23.5,"change":-4.3,"changeRate":-15.47},{"id":"mapo-zai-2nd","name":"마포자이2차","district":"마포구","size":"34평","tier":"28","basePrice":28,"currentPrice":27.5,"change":-0.5,"changeRate":-1.79},{"id":"jongno-gyeonghuigung-zai","name":"경희궁자이","district":"종로구","size":"24평","tier":"28","basePrice":24.5,"currentPrice":22.8,"change":-1.7,"changeRate":-6.94},{"id":"seongdong-epyeon-oksu","name":"이편한옥수파크힐스","district":"성동구","size":"24평","tier":"28","basePrice":24.5,"currentPrice":23.5,"change":-1,"changeRate":-4.08},{"id":"seongdong-hs-seoulforest-river","name":"힐스테이트서울숲리버","district":"성동구","size":"34평","tier":"28","basePrice":25,"currentPrice":24,"change":-1,"changeRate":-4},{"id":"songpa-parkrio","name":"파크리오","district":"송파구","size":"24평","tier":"32","basePrice":28.5,"currentPrice":14,"change":-14.5,"changeRate":-50.88},{"id":"songpa-els","name":"잠실엘스","district":"송파구","size":"24평","tier":"32","basePrice":31,"currentPrice":null,"change":null,"changeRate":null},{"id":"songpa-trizium","name":"트리지움","district":"송파구","size":"24평","tier":"32","basePrice":29.5,"currentPrice":27.5,"change":-2,"changeRate":-6.78},{"id":"songpa-olympic-family","name":"올림픽훼미리","district":"송파구","size":"34평","tier":"32","basePrice":28.5,"currentPrice":28.2,"change":-0.3,"changeRate":-1.05},{"id":"songpa-ogeum-hyundai","name":"오금현대","district":"송파구","size":"46평","tier":"32","basePrice":29.5,"currentPrice":28,"change":-1.5,"changeRate":-5.08},{"id":"gangnam-gaepo-raemian-forest","name":"개포래미안포레스트","district":"강남구","size":"24평","tier":"32","basePrice":29.5,"currentPrice":29,"change":-0.5,"changeRate":-1.69},{"id":"gangnam-daechi-samsung1","name":"대치삼성1차","district":"강남구","size":"24평","tier":"32","basePrice":28.5,"currentPrice":null,"change":null,"changeRate":null},{"id":"gangnam-yeoksam-raemian","name":"역삼래미안","district":"강남구","size":"24평","tier":"32","basePrice":29.8,"currentPrice":28.2,"change":-1.6,"changeRate":-5.37},{"id":"yongsan-hangang-daewoo","name":"한강대우","district":"용산구","size":"34평","tier":"32","basePrice":28.4,"currentPrice":28.5,"change":0.1,"changeRate":0.35},{"id":"mapo-epyeon-riverpark","name":"이편한세상마포리버파크","district":"마포구","size":"34평","tier":"32","basePrice":30,"currentPrice":24.5,"change":-5.5,"changeRate":-18.33},{"id":"seongdong-seoulforest-riverview-zai","name":"서울숲리버뷰자이","district":"성동구","size":"34평","tier":"32","basePrice":28.5,"currentPrice":22.5,"change":-6,"changeRate":-21.05},{"id":"seongdong-hannam-heights","name":"한남하이츠","district":"성동구","size":"28평","tier":"32","basePrice":28.5,"currentPrice":28,"change":-0.5,"changeRate":-1.75},{"id":"yongsan-bogwang-shindonga","name":"보광동 신동아아파트","district":"용산구","size":"31평","tier":"50","basePrice":38,"currentPrice":42,"change":4,"changeRate":10.53},{"id":"gangnam-sangnoksu","name":"상록수","district":"강남구","size":"34평","tier":"50","basePrice":33,"currentPrice":null,"change":null,"changeRate":null},{"id":"yeongdeungpo-yeouido-misung","name":"여의도미성","district":"영등포구","size":"32평","tier":"50","basePrice":32.5,"currentPrice":38,"change":5.5,"changeRate":16.92},{"id":"yeongdeungpo-yeouido-sibum","name":"여의도시범","district":"영등포구","size":"47평","tier":"50","basePrice":46,"currentPrice":null,"change":null,"changeRate":null}];
+
+const districts = ["강남구","강동구","강북구","강서구","관악구","구로구","노원구","동대문구","동작구","마포구","비잠실송파","서대문구","서초구","성동구","성북구","송파구","양천구","영등포구","용산구","은평구","종로구","중구"];
+
+const stats = {"total":278,"withPrice":259,"up":75,"down":149,"same":35,"noData":19,"avgRate":-3.92,"top5Up":[{"id":"dongjak-sangdo-thesharp1","name":"상도더샵1차","district":"동작구","size":"24평","tier":"20","basePrice":17.5,"currentPrice":23,"change":5.5,"changeRate":31.43},{"id":"dongdaemun-cheonggye-hyundai","name":"청계현대","district":"동대문구","size":"24평","tier":"12","basePrice":10,"currentPrice":13,"change":3,"changeRate":30},{"id":"nowon-sanggye5","name":"상계주공5단지","district":"노원구","size":"17평","tier":"12","basePrice":5.8,"currentPrice":7.3,"change":1.5,"changeRate":25.86},{"id":"yangcheon-mokdong-samsung2","name":"목동 삼성래미안2차","district":"양천구","size":"24평","tier":"12","basePrice":11.7,"currentPrice":14.5,"change":2.8,"changeRate":23.93},{"id":"songpa-the-platinum","name":"송파더플래티넘","district":"비잠실송파","size":"21평","tier":"14","basePrice":12,"currentPrice":14.7,"change":2.7,"changeRate":22.5}],"top5Down":[{"id":"gangnam-purunmaeul","name":"푸른마을","district":"강남구","size":"24평","tier":"28","basePrice":25,"currentPrice":2.44,"change":-22.56,"changeRate":-90.24},{"id":"mapo-coolong","name":"코오롱하늘채","district":"마포구","size":"34평","tier":"14","basePrice":12.5,"currentPrice":2.5,"change":-10,"changeRate":-80},{"id":"songpa-parkrio","name":"파크리오","district":"송파구","size":"24평","tier":"32","basePrice":28.5,"currentPrice":14,"change":-14.5,"changeRate":-50.88},{"id":"yeongdeungpo-dongbu-centrevil","name":"동부센트레빌","district":"영등포구","size":"40평대","tier":"20","basePrice":17,"currentPrice":10.2,"change":-6.8,"changeRate":-40},{"id":"songpa-helio-city","name":"헬리오시티","district":"송파구","size":"24평","tier":"28","basePrice":28,"currentPrice":18,"change":-10,"changeRate":-35.71}]};
+
+// Render stats
+function renderStats() {
+  const grid = document.getElementById('stats-grid');
+  const avgClass = stats.avgRate > 0 ? 'up' : stats.avgRate < 0 ? 'down' : 'same';
+  const avgSign = stats.avgRate > 0 ? '+' : '';
+  grid.innerHTML = `
+    <div class="stat-card"><div class="label">총 아파트</div><div class="value">${stats.total}개</div></div>
+    <div class="stat-card"><div class="label">상승</div><div class="value up">${stats.up}개</div></div>
+    <div class="stat-card"><div class="label">하락</div><div class="value down">${stats.down}개</div></div>
+    <div class="stat-card"><div class="label">보합</div><div class="value same">${stats.same}개</div></div>
+    <div class="stat-card"><div class="label">데이터없음</div><div class="value same">${stats.noData}개</div></div>
+    <div class="stat-card"><div class="label">평균 변동률</div><div class="value ${avgClass}">${avgSign}${stats.avgRate}%</div></div>
+  `;
+}
+
+// Render top 5
+function renderTop5() {
+  const section = document.getElementById('top-section');
+  function makeItems(list, cls) {
+    return list.map((d, i) => {
+      const sign = d.changeRate > 0 ? '+' : '';
+      const arrow = d.changeRate > 0 ? '\u2191' : '\u2193';
+      return `<div class="top-item">
+        <span class="rank">${i+1}</span>
+        <span class="apt-name">${d.name}</span>
+        <span class="apt-district">${d.district}</span>
+        <span class="change-rate ${cls}">${arrow} ${sign}${d.changeRate}% (${d.basePrice}\u2192${d.currentPrice}\uc5b5)</span>
+      </div>`;
+    }).join('');
+  }
+  section.innerHTML = `
+    <div class="top-card">
+      <h3 class="up-title">\u2191 \uc0c1\uc2b9 TOP 5</h3>
+      ${makeItems(stats.top5Up, 'up')}
+    </div>
+    <div class="top-card">
+      <h3 class="down-title">\u2193 \ud558\ub77d TOP 5</h3>
+      ${makeItems(stats.top5Down, 'down')}
+    </div>
+  `;
+}
+
+// Populate district filter
+function populateDistricts() {
+  const sel = document.getElementById('district-filter');
+  districts.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d;
+    sel.appendChild(opt);
+  });
+}
+
+// Format number
+function fmt(n) {
+  if (n === null || n === undefined) return '-';
+  return n.toFixed(2).replace(/\.?0+$/, '');
+}
+
+// Render table
+function renderTable() {
+  const districtVal = document.getElementById('district-filter').value;
+  const sortVal = document.getElementById('sort-select').value;
+  const dirVal = document.getElementById('direction-filter').value;
+  const searchVal = document.getElementById('search-input').value.trim().toLowerCase();
+
+  let filtered = DATA.slice();
+
+  // District filter
+  if (districtVal !== 'all') {
+    filtered = filtered.filter(d => d.district === districtVal);
+  }
+
+  // Direction filter
+  if (dirVal === 'up') filtered = filtered.filter(d => d.change !== null && d.change > 0);
+  else if (dirVal === 'down') filtered = filtered.filter(d => d.change !== null && d.change < 0);
+  else if (dirVal === 'same') filtered = filtered.filter(d => d.change !== null && d.change === 0);
+  else if (dirVal === 'nodata') filtered = filtered.filter(d => d.currentPrice === null);
+
+  // Search
+  if (searchVal) {
+    filtered = filtered.filter(d => d.name.toLowerCase().includes(searchVal) || d.district.includes(searchVal));
+  }
+
+  // Sort
+  const [sortKey, sortDir] = sortVal.split('-');
+  filtered.sort((a, b) => {
+    let va = a[sortKey];
+    let vb = b[sortKey];
+    // null values go to end
+    if (va === null && vb === null) return 0;
+    if (va === null) return 1;
+    if (vb === null) return -1;
+    if (typeof va === 'string') {
+      return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+    }
+    return sortDir === 'asc' ? va - vb : vb - va;
+  });
+
+  // Update count
+  document.getElementById('result-count').textContent = `${filtered.length}건 / 총 ${DATA.length}건`;
+
+  // Build rows
+  const tbody = document.getElementById('table-body');
+  const rows = filtered.map((d, i) => {
+    const hasPrice = d.currentPrice !== null;
+    let rowClass = 'row-nodata';
+    let changeCls = 'nodata';
+    let changeText = '데이터 없음';
+    let rateText = '-';
+    let arrow = '';
+
+    if (hasPrice) {
+      if (d.change > 0) {
+        rowClass = 'row-up';
+        changeCls = 'up';
+        arrow = '\u2191';
+      } else if (d.change < 0) {
+        rowClass = 'row-down';
+        changeCls = 'down';
+        arrow = '\u2193';
+      } else {
+        rowClass = 'row-same';
+        changeCls = 'same';
+        arrow = '-';
+      }
+      const sign = d.change > 0 ? '+' : '';
+      changeText = `${arrow} ${sign}${fmt(d.change)}`;
+      rateText = `${sign}${fmt(d.changeRate)}%`;
+    }
+
+    return `<tr class="${rowClass}">
+      <td>${i + 1}</td>
+      <td>${d.name}</td>
+      <td><span class="district-badge">${d.district}</span></td>
+      <td>${d.size}</td>
+      <td><span class="tier-badge">${d.tier}</span></td>
+      <td class="price">${fmt(d.basePrice)}</td>
+      <td class="price">${hasPrice ? fmt(d.currentPrice) : '<span style="color:#cbd5e0;font-style:italic">-</span>'}</td>
+      <td class="change-cell ${changeCls}">${changeText}</td>
+      <td class="change-cell ${changeCls}">${hasPrice ? rateText : '-'}</td>
+    </tr>`;
+  }).join('');
+
+  tbody.innerHTML = rows;
+}
+
+// Init
+renderStats();
+renderTop5();
+populateDistricts();
+renderTable();
+
+// Event listeners
+document.getElementById('district-filter').addEventListener('change', renderTable);
+document.getElementById('sort-select').addEventListener('change', renderTable);
+document.getElementById('direction-filter').addEventListener('change', renderTable);
+document.getElementById('search-input').addEventListener('input', renderTable);
+</script>
+
+</body>
+</html>
