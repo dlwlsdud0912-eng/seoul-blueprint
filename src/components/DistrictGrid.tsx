@@ -112,7 +112,7 @@ export default function DistrictGrid({
                 const hasMemo = !!memos[apt.id];
                 return (
                   <div key={apt.id}>
-                    <div className={hasMemo ? 'rounded-lg border border-[#e8e5e0] bg-white overflow-hidden' : ''}>
+                    <div className={hasMemo ? 'rounded-lg border border-[#e8e5e0] bg-white' : ''}>
                       <ApartmentCard
                         apartment={apt}
                         folders={folders}
