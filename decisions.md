@@ -762,3 +762,20 @@
   - 실패/매물없음: **62개**
 - **추가 스크립트**:
   - `scripts/research-naver-official-names.mjs`
+### [2026-03-17 22:09] 신규 매핑분만 3워커 병렬 크롤링 반영
+- **유형**: 운영 | 배포
+- **범위**:
+  - 전체 재크롤링이 아니라, `naverComplexId`는 있으나 `prices.json`에 아직 없던 신규 매핑분만 대상
+  - 대상 수: **134개**
+- **실행 내용**:
+  - `3워커 병렬` + `20초 stagger`로 신규 매핑 subset만 크롤링
+  - 결과를 `run_logs/newly-mapped-crawl-20260317/merged.json`으로 병합
+  - `scripts/apply-subset-prices.mjs`로 `public/prices.json`과 `src/data/apartments.ts`에 반영
+  - 현재 아파트 전체 리스트를 `exports/apartment-list-20260317.xlsx`로 내보냄
+- **실행 결과**:
+  - subset 크롤링: **134개 중 62개 성공 / 72개 매물없음**
+  - 전체 기준 complexId 매핑 완료: **891개**
+  - 전체 기준 가격 반영 성공: **819개**
+  - 전체 기준 실패/매물없음: **72개**
+- **비고**:
+  - 관리자 화면의 `마지막 크롤링` 시간은 이 반영분이 커밋/배포되기 전까지 이전 시각으로 보일 수 있음
