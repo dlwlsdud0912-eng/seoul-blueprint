@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-03-17T06:52:17.284Z",
-  "updatedAtKR": "2026. 03. 17. 15:52",
-  "totalCount": 811,
-  "successCount": 750,
-  "failCount": 61,
+  "updatedAt": "2026-03-17T08:00:34.093Z",
+  "updatedAtKR": "2026. 03. 17. 17:00",
+  "totalCount": 819,
+  "successCount": 757,
+  "failCount": 62,
   "prices": {
     "seongbuk-jangwi-ipk": {
       "price": 12.6,
@@ -9501,6 +9501,67 @@
           "count": 6
         }
       }
+    },
+    "gangseo-gpn8sp": {
+      "price": 15.6,
+      "articleCount": 192,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 15.6,
+          "count": 32
+        },
+        "84": {
+          "price": 16.7,
+          "count": 160
+        }
+      }
+    },
+    "yongsan-okcvmj": {
+      "price": 17,
+      "articleCount": 3,
+      "areaName": "76㎡",
+      "sizes": {
+        "84": {
+          "price": 18,
+          "count": 2
+        }
+      }
+    },
+    "gwangjin-h3zin8": {
+      "price": 5.3,
+      "articleCount": 1,
+      "areaName": "48㎡",
+      "sizes": {}
+    },
+    "yangcheon-7mnn70": {
+      "price": 36,
+      "articleCount": 2,
+      "areaName": "146㎡",
+      "sizes": {}
+    },
+    "yeongdeungpo-hj7701": {
+      "price": 25.9,
+      "articleCount": 1,
+      "areaName": "74㎡",
+      "sizes": {}
+    },
+    "yongsan-oygx09": {
+      "price": 42,
+      "articleCount": 7,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 42,
+          "count": 7
+        }
+      }
+    },
+    "gwangjin-1055j1w": {
+      "price": 5.3,
+      "articleCount": 1,
+      "areaName": "48㎡",
+      "sizes": {}
     }
   }
 }
