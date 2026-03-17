@@ -19,6 +19,40 @@ puppeteer.use(StealthPlugin());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+function getArgValue(flag) {
+  const idx = process.argv.indexOf(flag);
+  if (idx === -1) return undefined;
+  return process.argv[idx + 1];
+}
+
+function parsePositiveInt(value, fallback) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+const workerCount = parsePositiveInt(getArgValue('--worker-count'), 1);
+const workerIndex = parsePositiveInt(getArgValue('--worker-index'), 1);
+const delayMs = parsePositiveInt(getArgValue('--delay-ms'), 2000);
+const startupDelayMs = parsePositiveInt(getArgValue('--startup-delay-ms'), 0);
+const maxApartments = parsePositiveInt(getArgValue('--max-apartments'), 0);
+const outputArg = getArgValue('--output');
+const idsFileArg = getArgValue('--ids-file');
+
+if (workerIndex > workerCount) {
+  console.error(`workerIndex(${workerIndex}) cannot exceed workerCount(${workerCount}).`);
+  process.exit(1);
+}
+
+function readIdFilter(filePath) {
+  if (!filePath) return null;
+  const raw = fs.readFileSync(path.resolve(process.cwd(), filePath), 'utf-8').replace(/^\uFEFF/, '');
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed)) {
+    throw new Error(`ids file must be a JSON array: ${filePath}`);
+  }
+  return new Set(parsed.map(String));
+}
+
 // ─── --search 모드: 네이버 부동산에서 아파트 단지ID 검색 ───
 const searchArgIdx = process.argv.indexOf('--search');
 if (searchArgIdx !== -1) {
@@ -516,18 +550,40 @@ async function fetchPriceByNavigation(page, apt) {
 // ─── 메인 ───
 async function main() {
   const startTime = Date.now();
+  const workerLabel = workerCount > 1 ? ` [worker ${workerIndex}/${workerCount}]` : '';
   console.log('=== 네이버 부동산 크롤러 (API 직접호출 + 가격순 페이지네이션) ===\n');
 
   // 1) 아파트 데이터 로드
   const apartments = parseApartmentsFile();
-  const withComplexId = apartments.filter(a => a.naverComplexId);
+  const idFilter = readIdFilter(idsFileArg);
+  const targetApartments = idFilter
+    ? apartments.filter(a => idFilter.has(a.id))
+    : apartments;
+  const withComplexId = targetApartments.filter(a => a.naverComplexId);
   const withoutComplexId = apartments.filter(a => !a.naverComplexId);
+  const assignedApartments = withComplexId.filter((_, index) => (index % workerCount) === (workerIndex - 1));
+  const apartmentsToProcess = maxApartments > 0
+    ? assignedApartments.slice(0, maxApartments)
+    : assignedApartments;
 
-  console.log(`아파트 데이터: ${apartments.length}건 (complexId 있음: ${withComplexId.length}, 없음: ${withoutComplexId.length})`);
-  if (withoutComplexId.length > 0) {
+  console.log(`아파트 데이터: ${apartments.length}건 (대상: ${targetApartments.length}, complexId 있음: ${withComplexId.length}, 없음: ${targetApartments.length - withComplexId.length})`);
+  if (!idFilter && withoutComplexId.length > 0) {
     withoutComplexId.forEach(a => console.log(`  스킵: ${a.name}`));
   }
+  if (workerCount > 1) {
+    console.log(`worker split${workerLabel}: ${apartmentsToProcess.length}/${assignedApartments.length} apartments, delay ${delayMs}ms, startup delay ${startupDelayMs}ms`);
+  }
   console.log('');
+
+  if (apartmentsToProcess.length === 0) {
+    console.log(`No assigned apartments${workerLabel}; exiting.`);
+    return;
+  }
+
+  if (startupDelayMs > 0) {
+    console.log(`Waiting ${startupDelayMs}ms before launch${workerLabel}...`);
+    await delay(startupDelayMs);
+  }
 
   // 2) 브라우저 실행 (headless: false 필수 - 네이버 headless 감지)
   console.log('Chrome 브라우저 실행 중... (창이 뜹니다, 닫지 마세요!)');
@@ -546,10 +602,10 @@ async function main() {
   const prices = {};
   let successCount = 0;
   let failCount = 0;
-  const totalCount = withComplexId.length;
+  const totalCount = apartmentsToProcess.length;
 
-  for (let i = 0; i < withComplexId.length; i++) {
-    const apt = withComplexId[i];
+  for (let i = 0; i < apartmentsToProcess.length; i++) {
+    const apt = apartmentsToProcess[i];
     const idx = `[${i + 1}/${totalCount}]`;
 
     try {
@@ -582,8 +638,8 @@ async function main() {
     }
 
     // 딜레이: 2초 (너무 빠르면 의심)
-    if (i < withComplexId.length - 1) {
-      await delay(2000);
+    if (i < apartmentsToProcess.length - 1) {
+      await delay(delayMs);
     }
   }
 
@@ -601,10 +657,17 @@ async function main() {
     totalCount,
     successCount,
     failCount,
+    workerCount,
+    workerIndex,
+    assignedCount: assignedApartments.length,
+    sourceTotalCount: withComplexId.length,
     prices,
   };
 
-  const outputPath = path.join(__dirname, '..', 'public', 'prices.json');
+  const outputPath = outputArg
+    ? path.resolve(process.cwd(), outputArg)
+    : path.join(__dirname, '..', 'public', 'prices.json');
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2), 'utf-8');
 
   // 5) 브라우저 종료

@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-03-17T02:34:22.066Z",
-  "updatedAtKR": "2026. 03. 17. 11:34",
-  "totalCount": 774,
-  "successCount": 715,
-  "failCount": 59,
+  "updatedAt": "2026-03-17T06:52:17.284Z",
+  "updatedAtKR": "2026. 03. 17. 15:52",
+  "totalCount": 811,
+  "successCount": 750,
+  "failCount": 61,
   "prices": {
     "seongbuk-jangwi-ipk": {
       "price": 12.6,
@@ -9031,6 +9031,474 @@
         "84": {
           "price": 11.5,
           "count": 39
+        }
+      }
+    },
+    "gangnam-p55il3": {
+      "price": 24.5,
+      "articleCount": 13,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 24.5,
+          "count": 6
+        },
+        "84": {
+          "price": 29,
+          "count": 2
+        }
+      }
+    },
+    "gangdong-jr6kdi": {
+      "price": 11.5,
+      "articleCount": 69,
+      "areaName": "50㎡",
+      "sizes": {
+        "84": {
+          "price": 14.8,
+          "count": 56
+        }
+      }
+    },
+    "gangseo-26nqzi": {
+      "price": 12.4,
+      "articleCount": 5,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 12.4,
+          "count": 5
+        }
+      }
+    },
+    "gangseo-jvag0v": {
+      "price": 5.2,
+      "articleCount": 73,
+      "areaName": "39㎡",
+      "sizes": {
+        "59": {
+          "price": 7.5,
+          "count": 9
+        }
+      }
+    },
+    "nowon-1y7tg51": {
+      "price": 9.4,
+      "articleCount": 71,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.4,
+          "count": 17
+        },
+        "84": {
+          "price": 12,
+          "count": 42
+        }
+      }
+    },
+    "dongdaemun-1ri3hox": {
+      "price": 9.5,
+      "articleCount": 35,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.5,
+          "count": 11
+        },
+        "84": {
+          "price": 11,
+          "count": 4
+        }
+      }
+    },
+    "dongjak-890s4m": {
+      "price": 13.5,
+      "articleCount": 43,
+      "areaName": "46㎡",
+      "sizes": {
+        "59": {
+          "price": 16,
+          "count": 6
+        },
+        "84": {
+          "price": 18,
+          "count": 7
+        }
+      }
+    },
+    "mapo-r6i5n": {
+      "price": 21.3,
+      "articleCount": 85,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 21.3,
+          "count": 14
+        },
+        "84": {
+          "price": 24,
+          "count": 69
+        }
+      }
+    },
+    "seodaemun-1pdvsqm": {
+      "price": 12.9,
+      "articleCount": 83,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 12.9,
+          "count": 15
+        },
+        "84": {
+          "price": 14.5,
+          "count": 63
+        }
+      }
+    },
+    "seongdong-1k5rty7": {
+      "price": 16,
+      "articleCount": 24,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 16,
+          "count": 4
+        },
+        "84": {
+          "price": 18.5,
+          "count": 6
+        }
+      }
+    },
+    "seongdong-xr5i65": {
+      "price": 38,
+      "articleCount": 3,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 38,
+          "count": 3
+        }
+      }
+    },
+    "seongbuk-bkzp2a": {
+      "price": 10.1,
+      "articleCount": 144,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 10.1,
+          "count": 57
+        },
+        "84": {
+          "price": 10.5,
+          "count": 49
+        }
+      }
+    },
+    "seongbuk-zsscd0": {
+      "price": 9.2,
+      "articleCount": 24,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.2,
+          "count": 6
+        },
+        "84": {
+          "price": 10.4,
+          "count": 9
+        }
+      }
+    },
+    "songpa-xmemzf": {
+      "price": 17.5,
+      "articleCount": 144,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 17.5,
+          "count": 68
+        },
+        "84": {
+          "price": 19,
+          "count": 32
+        }
+      }
+    },
+    "songpa-1tg22z4": {
+      "price": 18.2,
+      "articleCount": 4,
+      "areaName": "71㎡",
+      "sizes": {
+        "84": {
+          "price": 19.8,
+          "count": 2
+        }
+      }
+    },
+    "yeongdeungpo-1l2m5zx": {
+      "price": 15,
+      "articleCount": 7,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 15,
+          "count": 3
+        },
+        "84": {
+          "price": 18,
+          "count": 1
+        }
+      }
+    },
+    "yongsan-1birinc": {
+      "price": 25,
+      "articleCount": 3,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 25,
+          "count": 3
+        }
+      }
+    },
+    "eunpyeong-1pz6gk1": {
+      "price": 9.5,
+      "articleCount": 52,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.5,
+          "count": 1
+        },
+        "84": {
+          "price": 11.7,
+          "count": 11
+        }
+      }
+    },
+    "gangdong-v7put4": {
+      "price": 13.5,
+      "articleCount": 8,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 13.5,
+          "count": 8
+        }
+      }
+    },
+    "gangbuk-r3so72": {
+      "price": 9.1,
+      "articleCount": 22,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.1,
+          "count": 4
+        },
+        "84": {
+          "price": 10.5,
+          "count": 5
+        }
+      }
+    },
+    "gangseo-1mv1uch": {
+      "price": 11.3,
+      "articleCount": 3,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 11.3,
+          "count": 3
+        }
+      }
+    },
+    "nowon-10byhx": {
+      "price": 4.5,
+      "articleCount": 36,
+      "areaName": "45㎡",
+      "sizes": {
+        "59": {
+          "price": 6.3,
+          "count": 13
+        },
+        "84": {
+          "price": 9.5,
+          "count": 9
+        }
+      }
+    },
+    "dobong-zbpe8o": {
+      "price": 8.7,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8.7,
+          "count": 1
+        }
+      }
+    },
+    "dongjak-3dyukn": {
+      "price": 12,
+      "articleCount": 27,
+      "areaName": "51㎡",
+      "sizes": {
+        "59": {
+          "price": 13.6,
+          "count": 26
+        }
+      }
+    },
+    "mapo-3agc6o": {
+      "price": 23,
+      "articleCount": 15,
+      "areaName": "122㎡",
+      "sizes": {}
+    },
+    "seodaemun-17epo2c": {
+      "price": 10.1,
+      "articleCount": 144,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 10.1,
+          "count": 57
+        },
+        "84": {
+          "price": 10.5,
+          "count": 49
+        }
+      }
+    },
+    "seongdong-x8lqtq": {
+      "price": 15.9,
+      "articleCount": 41,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 15.9,
+          "count": 22
+        },
+        "84": {
+          "price": 19,
+          "count": 13
+        }
+      }
+    },
+    "seongdong-kwjyik": {
+      "price": 13,
+      "articleCount": 58,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 13,
+          "count": 15
+        },
+        "84": {
+          "price": 13.3,
+          "count": 20
+        }
+      }
+    },
+    "seongdong-t7sq92": {
+      "price": 19.2,
+      "articleCount": 96,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 19.2,
+          "count": 43
+        },
+        "84": {
+          "price": 21.5,
+          "count": 48
+        }
+      }
+    },
+    "seongbuk-1knrei4": {
+      "price": 12,
+      "articleCount": 127,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 12,
+          "count": 24
+        },
+        "84": {
+          "price": 12.5,
+          "count": 76
+        }
+      }
+    },
+    "seongbuk-y2ehen": {
+      "price": 10.9,
+      "articleCount": 24,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 10.9,
+          "count": 12
+        },
+        "84": {
+          "price": 11.7,
+          "count": 12
+        }
+      }
+    },
+    "songpa-1c8sv7v": {
+      "price": 16,
+      "articleCount": 80,
+      "areaName": "51㎡",
+      "sizes": {
+        "59": {
+          "price": 17.5,
+          "count": 20
+        },
+        "84": {
+          "price": 21.5,
+          "count": 40
+        }
+      }
+    },
+    "yangcheon-ao6nem": {
+      "price": 1.1,
+      "articleCount": 52,
+      "areaName": "66㎡",
+      "sizes": {
+        "84": {
+          "price": 1.4,
+          "count": 28
+        }
+      }
+    },
+    "eunpyeong-1biyvnj": {
+      "price": 7.9,
+      "articleCount": 152,
+      "areaName": "66㎡",
+      "sizes": {
+        "84": {
+          "price": 9.3,
+          "count": 65
+        }
+      }
+    },
+    "junggu-hxhcd5": {
+      "price": 10.5,
+      "articleCount": 26,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 10.5,
+          "count": 1
+        },
+        "84": {
+          "price": 11,
+          "count": 6
         }
       }
     }
