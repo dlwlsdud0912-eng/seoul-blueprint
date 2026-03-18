@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { TierKey } from '@/types';
 import { buildTierExportPayload } from '@/lib/tier-export';
+import { checkPriceProximity } from '@/lib/price-proximity';
 
 type ExportApartment = {
   id: string;
@@ -26,12 +27,30 @@ export default function AdminTierExportView({
   activeTier,
   updatedAtKR,
 }: AdminTierExportViewProps) {
+  const [mode, setMode] = useState<'all' | 'proximity'>('all');
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [pdfLoading, setPdfLoading] = useState(false);
 
+  const filteredApartments = useMemo(() => {
+    if (mode === 'all') {
+      return apartments;
+    }
+
+    return apartments.filter((apartment) => checkPriceProximity(apartment.sizes).hasProximity);
+  }, [apartments, mode]);
+
+  const proximityCount = useMemo(
+    () => apartments.filter((apartment) => checkPriceProximity(apartment.sizes).hasProximity).length,
+    [apartments]
+  );
+
   const exportData = useMemo(
-    () => buildTierExportPayload(activeTier, apartments, updatedAtKR),
-    [activeTier, apartments, updatedAtKR]
+    () =>
+      buildTierExportPayload(activeTier, filteredApartments, updatedAtKR, {
+        titleSuffix: mode === 'proximity' ? '(가격근접 ON)' : '',
+        filenamePrefix: mode === 'proximity' ? '가격근접ON' : undefined,
+      }),
+    [activeTier, filteredApartments, mode, updatedAtKR]
   );
 
   async function handleCopy() {
@@ -119,12 +138,42 @@ export default function AdminTierExportView({
         </div>
 
         <div className="mt-4 flex flex-col gap-3 rounded-[24px] border border-white/80 bg-white/80 p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              data-testid="export-mode-all"
+              type="button"
+              onClick={() => setMode('all')}
+              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                mode === 'all'
+                  ? 'border-[#2f6feb] bg-[#edf4ff] text-[#2f6feb]'
+                  : 'border-[#d9e3ef] bg-white text-[#5d7088] hover:bg-[#f6f9fc]'
+              }`}
+            >
+              전체 {apartments.length}개
+            </button>
+            <button
+              data-testid="export-mode-proximity"
+              type="button"
+              onClick={() => setMode('proximity')}
+              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                mode === 'proximity'
+                  ? 'border-[#0f9d7a] bg-[#edf9f5] text-[#0f9d7a]'
+                  : 'border-[#d9e3ef] bg-white text-[#5d7088] hover:bg-[#f6f9fc]'
+              }`}
+            >
+              가격근접 ON만 {proximityCount}개
+            </button>
+          </div>
+
           <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
             <div className="text-sm text-[#516277]">
-              표 형식으로 유지한 상태에서 바로 복사하거나 PDF로 저장할 수 있습니다.
+              {mode === 'proximity'
+                ? '59㎡/84㎡ 가격 차이가 가까운 단지만 따로 골라 표와 PDF로 내보냅니다.'
+                : '표 형식으로 유지한 상태에서 바로 복사하거나 PDF로 저장할 수 있습니다.'}
             </div>
             <div className="flex flex-wrap gap-2">
               <button
+                data-testid="export-copy-button"
                 type="button"
                 onClick={handleCopy}
                 className="rounded-2xl bg-[#2f6feb] px-4 py-2.5 text-sm font-medium text-white shadow-[0_12px_28px_rgba(47,111,235,0.18)] transition hover:-translate-y-0.5"
@@ -136,6 +185,7 @@ export default function AdminTierExportView({
                     : 'HTML 복사'}
               </button>
               <button
+                data-testid="export-preview-button"
                 type="button"
                 onClick={handleOpenPreview}
                 className="rounded-2xl border border-[#d9e3ef] bg-white px-4 py-2.5 text-sm font-medium text-[#35506f] transition hover:bg-[#f6f9fc]"
@@ -143,6 +193,7 @@ export default function AdminTierExportView({
                 새 창 미리보기
               </button>
               <button
+                data-testid="export-pdf-button"
                 type="button"
                 onClick={handleDownloadPdf}
                 disabled={pdfLoading}

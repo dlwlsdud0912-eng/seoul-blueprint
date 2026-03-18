@@ -29,6 +29,11 @@ export type TierExportPayload = {
   documentHtml: string;
 };
 
+type TierExportOptions = {
+  titleSuffix?: string;
+  filenamePrefix?: string;
+};
+
 const LABEL_TITLE_SUFFIX = '티어 아파트 리스트';
 const LABEL_DESC = '네이버부동산 기준 실시간 최저 매물가 반영';
 const LABEL_DISTRICT = '구';
@@ -191,16 +196,18 @@ ${bodyHtml}
 export function buildTierExportPayload(
   tier: TierKey,
   apartments: ExportApartment[],
-  updatedAtKR: string
+  updatedAtKR: string,
+  options: TierExportOptions = {}
 ): TierExportPayload {
   const tierMeta = TIERS.find((item) => item.key === tier);
   const tierLabel = tierMeta?.label ?? `${tier}티어`;
-  const title = `${tierLabel} ${LABEL_TITLE_SUFFIX}`;
+  const title = `${tierLabel} ${LABEL_TITLE_SUFFIX}${options.titleSuffix ? ` ${options.titleSuffix}` : ''}`;
   const subtitle = `${LABEL_DESC} / 업데이트: ${updatedAtKR || '-'}`;
   const rows = buildRows(apartments);
   const bodyHtml = buildBodyHtml(title, subtitle, rows.length, rows);
   const documentHtml = buildDocumentHtml(title, bodyHtml);
-  const safeLabel = slugifyFilename(tierLabel) || `tier-${tier}`;
+  const filenameBase = options.filenamePrefix ? `${options.filenamePrefix}-${tierLabel}` : tierLabel;
+  const safeLabel = slugifyFilename(filenameBase) || `tier-${tier}`;
 
   return {
     title,

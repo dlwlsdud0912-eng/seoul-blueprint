@@ -1030,3 +1030,19 @@
   - preview iframe rendered
   - HTML copy button wrote export HTML to clipboard
   - PDF download succeeded with generated filename
+### [2026-03-18 16:24] Price proximity-only export mode
+- Type: admin tooling | filtered export
+- Added a second export mode inside `자료내보내기`:
+  - `전체`
+  - `가격근접 ON만`
+- `가격근접 ON만` uses `checkPriceProximity()` and limits the export table/PDF to apartments where 59㎡ and 84㎡ prices are considered close.
+- The mode affects all outputs consistently:
+  - preview table
+  - copied HTML
+  - PDF download filename/title
+- Local E2E verification:
+  - admin login success
+  - export tab open success
+  - `가격근접 ON만` toggle clickable
+  - copied HTML stayed table-based
+  - PDF download succeeded with filename like `가격근접ON-...pdf`
