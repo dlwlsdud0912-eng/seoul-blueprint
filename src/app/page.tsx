@@ -16,6 +16,7 @@ import {
 import { getOverlay, ApartmentOverlay } from '@/lib/apartment-overlay';
 import { APARTMENTS } from '@/data/apartments';
 import { isRegionAllowedApartment } from '@/data/region-exclusions';
+import { getListingStatusBadges } from '@/data/listing-status';
 import { NOTES } from '@/data/notes';
 import Header from '@/components/Header';
 import TierTabs from '@/components/TierTabs';
@@ -228,7 +229,12 @@ export default function Home() {
     () =>
       filteredApartments.map((apt) => {
         const livePrice = prices[apt.id];
-        if (!livePrice) return apt;
+        if (!livePrice) {
+          return {
+            ...apt,
+            statusBadges: getListingStatusBadges(apt.id),
+          };
+        }
         return {
           ...apt,
           currentPrice: livePrice.price,
@@ -238,6 +244,7 @@ export default function Home() {
           sizes: livePrice.sizes,
           areaName: livePrice.areaName,
           ownerVerified: livePrice.ownerVerified,
+          statusBadges: getListingStatusBadges(apt.id, livePrice),
         };
       }),
     [filteredApartments, prices]
@@ -248,13 +255,19 @@ export default function Home() {
     () =>
       mergedApartments.map((apt) => {
         const livePrice = prices[apt.id];
-        if (!livePrice) return apt;
+        if (!livePrice) {
+          return {
+            ...apt,
+            statusBadges: getListingStatusBadges(apt.id),
+          };
+        }
         return {
           ...apt,
           currentPrice: livePrice.price,
           priceChange:
             Math.round((livePrice.price - apt.basePrice) * 10) / 10,
           ownerVerified: livePrice.ownerVerified,
+          statusBadges: getListingStatusBadges(apt.id, livePrice),
         };
       }),
     [mergedApartments, prices]

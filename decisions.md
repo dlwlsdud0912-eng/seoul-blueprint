@@ -926,3 +926,13 @@
 - Result:
   - `매매 0건`: `롯데캐슬이스트폴`, `삼익`, `디에이치방배`, `자양현대6차`, `이문동코오롱`, `문래현대3차`, `녹번동굿모닝기획`, `불광현대`, `문래동현대1차`
   - `매매는 있으나 59/84㎡ 버킷 없음`: `여의도광장아파트`
+### [2026-03-18 13:53] Empty-listing reason badges in UI
+- Type: UX | data clarity
+- Added shared listing-status logic for customer-facing cards.
+- Blank/missing-size apartments now show reason badges such as:
+  - `매매 0건`
+  - `59/84㎡ 없음`
+  - `59㎡ 없음`
+  - `84㎡ 없음`
+  - `최소평형 114㎡부터`
+- Fixed reasons are pinned for the currently blank `10` apartments, and partial-size cases are derived automatically from live `areaName/sizes` data.

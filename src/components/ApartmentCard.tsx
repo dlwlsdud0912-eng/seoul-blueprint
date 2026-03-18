@@ -13,6 +13,7 @@ interface ApartmentCardProps {
     areaName?: string;
     sizes?: Record<string, { price: number; count: number } | null>;
     ownerVerified?: boolean;
+    statusBadges?: string[];
   };
   folderSlot?: React.ReactNode;
   folders?: FolderMap;
@@ -46,6 +47,7 @@ export default function ApartmentCard({
   const isCustomUnverified = apartment.id.startsWith('custom-') && !apartment.naverComplexId;
   const isPendingCrawl = apartment.id.startsWith('custom-') && !!apartment.naverComplexId && !apartment.currentPrice;
   const isOwnerVerificationMissing = apartment.ownerVerified === false;
+  const statusBadges = apartment.statusBadges ?? [];
 
   const price = apartment.currentPrice ?? apartment.basePrice;
 
@@ -214,6 +216,18 @@ export default function ApartmentCard({
           </span>
         </div>
         {/* 2행: 면적 + 가격 (항상 59→84 고정 순서, 최저가 강조) */}
+        {statusBadges.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-1">
+            {statusBadges.map((badge) => (
+              <span
+                key={badge}
+                className="shrink-0 rounded bg-[#f3efe8] px-1.5 py-px text-[9px] font-medium text-[#7a6854]"
+              >
+                {badge}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="flex items-baseline gap-1 mt-0.5 flex-wrap">
           {fixedSizeKeys.map((sizeKey) => {
             const sizeData = apartment.sizes?.[sizeKey];

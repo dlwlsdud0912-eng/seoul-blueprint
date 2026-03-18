@@ -32,6 +32,7 @@ import {
 } from '@/lib/funding-plan';
 import { APARTMENTS } from '@/data/apartments';
 import { isRegionAllowedApartment } from '@/data/region-exclusions';
+import { getListingStatusBadges } from '@/data/listing-status';
 import { TIERS } from '@/data/tiers';
 import type { PriceMap, MemoMap, TierKey } from '@/types';
 
@@ -479,6 +480,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
         effectivePrice: price,
         sizes: livePrice?.sizes,
         ownerVerified: livePrice?.ownerVerified,
+        statusBadges: getListingStatusBadges(apt.id, livePrice),
       };
     }).filter((apt) => apt.effectivePrice <= maxPriceEok)
       .sort((a, b) => b.effectivePrice - a.effectivePrice);
@@ -494,7 +496,12 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       APARTMENTS.filter((apt) => isRegionAllowedApartment(apt.id) && apt.tier === mindMapTier)
         .map((apt) => {
           const livePrice = prices[apt.id];
-          if (!livePrice) return apt;
+          if (!livePrice) {
+            return {
+              ...apt,
+              statusBadges: getListingStatusBadges(apt.id),
+            };
+          }
           return {
             ...apt,
             currentPrice: livePrice.price,
@@ -503,6 +510,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             areaName: livePrice.areaName,
             sizes: livePrice.sizes,
             ownerVerified: livePrice.ownerVerified,
+            statusBadges: getListingStatusBadges(apt.id, livePrice),
           };
         }),
     [mindMapTier, prices]

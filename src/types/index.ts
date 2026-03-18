@@ -46,6 +46,7 @@ export interface Apartment {
   naverComplexId?: string;
   currentPrice?: number;
   priceChange?: number;
+  statusBadges?: string[];
 }
 
 export interface DistrictNote {
