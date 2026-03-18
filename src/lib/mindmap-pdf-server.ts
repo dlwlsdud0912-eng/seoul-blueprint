@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import path from 'path';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, PDFPage, StandardFonts, rgb } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 
 type MindMapPdfItem = {
@@ -30,14 +30,23 @@ const PAGE_MARGIN = 28;
 const HEADER_HEIGHT = 92;
 const COLUMN_GAP = 18;
 const COLUMN_COUNT = 4;
-const COLUMN_WIDTH = (PAGE_WIDTH - PAGE_MARGIN * 2 - COLUMN_GAP * (COLUMN_COUNT - 1)) / COLUMN_COUNT;
+const COLUMN_WIDTH =
+  (PAGE_WIDTH - PAGE_MARGIN * 2 - COLUMN_GAP * (COLUMN_COUNT - 1)) / COLUMN_COUNT;
 const CARD_PADDING = 10;
 const DISTRICT_HEADER_HEIGHT = 30;
 const DISTRICT_GAP = 12;
 const CARD_GAP = 10;
-const OWNER_BADGE = '집주인인증X';
+const OWNER_BADGE = '\uC9D1\uC8FC\uC778\uC778\uC99DX';
+const DISTRICT_LABEL = '\uAD6C';
+const APARTMENT_LABEL = '\uC544\uD30C\uD2B8';
+const COUNT_LABEL = '\uAC1C';
+const ARTICLE_LABEL = '\uB9E4\uBB3C';
 
-function wrapText(text: string, maxWidth: number, font: any, size: number) {
+type EmbeddedFont = {
+  widthOfTextAtSize(text: string, size: number): number;
+};
+
+function wrapText(text: string, maxWidth: number, font: EmbeddedFont, size: number) {
   const words = text.split(/\s+/);
   const lines: string[] = [];
   let current = '';
@@ -49,22 +58,37 @@ function wrapText(text: string, maxWidth: number, font: any, size: number) {
       continue;
     }
 
-    if (current) lines.push(current);
-    current = word;
+    if (current) {
+      lines.push(current);
+      current = word;
+      continue;
+    }
+
+    let chunk = '';
+    for (const char of word) {
+      const nextChunk = `${chunk}${char}`;
+      if (font.widthOfTextAtSize(nextChunk, size) <= maxWidth) {
+        chunk = nextChunk;
+      } else {
+        if (chunk) lines.push(chunk);
+        chunk = char;
+      }
+    }
+    current = chunk;
   }
 
   if (current) lines.push(current);
   return lines;
 }
 
-function estimateCardHeight(item: MindMapPdfItem, regularFont: any, boldFont: any) {
+function estimateCardHeight(item: MindMapPdfItem, regularFont: EmbeddedFont, boldFont: EmbeddedFont) {
   const nameLines = wrapText(item.name, COLUMN_WIDTH - CARD_PADDING * 2 - 54, boldFont, 11);
   const priceLines = wrapText(item.priceLabel, COLUMN_WIDTH - CARD_PADDING * 2, regularFont, 9);
   const memoLines = item.memo
-    ? wrapText(item.memo, COLUMN_WIDTH - CARD_PADDING * 2, regularFont, 8)
+    ? wrapText(item.memo, COLUMN_WIDTH - CARD_PADDING * 2 - 12, regularFont, 8)
     : [];
 
-  const base =
+  const baseHeight =
     CARD_PADDING * 2 +
     nameLines.length * 14 +
     6 +
@@ -72,20 +96,19 @@ function estimateCardHeight(item: MindMapPdfItem, regularFont: any, boldFont: an
     4 +
     11;
 
-  if (memoLines.length === 0) return base;
-  return base + 10 + memoLines.length * 10 + 10;
+  if (memoLines.length === 0) return baseHeight;
+  return baseHeight + 10 + memoLines.length * 10 + 10;
 }
 
-function drawRoundedCard(page: any, x: number, y: number, width: number, height: number, fill: ReturnType<typeof rgb>, border?: ReturnType<typeof rgb>) {
+function drawCardBackground(page: PDFPage, x: number, y: number, width: number, height: number) {
   page.drawRectangle({
     x,
     y,
     width,
     height,
-    color: fill,
-    borderColor: border,
-    borderWidth: border ? 1 : 0,
-    opacity: 1,
+    color: rgb(0.47, 0.25, 0.95),
+    borderColor: rgb(0.91, 0.89, 0.98),
+    borderWidth: 1,
   });
 }
 
@@ -93,8 +116,13 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
   const pdf = await PDFDocument.create();
   pdf.registerFontkit(fontkit);
 
-  const regularFontBytes = readFileSync(path.join(process.cwd(), 'public', 'fonts', 'NotoSansKR-Regular.ttf'));
-  const boldFontBytes = readFileSync(path.join(process.cwd(), 'public', 'fonts', 'NanumGothicBold.ttf'));
+  const regularFontBytes = readFileSync(
+    path.join(process.cwd(), 'public', 'fonts', 'NotoSansKR-Regular.ttf')
+  );
+  const boldFontBytes = readFileSync(
+    path.join(process.cwd(), 'public', 'fonts', 'NanumGothicBold.ttf')
+  );
+
   const regularFont = await pdf.embedFont(regularFontBytes);
   const boldFont = await pdf.embedFont(boldFontBytes);
   const fallbackFont = await pdf.embedFont(StandardFonts.Helvetica);
@@ -102,10 +130,9 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
   const safeRegular = regularFont ?? fallbackFont;
   const safeBold = boldFont ?? fallbackFont;
 
-  const pages: any[] = [];
-
   function addPage() {
     const page = pdf.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+
     page.drawRectangle({
       x: 0,
       y: 0,
@@ -113,6 +140,7 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
       height: PAGE_HEIGHT,
       color: rgb(0.96, 0.95, 1),
     });
+
     page.drawRectangle({
       x: PAGE_MARGIN,
       y: PAGE_MARGIN,
@@ -126,10 +154,11 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
     page.drawRectangle({
       x: PAGE_MARGIN + 6,
       y: PAGE_HEIGHT - PAGE_MARGIN - 38,
-      width: 220,
+      width: 260,
       height: 28,
       color: rgb(0.43, 0.3, 1),
     });
+
     page.drawText(input.title, {
       x: PAGE_MARGIN + 18,
       y: PAGE_HEIGHT - PAGE_MARGIN - 29,
@@ -148,9 +177,13 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
       });
     }
 
-    const totalApartments = input.districts.reduce((sum, district) => sum + district.items.length, 0);
-    const chipText = `구 ${input.districts.length}개 | 아파트 ${totalApartments}개`;
+    const totalApartments = input.districts.reduce(
+      (sum, district) => sum + district.items.length,
+      0
+    );
+    const chipText = `${DISTRICT_LABEL} ${input.districts.length}${COUNT_LABEL} | ${APARTMENT_LABEL} ${totalApartments}${COUNT_LABEL}`;
     const chipWidth = safeRegular.widthOfTextAtSize(chipText, 10) + 28;
+
     page.drawRectangle({
       x: PAGE_WIDTH - PAGE_MARGIN - chipWidth - 6,
       y: PAGE_HEIGHT - PAGE_MARGIN - 38,
@@ -160,6 +193,7 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
       borderColor: rgb(0.9, 0.88, 0.96),
       borderWidth: 1,
     });
+
     page.drawText(chipText, {
       x: PAGE_WIDTH - PAGE_MARGIN - chipWidth + 8,
       y: PAGE_HEIGHT - PAGE_MARGIN - 30,
@@ -168,7 +202,6 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
       color: rgb(0.36, 0.34, 0.48),
     });
 
-    pages.push(page);
     return page;
   }
 
@@ -176,7 +209,7 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
   let columnIndex = 0;
   let cursorY = PAGE_HEIGHT - PAGE_MARGIN - HEADER_HEIGHT;
 
-  function nextColumn() {
+  function moveToNextColumn() {
     columnIndex += 1;
     if (columnIndex >= COLUMN_COUNT) {
       page = addPage();
@@ -189,10 +222,13 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
     const districtHeight =
       DISTRICT_HEADER_HEIGHT +
       DISTRICT_GAP +
-      district.items.reduce((sum, item) => sum + estimateCardHeight(item, safeRegular, safeBold) + CARD_GAP, 0);
+      district.items.reduce(
+        (sum, item) => sum + estimateCardHeight(item, safeRegular, safeBold) + CARD_GAP,
+        0
+      );
 
     if (cursorY - districtHeight < PAGE_MARGIN + 24) {
-      nextColumn();
+      moveToNextColumn();
     }
 
     const columnX = PAGE_MARGIN + columnIndex * (COLUMN_WIDTH + COLUMN_GAP);
@@ -204,6 +240,7 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
       height: DISTRICT_HEADER_HEIGHT,
       color: rgb(0.48, 0.25, 0.95),
     });
+
     page.drawText(district.district, {
       x: columnX + 12,
       y: cursorY - 20,
@@ -211,7 +248,8 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
       font: safeBold,
       color: rgb(1, 1, 1),
     });
-    page.drawText(`${district.items.length}개`, {
+
+    page.drawText(`${district.items.length}${COUNT_LABEL}`, {
       x: columnX + 12,
       y: cursorY - 33,
       size: 9,
@@ -225,7 +263,7 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
       const cardHeight = estimateCardHeight(item, safeRegular, safeBold);
       const cardY = cursorY - cardHeight;
 
-      drawRoundedCard(page, columnX, cardY, COLUMN_WIDTH, cardHeight, rgb(0.47, 0.25, 0.95), rgb(0.91, 0.89, 0.98));
+      drawCardBackground(page, columnX, cardY, COLUMN_WIDTH, cardHeight);
 
       const nameLines = wrapText(item.name, COLUMN_WIDTH - CARD_PADDING * 2 - 58, safeBold, 11);
       let textY = cardY + cardHeight - CARD_PADDING - 11;
@@ -242,8 +280,7 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
       }
 
       if (item.ownerVerified === false) {
-        const badgeText = OWNER_BADGE;
-        const badgeWidth = safeBold.widthOfTextAtSize(badgeText, 8) + 14;
+        const badgeWidth = safeBold.widthOfTextAtSize(OWNER_BADGE, 8) + 14;
         page.drawRectangle({
           x: columnX + COLUMN_WIDTH - badgeWidth - CARD_PADDING,
           y: cardY + cardHeight - 22,
@@ -251,7 +288,8 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
           height: 14,
           color: rgb(1, 0.95, 0.7),
         });
-        page.drawText(badgeText, {
+
+        page.drawText(OWNER_BADGE, {
           x: columnX + COLUMN_WIDTH - badgeWidth - CARD_PADDING + 7,
           y: cardY + cardHeight - 18,
           size: 8,
@@ -272,18 +310,18 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
         textY -= 11;
       }
 
-      page.drawText(`매물 ${item.articleCount ?? 0}개`, {
+      page.drawText(`${ARTICLE_LABEL} ${item.articleCount ?? 0}${COUNT_LABEL}`, {
         x: columnX + CARD_PADDING,
         y: textY - 2,
         size: 8,
         font: safeRegular,
         color: rgb(0.87, 0.85, 0.96),
       });
-      textY -= 14;
 
       if (item.memo) {
         const memoLines = wrapText(item.memo, COLUMN_WIDTH - CARD_PADDING * 2 - 12, safeRegular, 8);
         const memoHeight = memoLines.length * 10 + 10;
+
         page.drawRectangle({
           x: columnX + CARD_PADDING,
           y: cardY + 10,
@@ -293,6 +331,7 @@ export async function generateMindMapPdf(input: MindMapPdfInput): Promise<Uint8A
           borderColor: rgb(0.94, 0.88, 0.55),
           borderWidth: 1,
         });
+
         let memoY = cardY + memoHeight + 4;
         for (const line of memoLines) {
           page.drawText(line, {

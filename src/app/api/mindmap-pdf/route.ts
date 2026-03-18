@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateMindMapPdf, type MindMapPdfInput } from '@/lib/mindmap-pdf-server';
 
+export const runtime = 'nodejs';
+
 function sanitizeFilename(filename: string) {
   return filename.replace(/[<>:"/\\|?*\u0000-\u001F]/g, '-');
 }
