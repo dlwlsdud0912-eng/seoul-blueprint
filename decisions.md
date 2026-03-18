@@ -829,3 +829,18 @@
   - Added mind map mode toggle on the home page
   - Added `MindMapView` to show tier/folder apartments in a district -> apartment flow layout
   - Mind map nodes also show the `ownerVerified: false` badge
+### [2026-03-18 10:31] Mind map navigation + PDF export polish
+- Type: UI | export
+- Added:
+  - district mini map / quick jump chips
+  - zoom controls
+  - collapse / expand all districts
+  - per-district collapse toggle
+  - `PDF 저장` button
+- PDF approach:
+  - used a dedicated print HTML window instead of screenshot capture
+  - this keeps text and layout crisp when saving as PDF from the browser print dialog
+  - export is optimized for `A3 landscape`
+- UX polish:
+  - horizontal scroll hint retained
+  - right edge clipping feeling reduced with extra canvas padding and edge fades
