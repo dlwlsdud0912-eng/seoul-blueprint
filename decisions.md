@@ -893,3 +893,36 @@
   - added a shared region exclusion list for those apartments
   - applied the exclusion to home/admin apartment rendering
   - applied the same exclusion to customer-facing tier HTML generation
+### [2026-03-18 13:39] Wrong-region replacements from verified Naver links
+- Type: data quality | remapping | crawl
+- User-provided verified replacements:
+  - `강남구 상록수 -> 상록수아파트 (868)`
+  - `광진구 자양현대2단지 -> 자양현대2차 (102)`
+  - `용산구 대림아파트 -> 이촌대림 (762)`
+  - `강남구 가람아파트 -> 가람아파트 (860)`
+  - `영등포구 광장아파트 -> 여의도광장아파트 (740)`
+  - `강서구 강변월드메르디앙 -> 염창강변월드메르디앙 (26914)`
+  - `은평구 대림아파트 -> 녹번대림e편한세상아파트 (778)`
+  - `서대문구 DMC파크뷰자이1단지 -> complexId 108064`
+- Deleted instead of remapping:
+  - `마포구 성산동동도센트리움`
+  - `마포구 성산동현대아파트`
+  - `서대문구 북가좌동남아파트`
+  - `양천구 신정푸르지오`
+  - `양천구 세양청마루`
+  - `중구 현대`
+- Crawl result for corrected subset (8 ids, 3 workers):
+  - success `7`
+  - fail/no-listing `1`
+  - `DMC파크뷰자이1단지` restored successfully with `59㎡ 13.3억 / 84㎡ 14.8억`
+  - `여의도광장아파트` returned `매매 4건` but no usable `59/84㎡` result, so it remains blank
+- Current mapped status:
+  - total mapped apartments `886`
+  - success `876`
+  - fail/no-listing `10`
+### [2026-03-18 13:41] Remaining blank apartments verified
+- Type: data quality | verification
+- Re-checked all currently blank mapped apartments (`10`) with the browser crawler.
+- Result:
+  - `매매 0건`: `롯데캐슬이스트폴`, `삼익`, `디에이치방배`, `자양현대6차`, `이문동코오롱`, `문래현대3차`, `녹번동굿모닝기획`, `불광현대`, `문래동현대1차`
+  - `매매는 있으나 59/84㎡ 버킷 없음`: `여의도광장아파트`
