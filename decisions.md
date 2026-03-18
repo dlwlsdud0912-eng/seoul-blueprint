@@ -967,3 +967,15 @@
   - `지도` tab open success
   - sticky bar selector rendered
   - scroll test passed (`deltaY ≈ 3px` after deep scroll)
+### [2026-03-18 15:03] Desktop slim sticky bar + mobile bottom tier bar
+- Type: admin UX refinement
+- The previous sticky tier block felt too large and visually covered the content while scrolling.
+- Refined the selector into:
+  - `desktop/tablet`: slimmer sticky tier bar under the admin header
+  - `mobile`: bottom-fixed quick tier switch bar
+- Added extra bottom spacing so the fixed mobile bar does not cover map/mind map content.
+- Verified with mobile E2E:
+  - admin login success
+  - `지도` tab open success
+  - mobile bottom tier bar rendered
+  - scroll test passed (`deltaY = 0`)

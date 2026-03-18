@@ -414,39 +414,83 @@ function TierStickyBar({
       : 'border-[#6d4dff] bg-[#efe9ff] text-[#6d4dff] shadow-[0_10px_24px_rgba(109,77,255,0.10)]';
 
   return (
-    <div
-      data-testid="tier-sticky-bar"
-      className="sticky top-[106px] z-[9] -mx-1 rounded-[24px] border border-white/80 bg-[rgba(255,255,255,0.88)] px-3 py-3 shadow-[0_18px_40px_rgba(55,64,76,0.08)] backdrop-blur md:top-[114px] md:px-4"
-    >
-      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-[#37352f]">{title}</h2>
-          <p className="mt-1 text-xs text-[#787774]">{description}</p>
-        </div>
-        <div className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs text-[#787774] shadow-[0_8px_20px_rgba(39,43,54,0.05)]">
-          총 {totalCount}개 단지
+    <>
+      <div
+        data-testid="tier-sticky-bar"
+        className="sticky top-[106px] z-[9] hidden md:block"
+      >
+        <div className="-mx-1 rounded-[22px] border border-white/85 bg-[rgba(255,255,255,0.92)] px-3 py-2 shadow-[0_16px_38px_rgba(55,64,76,0.08)] backdrop-blur md:top-[114px] md:px-4">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold text-[#37352f]">{title}</h2>
+              <p className="mt-0.5 line-clamp-1 text-[11px] text-[#787774]">{description}</p>
+            </div>
+            <div className="shrink-0 rounded-full bg-white px-3 py-1 text-[11px] text-[#787774] shadow-[0_8px_20px_rgba(39,43,54,0.05)]">
+              총 {totalCount}개
+            </div>
+          </div>
+          <div className="-mx-1 overflow-x-auto px-1">
+            <div className="flex min-w-max gap-2">
+              {TIERS.map((tier) => (
+                <button
+                  key={tier.key}
+                  type="button"
+                  onClick={() => onSelect(tier.key)}
+                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                    activeTier === tier.key
+                      ? activeClass
+                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                  }`}
+                >
+                  {tier.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="-mx-1 overflow-x-auto px-1 pb-1">
-        <div className="flex min-w-max gap-2">
-          {TIERS.map((tier) => (
-            <button
-              key={tier.key}
-              type="button"
-              onClick={() => onSelect(tier.key)}
-              className={`shrink-0 rounded-full border px-3 py-2 text-xs font-medium transition-colors sm:px-4 ${
-                activeTier === tier.key
-                  ? activeClass
-                  : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
-              }`}
-            >
-              {tier.label}
-            </button>
-          ))}
+      <div className="md:hidden">
+        <div className="mb-3 rounded-[20px] border border-[#e8e5e0] bg-white px-4 py-3 shadow-[0_16px_34px_rgba(55,64,76,0.06)]">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-sm font-semibold text-[#37352f]">{title}</div>
+              <div className="mt-0.5 text-[11px] text-[#787774]">{description}</div>
+            </div>
+            <div className="shrink-0 rounded-full bg-[#f7f7f5] px-2.5 py-1 text-[11px] text-[#787774]">
+              {totalCount}개
+            </div>
+          </div>
+        </div>
+        <div data-testid="tier-mobile-bar" className="pointer-events-none fixed inset-x-3 bottom-3 z-[12]">
+          <div className="pointer-events-auto rounded-[24px] border border-white/90 bg-[rgba(255,255,255,0.96)] px-3 py-2 shadow-[0_22px_50px_rgba(44,53,68,0.18)] backdrop-blur">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <div className="text-[11px] font-semibold text-[#37352f]">티어 빠른 전환</div>
+              <div className="rounded-full bg-[#f7f7f5] px-2 py-1 text-[10px] text-[#787774]">
+                {TIERS.find((tier) => tier.key === activeTier)?.label ?? activeTier}
+              </div>
+            </div>
+            <div className="-mx-1 overflow-x-auto px-1 pb-1">
+              <div className="flex min-w-max gap-2">
+                {TIERS.map((tier) => (
+                  <button
+                    key={tier.key}
+                    type="button"
+                    onClick={() => onSelect(tier.key)}
+                    className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors ${
+                      activeTier === tier.key
+                        ? activeClass
+                        : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                    }`}
+                  >
+                    {tier.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -668,7 +712,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       {activeTab === 'guide' ? (
         <GuideContent />
       ) : activeTab === 'map' ? (
-        <div className="space-y-4">
+        <div className="space-y-4 pb-28 md:pb-0">
           <TierStickyBar
             title="관리자 지도"
             description="네이버 단지 좌표를 기반으로, 현재 티어 아파트를 지도에서 검수하는 전용 뷰입니다."
@@ -686,7 +730,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
           />
         </div>
       ) : activeTab === 'mindmap' ? (
-        <div className="space-y-4">
+        <div className="space-y-4 pb-28 md:pb-0">
           <TierStickyBar
             title="관리자 마인드맵"
             description="홈에서는 숨기고, 관리자 안에서만 보는 전용 뷰입니다."
