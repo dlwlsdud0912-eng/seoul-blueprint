@@ -1135,3 +1135,23 @@
   - `node --check scripts/merge-price-results.mjs` passed
   - `node --check scripts/apply-subset-prices.mjs` passed
   - regenerated premium tier HTML successfully
+### [2026-03-18 20:38] District auto-correction and catalog normalization
+- Type: mapping hygiene | customer-facing safety
+- Goal:
+  - fix district/complex mismatches without making daily crawls slower
+  - keep customer-facing views aligned to a single normalized catalog
+- Fix:
+  - added `src/data/catalog-apartments.ts` as the shared normalized apartment catalog
+  - applied deterministic district corrections for audited mapped complexes
+  - applied official Naver complex-name corrections for the most misleading mismatches
+  - hid the alias-only row `래미안명일역솔베뉴` so the canonical crawled row `래미안솔베뉴` is the only visible listing
+  - excluded three unresolved non-Seoul mis-matches from the visible catalog:
+    - `mapo-coolong`
+    - `gangnam-purunmaeul`
+    - `seodaemun-h9neqy`
+  - switched home/admin/export generation to use the normalized catalog instead of raw `APARTMENTS`
+  - added `npm run audit:districts` to re-check district consistency when new apartments or new mappings are added
+- Verification:
+  - `npm run build` passed
+  - `npx tsx scripts/generate-premium-tier12-html.mjs` passed
+  - `npm run audit:districts` returned `mismatchCount: 0`, `unresolvedCount: 0`

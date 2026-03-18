@@ -32,8 +32,7 @@ import {
   splitFunding,
   formatAmount,
 } from '@/lib/funding-plan';
-import { APARTMENTS } from '@/data/apartments';
-import { isRegionAllowedApartment } from '@/data/region-exclusions';
+import { CATALOG_APARTMENTS } from '@/data/catalog-apartments';
 import { getListingStatusBadges } from '@/data/listing-status';
 import { TIERS } from '@/data/tiers';
 import type { PriceMap, MemoMap, TierKey } from '@/types';
@@ -575,7 +574,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
     if (!dsrResult) return [];
     // 스트레스 기준이 있으면 그 값 사용, 없으면 기본값
     const maxPriceEok = (dsrResult.stressMaxPurchasePrice ?? dsrResult.maxPurchasePrice) / 10000;
-    return APARTMENTS.filter((apt) => isRegionAllowedApartment(apt.id)).map((apt) => {
+    return CATALOG_APARTMENTS.map((apt) => {
       const livePrice = prices[apt.id];
       const price = livePrice?.price ?? apt.basePrice;
       return {
@@ -599,7 +598,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
 
   const mindMapApartments = useMemo(
     () =>
-      APARTMENTS.filter((apt) => isRegionAllowedApartment(apt.id) && apt.tier === mindMapTier)
+      CATALOG_APARTMENTS.filter((apt) => apt.tier === mindMapTier)
         .filter((apt) => !!prices[apt.id])
         .map((apt) => {
           const livePrice = prices[apt.id];

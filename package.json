@@ -13,7 +13,8 @@
     "crawl:parallel": "node scripts/crawl-prices-parallel.mjs",
     "crawl:merge": "node scripts/merge-price-results.mjs",
     "crawl:apply-subset": "node scripts/apply-subset-prices.mjs",
-    "apartments:import-excel": "node scripts/import-excel-additions.mjs"
+    "apartments:import-excel": "node scripts/import-excel-additions.mjs",
+    "audit:districts": "npx tsx scripts/report-district-mismatches.mjs"
   },
   "dependencies": {
     "@fontsource/noto-sans-kr": "^5.2.9",

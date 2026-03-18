@@ -1,10 +1,8 @@
 import { writeFileSync } from 'node:fs';
-import apartmentModule from '../src/data/apartments.ts';
-import regionExclusionsModule from '../src/data/region-exclusions.ts';
+import catalogModule from '../src/data/catalog-apartments.ts';
 import pricesData from '../public/prices.json' with { type: 'json' };
 
-const APARTMENTS = apartmentModule.APARTMENTS;
-const { isRegionAllowedApartment } = regionExclusionsModule;
+const { CATALOG_APARTMENTS } = catalogModule;
 const prices = pricesData.prices || {};
 const updatedAtKR = pricesData.updatedAtKR || '';
 
@@ -43,9 +41,7 @@ function formatSizeLabel(apartment) {
   return '--';
 }
 
-const apartments = APARTMENTS.filter(
-  (apt) => isRegionAllowedApartment(apt.id) && apt.tier === '12'
-)
+const apartments = CATALOG_APARTMENTS.filter((apt) => apt.tier === '12')
   .map((apt) => {
     const live = prices[apt.id];
     if (typeof live?.price !== 'number') {
