@@ -11,7 +11,6 @@ export type District =
   | '동작구'
   | '용산구'
   | '송파구'
-  | '비잠실송파'
   | '강남구'
   | '서초구'
   | '서대문구'
@@ -67,6 +66,7 @@ export interface PriceResult {
   articleCount: number;
   areaName?: string;
   sizes?: Record<string, SizePrice | null>;
+  ownerVerified?: boolean;
 }
 
 export interface PriceMap {

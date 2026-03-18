@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-03-17T13:09:11.319Z",
-  "updatedAtKR": "2026. 03. 17. 22:09",
+  "updatedAt": "2026-03-18T00:27:16.665Z",
+  "updatedAtKR": "2026. 03. 18. 09:27",
   "totalCount": 891,
-  "successCount": 819,
-  "failCount": 72,
+  "successCount": 881,
+  "failCount": 10,
   "prices": {
     "seongbuk-jangwi-ipk": {
       "price": 12.6,
@@ -10272,6 +10272,818 @@
           "count": 19
         }
       }
+    },
+    "songpa-samsung-gwangnaru": {
+      "price": 14.3,
+      "articleCount": 144,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 14.3,
+          "count": 23
+        },
+        "84": {
+          "price": 15.5,
+          "count": 92
+        }
+      },
+      "ownerVerified": false
+    },
+    "dongdaemun-imun-ipk-zai": {
+      "price": 15.5,
+      "articleCount": 167,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 15.5,
+          "count": 14
+        },
+        "84": {
+          "price": 17.5,
+          "count": 153
+        }
+      },
+      "ownerVerified": false
+    },
+    "seodaemun-central-ipk": {
+      "price": 8.7,
+      "articleCount": 19,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 8.7,
+          "count": 3
+        },
+        "84": {
+          "price": 10.3,
+          "count": 8
+        }
+      },
+      "ownerVerified": false
+    },
+    "seongdong-hyundai-prime": {
+      "price": 16.45,
+      "articleCount": 200,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 16.45,
+          "count": 154
+        },
+        "84": {
+          "price": 20.45,
+          "count": 46
+        }
+      },
+      "ownerVerified": false
+    },
+    "yangcheon-mokdong1": {
+      "price": 20,
+      "articleCount": 108,
+      "areaName": "47㎡",
+      "sizes": {
+        "84": {
+          "price": 29,
+          "count": 15
+        }
+      },
+      "ownerVerified": false
+    },
+    "songpa-els": {
+      "price": 27.95,
+      "articleCount": 200,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 27.95,
+          "count": 200
+        }
+      },
+      "ownerVerified": false
+    },
+    "gangnam-sangnoksu": {
+      "price": 1.98,
+      "articleCount": 27,
+      "areaName": "43㎡",
+      "sizes": {
+        "59": {
+          "price": 2.8,
+          "count": 21
+        }
+      },
+      "ownerVerified": false
+    },
+    "gwangjin-by20yv": {
+      "price": 13.9,
+      "articleCount": 40,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 13.9,
+          "count": 25
+        },
+        "84": {
+          "price": 17.2,
+          "count": 15
+        }
+      },
+      "ownerVerified": false
+    },
+    "seongbuk-19qmysv": {
+      "price": 12.8,
+      "articleCount": 23,
+      "areaName": "49㎡",
+      "sizes": {
+        "59": {
+          "price": 13.9,
+          "count": 4
+        },
+        "84": {
+          "price": 17,
+          "count": 2
+        }
+      },
+      "ownerVerified": false
+    },
+    "junggu-1x2sdp5": {
+      "price": 19.9,
+      "articleCount": 3,
+      "areaName": "114㎡",
+      "sizes": {},
+      "ownerVerified": false
+    },
+    "gwangjin-1qbk331": {
+      "price": 19,
+      "articleCount": 39,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 19,
+          "count": 34
+        },
+        "84": {
+          "price": 24.9,
+          "count": 2
+        }
+      },
+      "ownerVerified": false
+    },
+    "gwangjin-n25m86": {
+      "price": 21,
+      "articleCount": 9,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 21,
+          "count": 9
+        }
+      },
+      "ownerVerified": false
+    },
+    "gangnam-1axdgfy": {
+      "price": 50.6,
+      "articleCount": 200,
+      "areaName": "84㎡",
+      "sizes": {
+        "59": {
+          "price": 52,
+          "count": 2
+        },
+        "84": {
+          "price": 50.6,
+          "count": 152
+        }
+      },
+      "ownerVerified": false
+    },
+    "seocho-1i1i35c": {
+      "price": 33,
+      "articleCount": 200,
+      "areaName": "43㎡",
+      "sizes": {
+        "59": {
+          "price": 38.9,
+          "count": 183
+        }
+      },
+      "ownerVerified": false
+    },
+    "gwangjin-by2086": {
+      "price": 17.5,
+      "articleCount": 32,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 17.5,
+          "count": 32
+        }
+      },
+      "ownerVerified": false
+    },
+    "guro-17b71mc": {
+      "price": 5.3,
+      "articleCount": 39,
+      "areaName": "44㎡",
+      "sizes": {
+        "59": {
+          "price": 6.2,
+          "count": 2
+        },
+        "84": {
+          "price": 7.5,
+          "count": 28
+        }
+      },
+      "ownerVerified": false
+    },
+    "dongjak-1i8ak8q": {
+      "price": 16.5,
+      "articleCount": 200,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 16.5,
+          "count": 12
+        },
+        "84": {
+          "price": 16.95,
+          "count": 107
+        }
+      },
+      "ownerVerified": false
+    },
+    "mapo-1dagmmy": {
+      "price": 1.65,
+      "articleCount": 7,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 1.65,
+          "count": 1
+        },
+        "84": {
+          "price": 2.3,
+          "count": 2
+        }
+      },
+      "ownerVerified": false
+    },
+    "yangcheon-qc5pac": {
+      "price": 2.35,
+      "articleCount": 4,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 2.35,
+          "count": 4
+        }
+      },
+      "ownerVerified": false
+    },
+    "yeongdeungpo-2qjrlw": {
+      "price": 11.5,
+      "articleCount": 13,
+      "areaName": "48㎡",
+      "sizes": {},
+      "ownerVerified": false
+    },
+    "eunpyeong-n6hl9n": {
+      "price": 6.8,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 6.8,
+          "count": 1
+        }
+      },
+      "ownerVerified": false
+    },
+    "eunpyeong-1696azi": {
+      "price": 6.2,
+      "articleCount": 30,
+      "areaName": "42㎡",
+      "sizes": {},
+      "ownerVerified": false
+    },
+    "gangdong-seonsa-hyundai": {
+      "price": 14,
+      "articleCount": 200,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 14,
+          "count": 136
+        }
+      },
+      "ownerVerified": false
+    },
+    "gwanak-hillstate-centciel": {
+      "price": 13.5,
+      "articleCount": 44,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 13.5,
+          "count": 3
+        },
+        "84": {
+          "price": 15.5,
+          "count": 41
+        }
+      },
+      "ownerVerified": false
+    },
+    "mapo-sangam-worldcup11": {
+      "price": 11,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 11,
+          "count": 1
+        }
+      },
+      "ownerVerified": false
+    },
+    "yangcheon-mokdong-park-zai": {
+      "price": 17.5,
+      "articleCount": 31,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 17.5,
+          "count": 31
+        }
+      },
+      "ownerVerified": false
+    },
+    "songpa-raemian-pinetop": {
+      "price": 20,
+      "articleCount": 43,
+      "areaName": "53㎡",
+      "sizes": {
+        "59": {
+          "price": 21.5,
+          "count": 15
+        },
+        "84": {
+          "price": 25.7,
+          "count": 19
+        }
+      },
+      "ownerVerified": false
+    },
+    "songpa-trizium": {
+      "price": 25.95,
+      "articleCount": 200,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 25.95,
+          "count": 200
+        }
+      },
+      "ownerVerified": false
+    },
+    "yeongdeungpo-yeouido-sibum": {
+      "price": 25.8,
+      "articleCount": 93,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 25.8,
+          "count": 39
+        },
+        "84": {
+          "price": 27,
+          "count": 26
+        }
+      },
+      "ownerVerified": false
+    },
+    "gwangjin-1jb4s0p": {
+      "price": 13.5,
+      "articleCount": 130,
+      "areaName": "51㎡",
+      "sizes": {
+        "59": {
+          "price": 15,
+          "count": 92
+        },
+        "84": {
+          "price": 17,
+          "count": 28
+        }
+      },
+      "ownerVerified": false
+    },
+    "gwangjin-1l6ninn": {
+      "price": 16.5,
+      "articleCount": 38,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 16.5,
+          "count": 38
+        }
+      },
+      "ownerVerified": false
+    },
+    "songpa-pb593b": {
+      "price": 15,
+      "articleCount": 43,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 15,
+          "count": 19
+        },
+        "84": {
+          "price": 18,
+          "count": 24
+        }
+      },
+      "ownerVerified": false
+    },
+    "gwangjin-192x14a": {
+      "price": 24,
+      "articleCount": 119,
+      "areaName": "75㎡",
+      "sizes": {
+        "84": {
+          "price": 24.9,
+          "count": 48
+        }
+      },
+      "ownerVerified": false
+    },
+    "gangnam-f4qa3c": {
+      "price": 28,
+      "articleCount": 20,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 28,
+          "count": 20
+        }
+      },
+      "ownerVerified": false
+    },
+    "yeongdeungpo-566wqg": {
+      "price": 25.8,
+      "articleCount": 93,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 25.8,
+          "count": 39
+        },
+        "84": {
+          "price": 27,
+          "count": 26
+        }
+      },
+      "ownerVerified": false
+    },
+    "gangdong-1rqrvfz": {
+      "price": 9.31,
+      "articleCount": 152,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 9.31,
+          "count": 138
+        }
+      },
+      "ownerVerified": false
+    },
+    "gwangjin-l09h22": {
+      "price": 17.5,
+      "articleCount": 32,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 17.5,
+          "count": 32
+        }
+      },
+      "ownerVerified": false
+    },
+    "dongjak-7wa77l": {
+      "price": 17,
+      "articleCount": 69,
+      "areaName": "84㎡",
+      "sizes": {
+        "59": {
+          "price": 17,
+          "count": 15
+        },
+        "84": {
+          "price": 17,
+          "count": 54
+        }
+      },
+      "ownerVerified": false
+    },
+    "songpa-11nontw": {
+      "price": 14.95,
+      "articleCount": 7,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 14.95,
+          "count": 7
+        }
+      },
+      "ownerVerified": false
+    },
+    "yeongdeungpo-ncq2w7": {
+      "price": 12,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 12,
+          "count": 1
+        }
+      },
+      "ownerVerified": false
+    },
+    "yeongdeungpo-pt1cno": {
+      "price": 12,
+      "articleCount": 1,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 12,
+          "count": 1
+        }
+      },
+      "ownerVerified": false
+    },
+    "dongdaemun-hwegyeong-zai": {
+      "price": 9,
+      "articleCount": 62,
+      "areaName": "39㎡",
+      "sizes": {
+        "59": {
+          "price": 15,
+          "count": 41
+        },
+        "84": {
+          "price": 17.8,
+          "count": 1
+        }
+      },
+      "ownerVerified": false
+    },
+    "dongjak-raemian-sangdo3": {
+      "price": 16.5,
+      "articleCount": 200,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 16.5,
+          "count": 12
+        },
+        "84": {
+          "price": 16.95,
+          "count": 107
+        }
+      },
+      "ownerVerified": false
+    },
+    "dongdaemun-raemian-lagrande": {
+      "price": 14,
+      "articleCount": 200,
+      "areaName": "52㎡",
+      "sizes": {
+        "59": {
+          "price": 15,
+          "count": 118
+        },
+        "84": {
+          "price": 18,
+          "count": 27
+        }
+      },
+      "ownerVerified": false
+    },
+    "gangdong-seonsa-hyundai-31": {
+      "price": 14,
+      "articleCount": 200,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 14,
+          "count": 136
+        }
+      },
+      "ownerVerified": false
+    },
+    "gangdong-olympic-foreon": {
+      "price": 11.5,
+      "articleCount": 200,
+      "areaName": "29㎡",
+      "sizes": {},
+      "ownerVerified": false
+    },
+    "gangnam-daechi-samsung1": {
+      "price": 26.5,
+      "articleCount": 168,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 26.5,
+          "count": 94
+        },
+        "84": {
+          "price": 34.5,
+          "count": 15
+        }
+      },
+      "ownerVerified": false
+    },
+    "gangdong-1e61zli": {
+      "price": 14,
+      "articleCount": 2,
+      "areaName": "47㎡",
+      "sizes": {
+        "59": {
+          "price": 20,
+          "count": 1
+        }
+      },
+      "ownerVerified": false
+    },
+    "gwangjin-1jb4s2f": {
+      "price": 15.5,
+      "articleCount": 63,
+      "areaName": "51㎡",
+      "sizes": {},
+      "ownerVerified": false
+    },
+    "seodaemun-re9ddu": {
+      "price": 14,
+      "articleCount": 14,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 14,
+          "count": 14
+        }
+      },
+      "ownerVerified": false
+    },
+    "eunpyeong-5o4fym": {
+      "price": 12,
+      "articleCount": 41,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 12,
+          "count": 9
+        },
+        "84": {
+          "price": 12.8,
+          "count": 32
+        }
+      },
+      "ownerVerified": false
+    },
+    "gwangjin-1qbk1ln": {
+      "price": 16.4,
+      "articleCount": 149,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 16.4,
+          "count": 11
+        },
+        "84": {
+          "price": 21.45,
+          "count": 118
+        }
+      },
+      "ownerVerified": false
+    },
+    "gangnam-2taavs": {
+      "price": 27,
+      "articleCount": 16,
+      "areaName": "97㎡",
+      "sizes": {},
+      "ownerVerified": false
+    },
+    "seocho-1wu99v4": {
+      "price": 50,
+      "articleCount": 4,
+      "areaName": "120㎡",
+      "sizes": {},
+      "ownerVerified": false
+    },
+    "yongsan-4x6r58": {
+      "price": 110,
+      "articleCount": 2,
+      "areaName": "242㎡",
+      "sizes": {},
+      "ownerVerified": false
+    },
+    "gangnam-w2vpuk": {
+      "price": 16,
+      "articleCount": 200,
+      "areaName": "34㎡",
+      "sizes": {
+        "59": {
+          "price": 28.2,
+          "count": 51
+        },
+        "84": {
+          "price": 34,
+          "count": 73
+        }
+      },
+      "ownerVerified": false
+    },
+    "gangdong-1w426qa": {
+      "price": 10.5,
+      "articleCount": 4,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 10.5,
+          "count": 1
+        },
+        "84": {
+          "price": 12,
+          "count": 3
+        }
+      },
+      "ownerVerified": false
+    },
+    "dongdaemun-1umywh5": {
+      "price": 9,
+      "articleCount": 62,
+      "areaName": "39㎡",
+      "sizes": {
+        "59": {
+          "price": 15,
+          "count": 41
+        },
+        "84": {
+          "price": 17.8,
+          "count": 1
+        }
+      },
+      "ownerVerified": false
+    },
+    "mapo-168sa8y": {
+      "price": 12,
+      "articleCount": 15,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 12,
+          "count": 15
+        }
+      },
+      "ownerVerified": false
+    },
+    "yangcheon-txlx0c": {
+      "price": 16.5,
+      "articleCount": 44,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 16.5,
+          "count": 35
+        }
+      },
+      "ownerVerified": false
+    },
+    "eunpyeong-feclmw": {
+      "price": 9.76,
+      "articleCount": 54,
+      "areaName": "67㎡",
+      "sizes": {
+        "84": {
+          "price": 11.59,
+          "count": 37
+        }
+      },
+      "ownerVerified": false
+    },
+    "junggu-1am9yfi": {
+      "price": 0.4,
+      "articleCount": 2,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 0.4,
+          "count": 2
+        }
+      },
+      "ownerVerified": false
     }
   }
 }

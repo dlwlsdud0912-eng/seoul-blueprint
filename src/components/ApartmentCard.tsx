@@ -12,6 +12,7 @@ interface ApartmentCardProps {
     articleCount?: number;
     areaName?: string;
     sizes?: Record<string, { price: number; count: number } | null>;
+    ownerVerified?: boolean;
   };
   folderSlot?: React.ReactNode;
   folders?: FolderMap;
@@ -44,6 +45,7 @@ export default function ApartmentCard({
 
   const isCustomUnverified = apartment.id.startsWith('custom-') && !apartment.naverComplexId;
   const isPendingCrawl = apartment.id.startsWith('custom-') && !!apartment.naverComplexId && !apartment.currentPrice;
+  const isOwnerVerificationMissing = apartment.ownerVerified === false;
 
   const price = apartment.currentPrice ?? apartment.basePrice;
 
@@ -197,6 +199,9 @@ export default function ApartmentCard({
           )}
           {hasProximity && (
             <span className="shrink-0 text-[8px] text-[#eb5757] bg-[#fbe4e4] px-1 py-px rounded font-medium">근접</span>
+          )}
+          {isOwnerVerificationMissing && (
+            <span className="shrink-0 text-[8px] text-[#8c6d1f] bg-[#fff7db] px-1 py-px rounded font-medium">집주인인증X</span>
           )}
           {isCustomUnverified && (
             <span className="shrink-0 text-[10px] text-[#b4b4b0] italic">미확인</span>

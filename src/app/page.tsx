@@ -60,8 +60,8 @@ export default function Home() {
         if (data?.prices) {
           const priceMap: PriceMap = {};
           for (const [id, info] of Object.entries(data.prices)) {
-            const p = info as { price: number; articleCount: number; areaName?: string; sizes?: Record<string, { price: number; count: number }> };
-            priceMap[id] = { price: p.price, articleCount: p.articleCount, areaName: p.areaName, sizes: p.sizes };
+            const p = info as { price: number; articleCount: number; areaName?: string; sizes?: Record<string, { price: number; count: number }>; ownerVerified?: boolean };
+            priceMap[id] = { price: p.price, articleCount: p.articleCount, areaName: p.areaName, sizes: p.sizes, ownerVerified: p.ownerVerified };
           }
           setPrices(priceMap);
           setLastUpdated(data.updatedAtKR || null);
@@ -236,6 +236,7 @@ export default function Home() {
           articleCount: livePrice.articleCount,
           sizes: livePrice.sizes,
           areaName: livePrice.areaName,
+          ownerVerified: livePrice.ownerVerified,
         };
       }),
     [filteredApartments, prices]
@@ -252,6 +253,7 @@ export default function Home() {
           currentPrice: livePrice.price,
           priceChange:
             Math.round((livePrice.price - apt.basePrice) * 10) / 10,
+          ownerVerified: livePrice.ownerVerified,
         };
       }),
     [mergedApartments, prices]

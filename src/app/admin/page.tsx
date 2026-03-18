@@ -466,7 +466,13 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
     return APARTMENTS.map((apt) => {
       const livePrice = prices[apt.id];
       const price = livePrice?.price ?? apt.basePrice;
-      return { ...apt, currentPrice: livePrice?.price, effectivePrice: price, sizes: livePrice?.sizes };
+      return {
+        ...apt,
+        currentPrice: livePrice?.price,
+        effectivePrice: price,
+        sizes: livePrice?.sizes,
+        ownerVerified: livePrice?.ownerVerified,
+      };
     }).filter((apt) => apt.effectivePrice <= maxPriceEok)
       .sort((a, b) => b.effectivePrice - a.effectivePrice);
   }, [dsrResult, prices]);
