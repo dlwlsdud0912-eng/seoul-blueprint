@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { execFileSync } from 'child_process';
 
 function getArgValue(flag) {
   const idx = process.argv.indexOf(flag);
@@ -55,6 +56,17 @@ for (const file of inputFiles) {
 const outputPath = path.resolve(process.cwd(), outputArg);
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, JSON.stringify(merged, null, 2), 'utf-8');
+
+try {
+  const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+  execFileSync(npxCommand, ['tsx', 'scripts/generate-premium-tier12-html.mjs'], {
+    cwd: process.cwd(),
+    stdio: 'inherit',
+  });
+} catch (error) {
+  console.warn('Warning: failed to regenerate premium tier HTML after merge');
+  console.warn(error instanceof Error ? error.message : String(error));
+}
 
 console.log(`Merged ${inputFiles.length} files into ${outputPath}`);
 console.log(`Total ${merged.totalCount}, success ${merged.successCount}, fail/no-listing ${merged.failCount}`);

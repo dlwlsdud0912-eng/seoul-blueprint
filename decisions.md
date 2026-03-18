@@ -1118,3 +1118,20 @@
   - `npm run build` passed
   - regenerated tier-12 HTML
   - confirmed `래미안명일역솔베뉴` no longer appears in the generated export files
+### [2026-03-18 20:24] Admin map / mind map / export source sync
+- Type: admin data consistency
+- The admin `지도`, `마인드맵`, and `자료내보내기` views must always reflect the same crawled dataset.
+- Root cause:
+  - the tier dataset in admin was still allowing `basePrice` fallback for items with no live crawl result
+  - this caused uncrawled entries to leak into map/mind map/export in inconsistent ways
+- Fix:
+  - `src/app/admin/page.tsx` now builds the tier dataset from apartments that have a live `prices.json` entry only
+  - `src/components/MindMapView.tsx` no longer falls back to `basePrice` for display/sorting
+  - `src/components/AdminMapView.tsx` no longer falls back to `basePrice` for marker summaries/pricing
+  - `src/lib/tier-export.ts` exports only rows with a real `currentPrice`
+  - crawl merge/apply scripts now regenerate the premium tier HTML automatically after `prices.json` updates
+- Verification:
+  - `npm run build` passed
+  - `node --check scripts/merge-price-results.mjs` passed
+  - `node --check scripts/apply-subset-prices.mjs` passed
+  - regenerated premium tier HTML successfully

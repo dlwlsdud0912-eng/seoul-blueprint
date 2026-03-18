@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execFileSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -100,6 +101,17 @@ function main() {
   target.failCount = totalCount - successCount;
 
   fs.writeFileSync(path.resolve(process.cwd(), targetFile), JSON.stringify(target, null, 2), 'utf-8');
+
+  try {
+    const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+    execFileSync(npxCommand, ['tsx', 'scripts/generate-premium-tier12-html.mjs'], {
+      cwd: process.cwd(),
+      stdio: 'inherit',
+    });
+  } catch (error) {
+    console.warn('Warning: failed to regenerate premium tier HTML after subset apply');
+    console.warn(error instanceof Error ? error.message : String(error));
+  }
 
   console.log(`Applied subset prices from ${subsetFile}`);
   console.log(`Updated ${Object.keys(subset.prices || {}).length} price entries`);
