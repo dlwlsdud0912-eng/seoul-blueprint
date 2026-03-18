@@ -847,9 +847,15 @@
 ### [2026-03-18 10:39] Admin-only mind map access + drag pan
 - Type: UI | admin
 - Access control:
-  - hid the mind map toggle from the public home view
-  - mind map opens only when admin auth is active
-  - added a direct `마인드맵` button in the admin header that links to `/?view=mindmap`
+  - hid the mind map from the public home view entirely
+  - moved the mind map entry into the admin page itself
+  - added a dedicated `마인드맵` admin tab and header button
 - Interaction:
   - added drag-to-pan on the mind map canvas
   - buttons and apartment links still behave normally; only the background canvas starts dragging
+### [2026-03-18 10:46] Mind map wheel zoom + PDF blank fix
+- Type: UI | export
+- Improvements:
+  - added `Ctrl/⌘ + mouse wheel` zoom on the mind map canvas
+  - switched PDF export from `about:blank + document.write` to `blob URL` print document generation
+  - this avoids blank tabs in browsers that were not reliably rendering the previous popup flow

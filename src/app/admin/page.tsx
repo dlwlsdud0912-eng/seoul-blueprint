@@ -3,12 +3,14 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import ApartmentCard from '@/components/ApartmentCard';
+import MindMapView from '@/components/MindMapView';
 import {
   isAdminAuthenticated,
   setAdminAuthenticated,
   adminLogout,
   verifyPassword,
 } from '@/lib/admin-auth';
+import { getMemos } from '@/lib/memo-storage';
 import {
   calculateDsr,
   type DsrInput,
@@ -29,7 +31,8 @@ import {
   formatAmount,
 } from '@/lib/funding-plan';
 import { APARTMENTS } from '@/data/apartments';
-import type { PriceMap } from '@/types';
+import { TIERS } from '@/data/tiers';
+import type { PriceMap, MemoMap, TierKey } from '@/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 상수
@@ -385,20 +388,23 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 // DSR 계산기 (인증 후 메인)
 // ─────────────────────────────────────────────────────────────────────────────
 
-type AdminTab = 'dsr' | 'funding' | 'guide';
+type AdminTab = 'dsr' | 'funding' | 'guide' | 'mindmap';
 
 function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState<AdminTab>('dsr');
+  const [mindMapTier, setMindMapTier] = useState<TierKey>('12');
   const [inputs, setInputs] = useState<StoredInputs>(DEFAULT_INPUTS);
   const [dsrResult, setDsrResult] = useState<DsrResult | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [prices, setPrices] = useState<PriceMap>({});
+  const [memos, setMemos] = useState<MemoMap>({});
   const hasCalculated = useRef(false);
   const prevLtv = useRef(inputs.ltvPercent);
 
   // 로드
   useEffect(() => {
     setInputs(loadInputs());
+    setMemos(getMemos());
   }, []);
 
   // prices.json 로드
@@ -477,6 +483,30 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       .sort((a, b) => b.effectivePrice - a.effectivePrice);
   }, [dsrResult, prices]);
 
+  const mindMapTierMeta = useMemo(
+    () => TIERS.find((tier) => tier.key === mindMapTier),
+    [mindMapTier]
+  );
+
+  const mindMapApartments = useMemo(
+    () =>
+      APARTMENTS.filter((apt) => apt.tier === mindMapTier)
+        .map((apt) => {
+          const livePrice = prices[apt.id];
+          if (!livePrice) return apt;
+          return {
+            ...apt,
+            currentPrice: livePrice.price,
+            priceChange: Math.round((livePrice.price - apt.basePrice) * 10) / 10,
+            articleCount: livePrice.articleCount,
+            areaName: livePrice.areaName,
+            sizes: livePrice.sizes,
+            ownerVerified: livePrice.ownerVerified,
+          };
+        }),
+    [mindMapTier, prices]
+  );
+
   // 구별 그룹핑
   const grouped = useMemo(() => {
     const map = new Map<string, typeof affordableApartments>();
@@ -517,12 +547,12 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             <span className="text-sm sm:text-base font-semibold text-[#37352f] truncate">관리자</span>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            <Link
-              href="/?view=mindmap"
+            <button
+              onClick={() => setActiveTab('mindmap')}
               className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#d9cff8] rounded-md text-[#6d4dff] bg-[#f5f1ff] hover:bg-[#efe9ff] transition-colors"
             >
               마인드맵
-            </Link>
+            </button>
             <button
               onClick={() => setShowPasswordModal(true)}
               className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
@@ -543,6 +573,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             { key: 'dsr' as AdminTab, label: 'DSR 계산기' },
             { key: 'funding' as AdminTab, label: '자금조달' },
             { key: 'guide' as AdminTab, label: '가이드' },
+            { key: 'mindmap' as AdminTab, label: '마인드맵' },
           ]).map((tab) => (
             <button
               key={tab.key}
@@ -562,6 +593,44 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       <main className="max-w-6xl mx-auto px-4 py-6">
       {activeTab === 'guide' ? (
         <GuideContent />
+      ) : activeTab === 'mindmap' ? (
+        <div className="space-y-4">
+          <div className="rounded-lg border border-[#e8e5e0] bg-white p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-[#37352f]">관리자 마인드맵</h2>
+                <p className="mt-1 text-xs text-[#787774]">
+                  홈에서는 숨기고, 관리자 안에서만 보는 전용 뷰입니다.
+                </p>
+              </div>
+              <div className="text-xs text-[#787774]">
+                총 {mindMapApartments.length}개 단지
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {TIERS.map((tier) => (
+                <button
+                  key={tier.key}
+                  onClick={() => setMindMapTier(tier.key)}
+                  className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                    mindMapTier === tier.key
+                      ? 'border-[#6d4dff] bg-[#efe9ff] text-[#6d4dff]'
+                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                  }`}
+                >
+                  {tier.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <MindMapView
+            apartments={mindMapApartments}
+            memos={memos}
+            activeTier={mindMapTier}
+            title={`${mindMapTierMeta?.label ?? mindMapTier} 관리자 마인드맵`}
+            subtitle={`${mindMapTierMeta?.maxPrice ?? mindMapTier} 기준 단지를 관리자 전용 탐색 뷰로 정리`}
+          />
+        </div>
       ) : activeTab === 'funding' ? (
         <FundingPlanTab />
       ) : (

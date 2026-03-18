@@ -344,13 +344,13 @@ export default function MindMapView({
   }
 
   function exportToPdf() {
-    const printWindow = window.open('', '_blank', 'noopener,noreferrer');
+    const blob = new Blob([buildPrintHtml({ title, subtitle, districts, memos })], {
+      type: 'text/html;charset=utf-8',
+    });
+    const objectUrl = URL.createObjectURL(blob);
+    const printWindow = window.open(objectUrl, '_blank');
     if (!printWindow) return;
-
-    const html = buildPrintHtml({ title, subtitle, districts, memos });
-    printWindow.document.open();
-    printWindow.document.write(html);
-    printWindow.document.close();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
   }
 
   function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
@@ -392,6 +392,16 @@ export default function MindMapView({
     setIsDragging(false);
   }
 
+  function handleWheel(event: React.WheelEvent<HTMLDivElement>) {
+    if (!event.ctrlKey && !event.metaKey) return;
+    event.preventDefault();
+
+    setZoom((current) => {
+      const next = event.deltaY > 0 ? current - ZOOM_STEP : current + ZOOM_STEP;
+      return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Number(next.toFixed(2))));
+    });
+  }
+
   return (
     <section className="rounded-[28px] border border-[#d9cff8] bg-[radial-gradient(circle_at_top,_#efe9ff_0%,_#e8e4fb_35%,_#f5f1ff_100%)] px-4 py-5 shadow-[0_20px_60px_rgba(109,82,255,0.08)]">
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -416,7 +426,7 @@ export default function MindMapView({
 
       <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="text-[11px] text-[#7f78a8]">
-          넓은 마인드맵이라 좌우 스크롤과 줌으로 탐색할 수 있습니다.
+          넓은 마인드맵이라 드래그, 좌우 스크롤, Ctrl/⌘ + 휠 줌으로 탐색할 수 있습니다.
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex rounded-full border border-[#d9cff8] bg-white/75 p-1 shadow-[0_8px_18px_rgba(109,77,255,0.08)]">
@@ -489,6 +499,7 @@ export default function MindMapView({
           onPointerUp={handlePointerEnd}
           onPointerCancel={handlePointerEnd}
           onPointerLeave={handlePointerEnd}
+          onWheel={handleWheel}
           className={`overflow-x-auto px-1 pb-4 ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
         >
           <div
