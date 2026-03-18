@@ -584,6 +584,8 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
         effectivePrice: price,
         sizes: livePrice?.sizes,
         ownerVerified: livePrice?.ownerVerified,
+        floorInfo: livePrice?.floorInfo,
+        isFirstFloor: livePrice?.isFirstFloor,
         statusBadges: getListingStatusBadges(apt.id, livePrice),
       };
     }).filter((apt) => apt.effectivePrice <= maxPriceEok)
@@ -614,6 +616,8 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             areaName: livePrice.areaName,
             sizes: livePrice.sizes,
             ownerVerified: livePrice.ownerVerified,
+            floorInfo: livePrice.floorInfo,
+            isFirstFloor: livePrice.isFirstFloor,
             statusBadges: getListingStatusBadges(apt.id, livePrice),
           };
         }),

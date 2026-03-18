@@ -47,6 +47,8 @@ export interface Apartment {
   currentPrice?: number;
   priceChange?: number;
   statusBadges?: string[];
+  floorInfo?: string;
+  isFirstFloor?: boolean;
 }
 
 export interface DistrictNote {
@@ -60,6 +62,8 @@ export interface DistrictNote {
 export interface SizePrice {
   price: number;
   count: number;
+  floorInfo?: string;
+  isFirstFloor?: boolean;
 }
 
 export interface PriceResult {
@@ -68,6 +72,8 @@ export interface PriceResult {
   areaName?: string;
   sizes?: Record<string, SizePrice | null>;
   ownerVerified?: boolean;
+  floorInfo?: string;
+  isFirstFloor?: boolean;
 }
 
 export interface PriceMap {

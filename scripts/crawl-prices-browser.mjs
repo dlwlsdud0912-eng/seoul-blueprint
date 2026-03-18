@@ -278,6 +278,11 @@ function parsePrice(priceStr) {
   return null;
 }
 
+function isFirstFloorArticle(floorInfo) {
+  if (!floorInfo) return false;
+  return /^1\s*\//.test(String(floorInfo).trim());
+}
+
 const delay = (ms) => new Promise(r => setTimeout(r, ms));
 
 // ─── API URL 빌더 (가격순 정렬) ───
@@ -375,6 +380,8 @@ async function fetchMissingBucketPrice(page, complexId, headers, bucket) {
     const candidateArticles = ownerOnly.length > 0 ? ownerOnly : saleOnly;
 
     let minPrice = null;
+    let floorInfo = undefined;
+    let isFirstFloor = false;
     for (const article of candidateArticles) {
       const dealPrice = article.dealPrc != null ? article.dealPrc : article.dealOrWarrantPrc;
       if (!dealPrice) continue;
@@ -383,6 +390,8 @@ async function fetchMissingBucketPrice(page, complexId, headers, bucket) {
       const rounded = Math.round(parsed * 100) / 100;
       if (minPrice === null || rounded < minPrice) {
         minPrice = rounded;
+        floorInfo = article.floorInfo;
+        isFirstFloor = isFirstFloorArticle(article.floorInfo);
       }
     }
 
@@ -391,6 +400,8 @@ async function fetchMissingBucketPrice(page, complexId, headers, bucket) {
         price: minPrice,
         count: candidateArticles.length,
         ownerVerified: ownerOnly.length > 0,
+        floorInfo,
+        isFirstFloor,
       };
     }
 
@@ -577,7 +588,12 @@ async function fetchPriceByNavigation(page, apt) {
       if (Math.abs(exArea - bucket.center) <= bucket.tolerance) {
         bucketCounts[bucket.key] = (bucketCounts[bucket.key] || 0) + 1;
         if (!sizes[bucket.key] || rounded < sizes[bucket.key].price) {
-          sizes[bucket.key] = { price: rounded, count: 0 };
+          sizes[bucket.key] = {
+            price: rounded,
+            count: 0,
+            floorInfo: article.floorInfo,
+            isFirstFloor: isFirstFloorArticle(article.floorInfo),
+          };
         }
         break;
       }
@@ -601,6 +617,8 @@ async function fetchPriceByNavigation(page, apt) {
       sizes[bucket.key] = {
         price: supplemental.price,
         count: supplemental.count,
+        floorInfo: supplemental.floorInfo,
+        isFirstFloor: supplemental.isFirstFloor,
       };
       if (!supplemental.ownerVerified) {
         usedFallbackListing = true;
@@ -611,6 +629,8 @@ async function fetchPriceByNavigation(page, apt) {
   let bestPrice = null;
   let bestAreaName = apt.size;
   let trackedArticleCount = 0;
+  let bestFloorInfo = undefined;
+  let bestIsFirstFloor = false;
 
   for (const [key, data] of Object.entries(sizes)) {
     if (data === null || !data) continue;
@@ -618,6 +638,8 @@ async function fetchPriceByNavigation(page, apt) {
     if (bestPrice === null || data.price < bestPrice) {
       bestPrice = data.price;
       bestAreaName = `${key}㎡`;
+      bestFloorInfo = data.floorInfo;
+      bestIsFirstFloor = !!data.isFirstFloor;
     }
   }
 
@@ -627,6 +649,8 @@ async function fetchPriceByNavigation(page, apt) {
       articleCount: candidateArticles.length,
       areaName: apt.size,
       ownerVerified: !usedFallbackListing,
+      floorInfo: bestFloorInfo,
+      isFirstFloor: bestIsFirstFloor,
     };
   }
 
@@ -636,6 +660,8 @@ async function fetchPriceByNavigation(page, apt) {
     areaName: bestAreaName,
     sizes,
     ownerVerified: !usedFallbackListing,
+    floorInfo: bestFloorInfo,
+    isFirstFloor: bestIsFirstFloor,
   };
 }
 
@@ -713,6 +739,8 @@ async function main() {
           areaName: result.areaName,
           sizes: result.sizes || {},
           ownerVerified: result.ownerVerified,
+          floorInfo: result.floorInfo,
+          isFirstFloor: result.isFirstFloor,
         };
         successCount++;
         // 멀티사이즈 로그: 59㎡:9.5 | 84㎡:11.8

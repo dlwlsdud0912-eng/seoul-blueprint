@@ -62,8 +62,24 @@ export default function Home() {
         if (data?.prices) {
           const priceMap: PriceMap = {};
           for (const [id, info] of Object.entries(data.prices)) {
-            const p = info as { price: number; articleCount: number; areaName?: string; sizes?: Record<string, { price: number; count: number }>; ownerVerified?: boolean };
-            priceMap[id] = { price: p.price, articleCount: p.articleCount, areaName: p.areaName, sizes: p.sizes, ownerVerified: p.ownerVerified };
+            const p = info as {
+              price: number;
+              articleCount: number;
+              areaName?: string;
+              sizes?: Record<string, { price: number; count: number; floorInfo?: string; isFirstFloor?: boolean }>;
+              ownerVerified?: boolean;
+              floorInfo?: string;
+              isFirstFloor?: boolean;
+            };
+            priceMap[id] = {
+              price: p.price,
+              articleCount: p.articleCount,
+              areaName: p.areaName,
+              sizes: p.sizes,
+              ownerVerified: p.ownerVerified,
+              floorInfo: p.floorInfo,
+              isFirstFloor: p.isFirstFloor,
+            };
           }
           setPrices(priceMap);
           setLastUpdated(data.updatedAtKR || null);
@@ -244,6 +260,8 @@ export default function Home() {
           sizes: livePrice.sizes,
           areaName: livePrice.areaName,
           ownerVerified: livePrice.ownerVerified,
+          floorInfo: livePrice.floorInfo,
+          isFirstFloor: livePrice.isFirstFloor,
           statusBadges: getListingStatusBadges(apt.id, livePrice),
         };
       }),
@@ -261,14 +279,16 @@ export default function Home() {
             statusBadges: getListingStatusBadges(apt.id),
           };
         }
-        return {
-          ...apt,
-          currentPrice: livePrice.price,
-          priceChange:
-            Math.round((livePrice.price - apt.basePrice) * 10) / 10,
-          ownerVerified: livePrice.ownerVerified,
-          statusBadges: getListingStatusBadges(apt.id, livePrice),
-        };
+          return {
+            ...apt,
+            currentPrice: livePrice.price,
+            priceChange:
+              Math.round((livePrice.price - apt.basePrice) * 10) / 10,
+            ownerVerified: livePrice.ownerVerified,
+            floorInfo: livePrice.floorInfo,
+            isFirstFloor: livePrice.isFirstFloor,
+            statusBadges: getListingStatusBadges(apt.id, livePrice),
+          };
       }),
     [mergedApartments, prices]
   );

@@ -1061,3 +1061,19 @@
   - proximity mode preview showed the new `가격근접` column
   - clipboard HTML contained `가격근접` and `차이`
   - PDF download still succeeded in proximity mode
+### [2026-03-18 17:05] Lowest-price first-floor badge
+- Type: crawler | UI clarity
+- Confirmed Naver article responses expose the floor via `floorInfo` (sample value: `중/29`).
+- Updated the browser crawler so the tracked lowest-price listing now stores:
+  - `floorInfo`
+  - `isFirstFloor`
+- The check is conservative:
+  - only `1/...` is treated as `1층`
+  - middle/high labels like `중/29`, `고/20` are not highlighted
+- Updated app mapping/types so the main apartment cards can show a `최저가 1층` badge when the current lowest tracked price is on the first floor.
+- Verification:
+  - `node --check scripts/crawl-prices-browser.mjs` passed
+  - `npm run build` passed
+- Note:
+  - existing saved `prices.json` does not contain floor metadata yet
+  - the badge becomes visible as new crawl data is collected

@@ -47,6 +47,7 @@ export default function ApartmentCard({
   const isCustomUnverified = apartment.id.startsWith('custom-') && !apartment.naverComplexId;
   const isPendingCrawl = apartment.id.startsWith('custom-') && !!apartment.naverComplexId && !apartment.currentPrice;
   const isOwnerVerificationMissing = apartment.ownerVerified === false;
+  const isLowestPriceFirstFloor = apartment.isFirstFloor === true;
   const statusBadges = apartment.statusBadges ?? [];
 
   const price = apartment.currentPrice ?? apartment.basePrice;
@@ -201,6 +202,9 @@ export default function ApartmentCard({
           )}
           {hasProximity && (
             <span className="shrink-0 text-[8px] text-[#eb5757] bg-[#fbe4e4] px-1 py-px rounded font-medium">근접</span>
+          )}
+          {isLowestPriceFirstFloor && (
+            <span className="shrink-0 text-[8px] text-[#8b5a2b] bg-[#fff1e5] px-1 py-px rounded font-medium">최저가 1층</span>
           )}
           {isOwnerVerificationMissing && (
             <span className="shrink-0 text-[8px] text-[#8c6d1f] bg-[#fff7db] px-1 py-px rounded font-medium">집주인인증X</span>
