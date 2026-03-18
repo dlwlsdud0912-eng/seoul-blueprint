@@ -56,220 +56,6 @@ function formatPriceLabel(apartment: MindMapApartment) {
   return `${fallbackArea} ${formatPrice(fallbackPrice)}`;
 }
 
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function buildPrintHtml({
-  title,
-  subtitle,
-  districts,
-  memos,
-}: {
-  title: string;
-  subtitle?: string;
-  districts: DistrictGroup[];
-  memos: MemoMap;
-}) {
-  const sections = districts
-    .map(({ district, items }) => {
-      const cards = items
-        .map((apartment) => {
-          const memo = memos[apartment.id];
-          return `
-            <article class="card">
-              <div class="card-head">
-                <h4>${escapeHtml(apartment.name)}</h4>
-                ${apartment.ownerVerified === false ? `<span class="badge">${OWNER_BADGE}</span>` : ''}
-              </div>
-              <p class="price">${escapeHtml(formatPriceLabel(apartment))}</p>
-              <p class="meta">${ARTICLE_LABEL} ${apartment.articleCount ?? 0}${COUNT_LABEL}</p>
-              ${memo ? `<div class="memo">${escapeHtml(memo)}</div>` : ''}
-            </article>
-          `;
-        })
-        .join('');
-
-      return `
-        <section class="district">
-          <div class="district-head">
-            <h3>${escapeHtml(district)}</h3>
-            <span>${items.length}${COUNT_LABEL}</span>
-          </div>
-          <div class="cards">${cards}</div>
-        </section>
-      `;
-    })
-    .join('');
-
-  return `<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <title>${escapeHtml(title)}</title>
-  <style>
-    @page { size: A3 landscape; margin: 12mm; }
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
-      background: #f4f0ff;
-      color: #251f3b;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    body { padding: 20px; }
-    .shell {
-      border: 1px solid #d9cff8;
-      border-radius: 28px;
-      background: radial-gradient(circle at top, #efe9ff 0%, #e8e4fb 35%, #f5f1ff 100%);
-      padding: 24px;
-    }
-    .header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-    .title {
-      display: inline-block;
-      background: #6d4dff;
-      color: white;
-      border-radius: 999px;
-      padding: 10px 18px;
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .subtitle {
-      margin: 0;
-      color: #6f6895;
-      font-size: 13px;
-    }
-    .meta-chip {
-      border: 1px solid rgba(255,255,255,.7);
-      background: rgba(255,255,255,.72);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 12px;
-      color: #5d567a;
-      white-space: nowrap;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 18px;
-      align-items: start;
-    }
-    .district {
-      break-inside: avoid;
-      page-break-inside: avoid;
-    }
-    .district-head {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border-radius: 18px;
-      background: #7b3ff2;
-      color: white;
-      padding: 10px 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 14px 24px rgba(123,63,242,.18);
-    }
-    .district-head h3 {
-      margin: 0;
-      font-size: 14px;
-      font-weight: 700;
-    }
-    .district-head span {
-      font-size: 11px;
-      color: rgba(255,255,255,.82);
-    }
-    .cards {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .card {
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,.7);
-      background: linear-gradient(135deg, #6f33f0 0%, #8245ff 100%);
-      color: white;
-      padding: 14px 16px;
-      box-shadow: 0 12px 22px rgba(88,52,201,.18);
-    }
-    .card-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .card-head h4 {
-      margin: 0;
-      font-size: 14px;
-      line-height: 1.45;
-      font-weight: 700;
-    }
-    .badge {
-      flex-shrink: 0;
-      border-radius: 999px;
-      background: #fff3b2;
-      color: #7b5d00;
-      padding: 4px 8px;
-      font-size: 10px;
-      font-weight: 700;
-    }
-    .price {
-      margin: 10px 0 4px;
-      font-size: 12px;
-      color: rgba(255,255,255,.95);
-    }
-    .meta {
-      margin: 0;
-      font-size: 11px;
-      color: rgba(255,255,255,.75);
-    }
-    .memo {
-      margin-top: 10px;
-      border: 1px solid #efe08b;
-      border-radius: 10px;
-      background: #fff4ad;
-      color: #5d4a00;
-      padding: 8px 10px;
-      font-size: 11px;
-      line-height: 1.6;
-    }
-  </style>
-</head>
-<body>
-  <main class="shell">
-    <div class="header">
-      <div>
-        <div class="title">${escapeHtml(title)}</div>
-        ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ''}
-      </div>
-      <div class="meta-chip">${DISTRICT_LABEL} ${districts.length}${COUNT_LABEL} | ${APARTMENT_LABEL} ${districts.reduce((sum, group) => sum + group.items.length, 0)}${COUNT_LABEL}</div>
-    </div>
-    <section class="grid">
-      ${sections}
-    </section>
-  </main>
-  <script>
-    window.addEventListener('load', () => {
-      setTimeout(() => window.print(), 250);
-    });
-  </script>
-</body>
-</html>`;
-}
-
 export default function MindMapView({
   apartments,
   memos,
@@ -288,8 +74,10 @@ export default function MindMapView({
   const [zoom, setZoom] = useState(1);
   const [collapsedDistricts, setCollapsedDistricts] = useState<Record<string, boolean>>({});
   const [isDragging, setIsDragging] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [pdfLoading, setPdfLoading] = useState(false);
 
-  const districts = useMemo(() => {
+  const districts = useMemo<DistrictGroup[]>(() => {
     const grouped = apartments.reduce<Record<string, MindMapApartment[]>>((acc, apartment) => {
       if (!acc[apartment.district]) acc[apartment.district] = [];
       acc[apartment.district].push(apartment);
@@ -307,12 +95,38 @@ export default function MindMapView({
       .sort((a, b) => a.minPrice - b.minPrice);
   }, [apartments]);
 
+  const filteredDistricts = useMemo<DistrictGroup[]>(() => {
+    const keyword = searchQuery.trim().toLowerCase();
+    if (!keyword) return districts;
+
+    return districts
+      .map((district) => {
+        const items = district.items.filter((apartment) => {
+          const memo = memos[apartment.id] ?? '';
+          return (
+            district.district.toLowerCase().includes(keyword) ||
+            apartment.name.toLowerCase().includes(keyword) ||
+            memo.toLowerCase().includes(keyword)
+          );
+        });
+
+        return {
+          ...district,
+          items,
+          minPrice: items.length
+            ? Math.min(...items.map((item) => item.currentPrice ?? item.basePrice))
+            : district.minPrice,
+        };
+      })
+      .filter((district) => district.items.length > 0);
+  }, [districts, memos, searchQuery]);
+
   const visibleApartmentCount = useMemo(
     () =>
-      districts.reduce((sum, district) => {
+      filteredDistricts.reduce((sum, district) => {
         return sum + (collapsedDistricts[district.district] ? 0 : district.items.length);
       }, 0),
-    [collapsedDistricts, districts]
+    [collapsedDistricts, filteredDistricts]
   );
 
   const canZoomOut = zoom > MIN_ZOOM;
@@ -339,18 +153,61 @@ export default function MindMapView({
 
   function setAllDistricts(collapsed: boolean) {
     setCollapsedDistricts(
-      Object.fromEntries(districts.map((district) => [district.district, collapsed]))
+      Object.fromEntries(filteredDistricts.map((district) => [district.district, collapsed]))
     );
   }
 
-  function exportToPdf() {
-    const blob = new Blob([buildPrintHtml({ title, subtitle, districts, memos })], {
-      type: 'text/html;charset=utf-8',
-    });
-    const objectUrl = URL.createObjectURL(blob);
-    const printWindow = window.open(objectUrl, '_blank');
-    if (!printWindow) return;
-    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+  async function exportToPdf() {
+    setPdfLoading(true);
+    try {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      const baseTitle = title.replace(/\s+/g, '-');
+      const filename = `${baseTitle}-${y}${m}${d}.pdf`;
+
+      const payload = {
+        title,
+        subtitle,
+        filename,
+        districts: filteredDistricts.map((district) => ({
+          district: district.district,
+          items: district.items.map((apartment) => ({
+            id: apartment.id,
+            name: apartment.name,
+            priceLabel: formatPriceLabel(apartment),
+            articleCount: apartment.articleCount,
+            ownerVerified: apartment.ownerVerified,
+            memo: memos[apartment.id] ?? '',
+          })),
+        })),
+      };
+
+      const response = await fetch('/api/mindmap-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error('PDF export failed');
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
+    } finally {
+      setPdfLoading(false);
+    }
   }
 
   function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
@@ -413,13 +270,14 @@ export default function MindMapView({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-[11px] text-[#5d567a] backdrop-blur">
-            {`${DISTRICT_LABEL} ${districts.length}${COUNT_LABEL} | ${APARTMENT_LABEL} ${apartments.length}${COUNT_LABEL}`}
+            {`${DISTRICT_LABEL} ${filteredDistricts.length}${COUNT_LABEL} | ${APARTMENT_LABEL} ${filteredDistricts.reduce((sum, district) => sum + district.items.length, 0)}${COUNT_LABEL}`}
           </div>
           <button
             onClick={exportToPdf}
+            disabled={pdfLoading || filteredDistricts.length === 0}
             className="rounded-full border border-[#d9cff8] bg-white/80 px-3 py-1.5 text-[11px] font-medium text-[#6d4dff] shadow-[0_8px_18px_rgba(109,77,255,0.08)] transition-colors hover:bg-white"
           >
-            PDF 저장
+            {pdfLoading ? 'PDF 생성 중...' : 'PDF 저장'}
           </button>
         </div>
       </div>
@@ -429,6 +287,13 @@ export default function MindMapView({
           넓은 마인드맵이라 드래그, 좌우 스크롤, Ctrl/⌘ + 휠 줌으로 탐색할 수 있습니다.
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="구, 아파트, 메모 검색"
+            className="min-w-[220px] rounded-full border border-[#d9cff8] bg-white/85 px-3 py-1.5 text-[11px] text-[#37352f] shadow-[0_8px_18px_rgba(109,77,255,0.06)] outline-none placeholder:text-[#9d97bf]"
+          />
           <div className="inline-flex rounded-full border border-[#d9cff8] bg-white/75 p-1 shadow-[0_8px_18px_rgba(109,77,255,0.08)]">
             <button
               onClick={() => setZoom((value) => Math.max(MIN_ZOOM, Number((value - ZOOM_STEP).toFixed(2))))}
@@ -469,7 +334,7 @@ export default function MindMapView({
           <div className="text-[11px] text-[#7f78a8]">보이는 카드 {visibleApartmentCount}개</div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {districts.map((district) => {
+          {filteredDistricts.map((district) => {
             const isCollapsed = !!collapsedDistricts[district.district];
             return (
               <button
@@ -516,7 +381,7 @@ export default function MindMapView({
             <div className="relative flex items-start gap-8">
               <div className="pointer-events-none absolute left-12 right-12 top-6 h-px bg-[#9f8cff]" />
 
-              {districts.map(({ district, items }) => {
+              {filteredDistricts.map(({ district, items }) => {
                 const isCollapsed = !!collapsedDistricts[district];
 
                 return (

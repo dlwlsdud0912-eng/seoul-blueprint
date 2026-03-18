@@ -859,3 +859,12 @@
   - added `Ctrl/⌘ + mouse wheel` zoom on the mind map canvas
   - switched PDF export from `about:blank + document.write` to `blob URL` print document generation
   - this avoids blank tabs in browsers that were not reliably rendering the previous popup flow
+### [2026-03-18 10:54] Real mind map PDF download + search
+- Type: admin UI | export
+- Changes:
+  - added mind map search on `district / apartment / memo`
+  - search result is reflected in mini map, visible count, and PDF export scope
+  - changed PDF export to a real server-generated PDF via `/api/mindmap-pdf`
+  - automatic filename now includes the current mind map title and date
+- Result:
+  - downloaded file is now a real PDF binary instead of a saved HTML/print helper document
