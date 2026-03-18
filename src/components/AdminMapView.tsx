@@ -1,0 +1,453 @@
+'use client';
+
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Apartment, MemoMap, TierKey } from '@/types';
+import { getComplexCoordinate } from '@/data/complex-coordinates';
+
+type MapApartment = Apartment & {
+  articleCount?: number;
+  areaName?: string;
+  sizes?: Record<string, { price: number; count: number } | null>;
+  ownerVerified?: boolean;
+  statusBadges?: string[];
+};
+
+interface AdminMapViewProps {
+  apartments: MapApartment[];
+  memos: MemoMap;
+  title: string;
+  subtitle?: string;
+  activeTier: TierKey;
+}
+
+type MarkerApartment = MapApartment & {
+  lat: number;
+  lng: number;
+  effectivePrice: number;
+  memo: string;
+};
+
+const DEFAULT_CENTER: [number, number] = [37.5665, 126.978];
+
+function formatPrice(value?: number) {
+  if (typeof value !== 'number') return '--';
+  return `${value}억`;
+}
+
+function formatPriceSummary(apartment: MarkerApartment) {
+  const size59 = apartment.sizes?.['59'];
+  const size84 = apartment.sizes?.['84'];
+
+  if (size59 || size84) {
+    return `59㎡ ${formatPrice(size59?.price)} | 84㎡ ${formatPrice(size84?.price)}`;
+  }
+
+  return `${apartment.areaName || apartment.size} ${formatPrice(apartment.currentPrice ?? apartment.basePrice)}`;
+}
+
+function getMarkerColor(apartment: MarkerApartment) {
+  if (apartment.statusBadges?.some((badge) => badge.includes('매매 0건'))) {
+    return '#9ea4b3';
+  }
+  if (apartment.ownerVerified === false) {
+    return '#f59e0b';
+  }
+  if ((apartment.currentPrice ?? apartment.basePrice) <= 12) {
+    return '#2383e2';
+  }
+  if ((apartment.currentPrice ?? apartment.basePrice) <= 16) {
+    return '#7b3ff2';
+  }
+  return '#1f9d7a';
+}
+
+export default function AdminMapView({
+  apartments,
+  memos,
+  title,
+  subtitle,
+  activeTier,
+}: AdminMapViewProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<any>(null);
+  const markerLayerRef = useRef<any>(null);
+  const leafletRef = useRef<any>(null);
+  const selectedMarkerRef = useRef<any>(null);
+  const didFitBoundsRef = useRef(false);
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [showOnlyWithPrice, setShowOnlyWithPrice] = useState(false);
+  const [leafletReady, setLeafletReady] = useState(false);
+
+  const mappedApartments = useMemo<MarkerApartment[]>(() => {
+    return apartments
+      .map((apartment) => {
+        const coordinate = getComplexCoordinate(apartment.naverComplexId);
+        if (!coordinate) return null;
+        return {
+          ...apartment,
+          lat: coordinate.lat,
+          lng: coordinate.lng,
+          effectivePrice: apartment.currentPrice ?? apartment.basePrice,
+          memo: memos[apartment.id] ?? '',
+        };
+      })
+      .filter((apartment): apartment is MarkerApartment => apartment !== null);
+  }, [apartments, memos]);
+
+  const filteredApartments = useMemo(() => {
+    const keyword = query.trim().toLowerCase();
+
+    return mappedApartments
+      .filter((apartment) => {
+        if (showOnlyWithPrice && apartment.currentPrice == null) {
+          return false;
+        }
+
+        if (!keyword) return true;
+
+        return (
+          apartment.district.toLowerCase().includes(keyword) ||
+          apartment.name.toLowerCase().includes(keyword) ||
+          apartment.memo.toLowerCase().includes(keyword) ||
+          apartment.statusBadges?.some((badge) => badge.toLowerCase().includes(keyword))
+        );
+      })
+      .sort((a, b) => a.effectivePrice - b.effectivePrice);
+  }, [mappedApartments, query, showOnlyWithPrice]);
+
+  const selectedApartment =
+    filteredApartments.find((apartment) => apartment.id === selectedId) ?? filteredApartments[0] ?? null;
+
+  const missingCoordinateCount = apartments.length - mappedApartments.length;
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function initLeaflet() {
+      const L = await import('leaflet');
+      if (!mounted || !containerRef.current) return;
+
+      leafletRef.current = L;
+
+      if (!mapRef.current) {
+        const map = L.map(containerRef.current, {
+          center: DEFAULT_CENTER,
+          zoom: 11,
+          zoomControl: true,
+          scrollWheelZoom: true,
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors',
+        }).addTo(map);
+
+        markerLayerRef.current = L.layerGroup().addTo(map);
+        mapRef.current = map;
+      }
+
+      setLeafletReady(true);
+    }
+
+    initLeaflet();
+
+    return () => {
+      mounted = false;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+      markerLayerRef.current = null;
+      selectedMarkerRef.current = null;
+      didFitBoundsRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!leafletReady || !leafletRef.current || !mapRef.current || !markerLayerRef.current) return;
+
+    const L = leafletRef.current;
+    const markerLayer = markerLayerRef.current;
+    markerLayer.clearLayers();
+    selectedMarkerRef.current = null;
+
+    if (!filteredApartments.length) return;
+
+    const bounds = L.latLngBounds([]);
+
+    filteredApartments.forEach((apartment) => {
+      const marker = L.circleMarker([apartment.lat, apartment.lng], {
+        radius: apartment.id === selectedApartment?.id ? 9 : 7,
+        weight: apartment.id === selectedApartment?.id ? 3 : 2,
+        color: apartment.id === selectedApartment?.id ? '#1d1d1f' : '#ffffff',
+        fillColor: getMarkerColor(apartment),
+        fillOpacity: 0.92,
+      });
+
+      marker.on('click', () => {
+        setSelectedId(apartment.id);
+      });
+      marker.bindTooltip(
+        `${apartment.district} · ${apartment.name}<br/>${formatPriceSummary(apartment)}`,
+        { direction: 'top' }
+      );
+      marker.addTo(markerLayer);
+      bounds.extend([apartment.lat, apartment.lng]);
+
+      if (apartment.id === selectedApartment?.id) {
+        selectedMarkerRef.current = marker;
+      }
+    });
+
+    if (!didFitBoundsRef.current) {
+      if (filteredApartments.length === 1) {
+        mapRef.current.setView([filteredApartments[0].lat, filteredApartments[0].lng], 14);
+      } else {
+        mapRef.current.fitBounds(bounds.pad(0.12));
+      }
+      didFitBoundsRef.current = true;
+    }
+  }, [filteredApartments, leafletReady, selectedApartment]);
+
+  useEffect(() => {
+    if (!leafletReady || !mapRef.current || !selectedApartment) return;
+    mapRef.current.panTo([selectedApartment.lat, selectedApartment.lng], {
+      animate: true,
+      duration: 0.6,
+    });
+  }, [leafletReady, selectedApartment]);
+
+  useEffect(() => {
+    if (!filteredApartments.length) {
+      setSelectedId(null);
+      return;
+    }
+
+    if (!selectedId || !filteredApartments.some((apartment) => apartment.id === selectedId)) {
+      setSelectedId(filteredApartments[0].id);
+    }
+  }, [filteredApartments, selectedId]);
+
+  function resetViewport() {
+    if (!leafletRef.current || !mapRef.current || !filteredApartments.length) return;
+    const L = leafletRef.current;
+    const bounds = L.latLngBounds(filteredApartments.map((apartment) => [apartment.lat, apartment.lng]));
+    if (filteredApartments.length === 1) {
+      mapRef.current.setView([filteredApartments[0].lat, filteredApartments[0].lng], 14);
+      return;
+    }
+    mapRef.current.fitBounds(bounds.pad(0.12));
+  }
+
+  return (
+    <div className="space-y-4">
+      <section className="rounded-[28px] border border-[#d8e4d9] bg-[linear-gradient(180deg,#f4fbf4_0%,#eef7f0_100%)] p-4 shadow-[0_20px_45px_rgba(74,124,89,0.08)] sm:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
+            <div className="inline-flex items-center rounded-full bg-[#1f8f5f] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(31,143,95,0.2)]">
+              관리자 지도
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-[#163325]">{title}</h2>
+              <p className="mt-1 text-sm text-[#557260]">
+                {subtitle || '단지 좌표와 현재 가격 데이터를 지도 위에서 함께 확인합니다.'}
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs text-[#4f6857] sm:grid-cols-4">
+            <div className="rounded-2xl border border-white/80 bg-white/75 px-3 py-2">
+              <div className="text-[11px] text-[#7b8e80]">현재 티어</div>
+              <div className="mt-1 font-semibold text-[#183726]">{activeTier} 티어</div>
+            </div>
+            <div className="rounded-2xl border border-white/80 bg-white/75 px-3 py-2">
+              <div className="text-[11px] text-[#7b8e80]">표시 단지</div>
+              <div className="mt-1 font-semibold text-[#183726]">{filteredApartments.length}개</div>
+            </div>
+            <div className="rounded-2xl border border-white/80 bg-white/75 px-3 py-2">
+              <div className="text-[11px] text-[#7b8e80]">좌표 보유</div>
+              <div className="mt-1 font-semibold text-[#183726]">{mappedApartments.length}개</div>
+            </div>
+            <div className="rounded-2xl border border-white/80 bg-white/75 px-3 py-2">
+              <div className="text-[11px] text-[#7b8e80]">좌표 누락</div>
+              <div className="mt-1 font-semibold text-[#183726]">{missingCoordinateCount}개</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-3 rounded-[24px] border border-white/80 bg-white/72 p-3 sm:p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-1 flex-col gap-3 sm:flex-row">
+              <input
+                type="text"
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  didFitBoundsRef.current = false;
+                }}
+                placeholder="구, 아파트명, 메모, 상태 배지 검색"
+                className="w-full rounded-2xl border border-[#d9e6db] bg-white px-4 py-3 text-sm text-[#173325] outline-none transition focus:border-[#1f8f5f] focus:ring-2 focus:ring-[#d4efde] sm:max-w-md"
+              />
+              <label className="inline-flex items-center gap-2 rounded-2xl border border-[#d9e6db] bg-white px-4 py-3 text-sm text-[#355847]">
+                <input
+                  type="checkbox"
+                  checked={showOnlyWithPrice}
+                  onChange={(event) => {
+                    setShowOnlyWithPrice(event.target.checked);
+                    didFitBoundsRef.current = false;
+                  }}
+                  className="h-4 w-4 rounded border-[#c6d8cb] text-[#1f8f5f]"
+                />
+                가격 있는 단지만
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery('');
+                  setShowOnlyWithPrice(false);
+                  didFitBoundsRef.current = false;
+                }}
+                className="rounded-2xl border border-[#d9e6db] bg-white px-4 py-3 text-sm text-[#355847] transition hover:bg-[#f4fbf4]"
+              >
+                필터 초기화
+              </button>
+              <button
+                type="button"
+                onClick={resetViewport}
+                className="rounded-2xl bg-[#173f2a] px-4 py-3 text-sm font-medium text-white shadow-[0_12px_28px_rgba(23,63,42,0.16)] transition hover:-translate-y-0.5"
+              >
+                지도 맞춤 보기
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[#4f6857]">
+            <span className="rounded-full bg-white px-3 py-1.5">지도 베이스: OpenStreetMap</span>
+            <span className="rounded-full bg-white px-3 py-1.5">좌표 기준: 네이버 단지 좌표</span>
+            <span className="rounded-full bg-white px-3 py-1.5">클릭 시 우측 상세 + 네이버 링크</span>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <section className="overflow-hidden rounded-[28px] border border-[#e4ece5] bg-white shadow-[0_18px_45px_rgba(54,84,63,0.08)]">
+          <div className="flex items-center justify-between border-b border-[#edf2ee] px-4 py-3">
+            <div>
+              <h3 className="text-sm font-semibold text-[#163325]">단지 지도</h3>
+              <p className="mt-1 text-xs text-[#708576]">
+                핀을 클릭하면 우측 카드가 바뀌고, 지도는 해당 단지로 이동합니다.
+              </p>
+            </div>
+            <div className="text-xs text-[#708576]">
+              {filteredApartments.length ? `${filteredApartments.length}개 단지 표시 중` : '표시할 단지가 없습니다'}
+            </div>
+          </div>
+          <div
+            ref={containerRef}
+            className="h-[62vh] min-h-[520px] w-full bg-[#eef5ef]"
+          />
+        </section>
+
+        <aside className="flex flex-col overflow-hidden rounded-[28px] border border-[#e4ece5] bg-white shadow-[0_18px_45px_rgba(54,84,63,0.08)]">
+          <div className="border-b border-[#edf2ee] px-4 py-3">
+            <h3 className="text-sm font-semibold text-[#163325]">선택 단지</h3>
+            <p className="mt-1 text-xs text-[#708576]">지도와 목록을 함께 보면서 검수할 수 있습니다.</p>
+          </div>
+
+          {selectedApartment ? (
+            <div className="space-y-4 px-4 py-4">
+              <div className="rounded-[24px] border border-[#e8efe9] bg-[linear-gradient(180deg,#f7fbf8_0%,#eef6f0_100%)] p-4">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-[#567260]">
+                  <span className="rounded-full bg-white px-3 py-1.5">{selectedApartment.district}</span>
+                  <span className="rounded-full bg-white px-3 py-1.5">
+                    {selectedApartment.articleCount ? `매물 ${selectedApartment.articleCount}개` : '매물 정보 확인'}
+                  </span>
+                </div>
+                <div className="mt-3 text-xl font-semibold text-[#143021]">{selectedApartment.name}</div>
+                <div className="mt-2 text-sm text-[#406050]">{formatPriceSummary(selectedApartment)}</div>
+                <div className="mt-2 text-xs text-[#567260]">
+                  기준가 {formatPrice(selectedApartment.basePrice)}
+                  {selectedApartment.currentPrice != null ? ` · 현재 ${formatPrice(selectedApartment.currentPrice)}` : ''}
+                </div>
+                {selectedApartment.statusBadges && selectedApartment.statusBadges.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {selectedApartment.statusBadges.map((badge) => (
+                      <span
+                        key={badge}
+                        className="rounded-full border border-[#d8e4d9] bg-white px-2.5 py-1 text-[11px] text-[#5b6f61]"
+                      >
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <a
+                    href={`https://new.land.naver.com/complexes/${selectedApartment.naverComplexId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-2xl bg-[#1f8f5f] px-4 py-2 text-sm font-medium text-white transition hover:-translate-y-0.5"
+                  >
+                    네이버 단지 열기
+                  </a>
+                  <button
+                    type="button"
+                    onClick={resetViewport}
+                    className="rounded-2xl border border-[#d8e4d9] bg-white px-4 py-2 text-sm text-[#355847] transition hover:bg-[#f4fbf4]"
+                  >
+                    지도 다시 맞춤
+                  </button>
+                </div>
+              </div>
+
+              {selectedApartment.memo ? (
+                <div className="rounded-[24px] border border-[#efe7bf] bg-[#fff8d9] p-4">
+                  <div className="text-xs font-semibold text-[#8b6d18]">메모</div>
+                  <div className="mt-2 whitespace-pre-wrap text-sm text-[#6f5614]">
+                    {selectedApartment.memo}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="max-h-[42vh] overflow-y-auto rounded-[24px] border border-[#edf2ee] bg-[#fbfcfb] p-2">
+                <div className="mb-2 px-2 text-xs font-semibold text-[#6d8373]">현재 필터 결과</div>
+                <div className="space-y-2">
+                  {filteredApartments.map((apartment) => (
+                    <button
+                      key={apartment.id}
+                      type="button"
+                      onClick={() => setSelectedId(apartment.id)}
+                      className={`w-full rounded-[20px] border px-3 py-3 text-left transition ${
+                        apartment.id === selectedApartment.id
+                          ? 'border-[#1f8f5f] bg-[#eef8f0] shadow-[0_10px_24px_rgba(31,143,95,0.12)]'
+                          : 'border-[#e5ece6] bg-white hover:bg-[#f6fbf7]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-xs text-[#6d8373]">{apartment.district}</div>
+                          <div className="mt-1 text-sm font-semibold text-[#173325]">{apartment.name}</div>
+                          <div className="mt-1 text-xs text-[#587060]">{formatPriceSummary(apartment)}</div>
+                        </div>
+                        <span
+                          className="mt-0.5 h-3 w-3 shrink-0 rounded-full"
+                          style={{ backgroundColor: getMarkerColor(apartment) }}
+                        />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="px-4 py-6 text-sm text-[#708576]">
+              {leafletReady ? '검색 조건에 맞는 단지가 없습니다.' : '지도를 불러오는 중입니다.'}
+            </div>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
+}

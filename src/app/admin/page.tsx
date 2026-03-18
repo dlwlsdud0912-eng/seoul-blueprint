@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import ApartmentCard from '@/components/ApartmentCard';
+import AdminMapView from '@/components/AdminMapView';
 import MindMapView from '@/components/MindMapView';
 import {
   isAdminAuthenticated,
@@ -390,7 +391,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 // DSR 계산기 (인증 후 메인)
 // ─────────────────────────────────────────────────────────────────────────────
 
-type AdminTab = 'dsr' | 'funding' | 'guide' | 'mindmap';
+type AdminTab = 'dsr' | 'funding' | 'guide' | 'mindmap' | 'map';
 
 function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState<AdminTab>('dsr');
@@ -557,6 +558,12 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
           </div>
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <button
+              onClick={() => setActiveTab('map')}
+              className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#cfe4d7] rounded-md text-[#1f8f5f] bg-[#eef8f0] hover:bg-[#e4f3e8] transition-colors"
+            >
+              지도
+            </button>
+            <button
               onClick={() => setActiveTab('mindmap')}
               className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#d9cff8] rounded-md text-[#6d4dff] bg-[#f5f1ff] hover:bg-[#efe9ff] transition-colors"
             >
@@ -582,6 +589,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             { key: 'dsr' as AdminTab, label: 'DSR 계산기' },
             { key: 'funding' as AdminTab, label: '자금조달' },
             { key: 'guide' as AdminTab, label: '가이드' },
+            { key: 'map' as AdminTab, label: '지도' },
             { key: 'mindmap' as AdminTab, label: '마인드맵' },
           ]).map((tab) => (
             <button
@@ -602,6 +610,44 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       <main className="max-w-6xl mx-auto px-4 py-6">
       {activeTab === 'guide' ? (
         <GuideContent />
+      ) : activeTab === 'map' ? (
+        <div className="space-y-4">
+          <div className="rounded-lg border border-[#e8e5e0] bg-white p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-semibold text-[#37352f]">관리자 지도</h2>
+                <p className="mt-1 text-xs text-[#787774]">
+                  네이버 단지 좌표를 기반으로, 현재 티어 아파트를 지도에서 검수하는 전용 뷰입니다.
+                </p>
+              </div>
+              <div className="text-xs text-[#787774]">
+                총 {mindMapApartments.length}개 단지
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {TIERS.map((tier) => (
+                <button
+                  key={tier.key}
+                  onClick={() => setMindMapTier(tier.key)}
+                  className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                    mindMapTier === tier.key
+                      ? 'border-[#1f8f5f] bg-[#eef8f0] text-[#1f8f5f]'
+                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                  }`}
+                >
+                  {tier.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <AdminMapView
+            apartments={mindMapApartments}
+            memos={memos}
+            activeTier={mindMapTier}
+            title={`${mindMapTierMeta?.label ?? mindMapTier} 관리자 지도`}
+            subtitle={`${mindMapTierMeta?.maxPrice ?? mindMapTier} 기준 단지를 지도 위에서 검수하고 비교합니다.`}
+          />
+        </div>
       ) : activeTab === 'mindmap' ? (
         <div className="space-y-4">
           <div className="rounded-lg border border-[#e8e5e0] bg-white p-4">

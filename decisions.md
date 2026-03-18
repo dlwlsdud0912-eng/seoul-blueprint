@@ -936,3 +936,22 @@
   - `84㎡ 없음`
   - `최소평형 114㎡부터`
 - Fixed reasons are pinned for the currently blank `10` apartments, and partial-size cases are derived automatically from live `areaName/sizes` data.
+### [2026-03-18 14:35] Admin map view added with E2E verification
+- Type: admin UX | mapping
+- Added a new admin-only `지도` tab alongside `DSR / 자금조달 / 가이드 / 마인드맵`.
+- Coordinates are sourced from Naver complex overview audit data plus manual overrides for recently corrected complex IDs:
+  - `868`, `860`, `740`, `26914`
+- Implemented interactive map view with:
+  - tier-based apartment filtering
+  - search by 구 / 아파트명 / 메모 / 상태 배지
+  - marker click -> selected apartment detail panel
+  - direct Naver complex link button
+  - map reset and price-only filter
+- Map base uses OpenStreetMap tiles, while apartment coordinates themselves come from Naver complex coordinate data.
+- Verified locally with browser E2E:
+  - admin login success
+  - `지도` tab render success
+  - Leaflet pane rendered
+  - tile images rendered
+  - interactive markers rendered
+  - current `12` tier example: `388` markers visible, `31` apartments still missing coordinates
