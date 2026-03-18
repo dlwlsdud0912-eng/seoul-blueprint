@@ -58,7 +58,7 @@ export const APARTMENTS: Apartment[] = [
   // ========== 티어 14 (매매가 14억 이하) ==========
 
   // 용산구
-  { id: 'yongsan-hangangtown', name: '한강타운', district: '용산구', size: '24평', basePrice: 12.8, tier: '14', naverComplexId: '1351' },
+  { id: 'yongsan-hangangtown', name: '한강타운', district: '용산구', size: '24평', basePrice: 13, tier: '14', naverComplexId: '3804' },
 
   // 성동구
   { id: 'seongdong-seongsu-woobang2', name: '성수우방2차', district: '성동구', size: '24평', basePrice: 13.5, tier: '14', naverComplexId: '324' },

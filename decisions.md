@@ -1077,3 +1077,18 @@
 - Note:
   - existing saved `prices.json` does not contain floor metadata yet
   - the badge becomes visible as new crawl data is collected
+### [2026-03-18 17:16] Yongsan Hangangtown remap fix
+- Type: data correction | customer claim response
+- A customer report showed `용산구 한강타운` was opening the wrong Naver complex.
+- Root cause:
+  - the apartment had been mapped to `1351`, which resolves to a different `한강타운`
+  - the correct Yongsan complex is `3804`
+- Actions taken:
+  - updated `src/data/apartments.ts` to use `naverComplexId: '3804'`
+  - re-crawled only `용산구 한강타운`
+  - applied the corrected subset back into `public/prices.json`
+- Corrected live result:
+  - current price `13억`
+  - `59㎡` only
+  - no `84㎡` bucket returned
+  - lowest tracked floor `3/14`
