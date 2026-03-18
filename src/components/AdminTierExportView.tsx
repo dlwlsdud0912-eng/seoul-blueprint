@@ -30,18 +30,22 @@ export default function AdminTierExportView({
   const [mode, setMode] = useState<'all' | 'proximity'>('all');
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [pdfLoading, setPdfLoading] = useState(false);
+  const liveApartments = useMemo(
+    () => apartments.filter((apartment) => typeof apartment.currentPrice === 'number'),
+    [apartments]
+  );
 
   const filteredApartments = useMemo(() => {
     if (mode === 'all') {
-      return apartments;
+      return liveApartments;
     }
 
-    return apartments.filter((apartment) => checkPriceProximity(apartment.sizes).hasProximity);
-  }, [apartments, mode]);
+    return liveApartments.filter((apartment) => checkPriceProximity(apartment.sizes).hasProximity);
+  }, [liveApartments, mode]);
 
   const proximityCount = useMemo(
-    () => apartments.filter((apartment) => checkPriceProximity(apartment.sizes).hasProximity).length,
-    [apartments]
+    () => liveApartments.filter((apartment) => checkPriceProximity(apartment.sizes).hasProximity).length,
+    [liveApartments]
   );
 
   const exportData = useMemo(

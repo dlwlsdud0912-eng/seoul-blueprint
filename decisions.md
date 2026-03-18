@@ -1105,3 +1105,16 @@
 - Also updated the apartment baseline/tier:
   - `basePrice: 15`
   - `tier: 16`
+### [2026-03-18 20:12] Export safety fix for customer-facing tables
+- Type: admin export | data integrity
+- A customer-facing export included `래미안명일역솔베뉴 13.2억`, which is not a live-priced row.
+- Root cause:
+  - export generation allowed rows with no `currentPrice`
+  - those rows fell back to `basePrice`, so unmapped or uncrawled apartments leaked into HTML/PDF exports
+- Fix:
+  - `src/lib/tier-export.ts` now exports only apartments with a real `currentPrice`
+  - `scripts/generate-premium-tier12-html.mjs` now also excludes apartments without live prices
+- Verification:
+  - `npm run build` passed
+  - regenerated tier-12 HTML
+  - confirmed `래미안명일역솔베뉴` no longer appears in the generated export files

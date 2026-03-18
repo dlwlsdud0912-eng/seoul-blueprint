@@ -67,7 +67,7 @@ function formatPriceSummary(apartment: MarkerApartment) {
     return `59㎡ ${formatPrice(size59?.price)} | 84㎡ ${formatPrice(size84?.price)}`;
   }
 
-  return `${apartment.areaName || apartment.size} ${formatPrice(apartment.currentPrice ?? apartment.basePrice)}`;
+  return `${apartment.areaName || apartment.size} ${formatPrice(apartment.currentPrice)}`;
 }
 
 function getMarkerColor(apartment: MarkerApartment) {
@@ -77,10 +77,10 @@ function getMarkerColor(apartment: MarkerApartment) {
   if (apartment.ownerVerified === false) {
     return '#f59e0b';
   }
-  if ((apartment.currentPrice ?? apartment.basePrice) <= 12) {
+  if ((apartment.currentPrice ?? Number.POSITIVE_INFINITY) <= 12) {
     return '#2383e2';
   }
-  if ((apartment.currentPrice ?? apartment.basePrice) <= 16) {
+  if ((apartment.currentPrice ?? Number.POSITIVE_INFINITY) <= 16) {
     return '#7c3aed';
   }
   return '#0f9d7a';
@@ -182,7 +182,7 @@ export default function AdminMapView({
           ...apartment,
           lat: coordinate.lat,
           lng: coordinate.lng,
-          effectivePrice: apartment.currentPrice ?? apartment.basePrice,
+          effectivePrice: apartment.currentPrice ?? Number.POSITIVE_INFINITY,
           memo: memos[apartment.id] ?? '',
         };
       })

@@ -51,7 +51,7 @@ function formatPriceLabel(apartment: MindMapApartment) {
     ].join('  |  ');
   }
 
-  const fallbackPrice = apartment.currentPrice ?? apartment.basePrice;
+  const fallbackPrice = apartment.currentPrice;
   const fallbackArea = apartment.areaName || apartment.size;
   return `${fallbackArea} ${formatPrice(fallbackPrice)}`;
 }
@@ -88,9 +88,9 @@ export default function MindMapView({
       .map(([district, items]) => ({
         district,
         items: [...items].sort(
-          (a, b) => (a.currentPrice ?? a.basePrice) - (b.currentPrice ?? b.basePrice)
+          (a, b) => (a.currentPrice ?? Number.POSITIVE_INFINITY) - (b.currentPrice ?? Number.POSITIVE_INFINITY)
         ),
-        minPrice: Math.min(...items.map((item) => item.currentPrice ?? item.basePrice)),
+        minPrice: Math.min(...items.map((item) => item.currentPrice ?? Number.POSITIVE_INFINITY)),
       }))
       .sort((a, b) => a.minPrice - b.minPrice);
   }, [apartments]);
@@ -114,7 +114,7 @@ export default function MindMapView({
           ...district,
           items,
           minPrice: items.length
-            ? Math.min(...items.map((item) => item.currentPrice ?? item.basePrice))
+            ? Math.min(...items.map((item) => item.currentPrice ?? Number.POSITIVE_INFINITY))
             : district.minPrice,
         };
       })

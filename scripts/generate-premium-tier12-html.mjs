@@ -48,13 +48,17 @@ const apartments = APARTMENTS.filter(
 )
   .map((apt) => {
     const live = prices[apt.id];
+    if (typeof live?.price !== 'number') {
+      return null;
+    }
     return {
       ...apt,
-      currentPrice: live?.price ?? apt.basePrice,
-      areaName: live?.areaName ?? '',
-      sizes: live?.sizes ?? null,
+      currentPrice: live.price,
+      areaName: live.areaName ?? '',
+      sizes: live.sizes ?? null,
     };
   })
+  .filter(Boolean)
   .sort(
     (a, b) =>
       a.currentPrice - b.currentPrice || a.district.localeCompare(b.district, 'ko')

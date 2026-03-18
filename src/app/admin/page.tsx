@@ -600,24 +600,19 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   const mindMapApartments = useMemo(
     () =>
       APARTMENTS.filter((apt) => isRegionAllowedApartment(apt.id) && apt.tier === mindMapTier)
+        .filter((apt) => !!prices[apt.id])
         .map((apt) => {
           const livePrice = prices[apt.id];
-          if (!livePrice) {
-            return {
-              ...apt,
-              statusBadges: getListingStatusBadges(apt.id),
-            };
-          }
           return {
             ...apt,
-            currentPrice: livePrice.price,
-            priceChange: Math.round((livePrice.price - apt.basePrice) * 10) / 10,
-            articleCount: livePrice.articleCount,
-            areaName: livePrice.areaName,
-            sizes: livePrice.sizes,
-            ownerVerified: livePrice.ownerVerified,
-            floorInfo: livePrice.floorInfo,
-            isFirstFloor: livePrice.isFirstFloor,
+            currentPrice: livePrice?.price,
+            priceChange: livePrice ? Math.round((livePrice.price - apt.basePrice) * 10) / 10 : 0,
+            articleCount: livePrice?.articleCount,
+            areaName: livePrice?.areaName,
+            sizes: livePrice?.sizes,
+            ownerVerified: livePrice?.ownerVerified,
+            floorInfo: livePrice?.floorInfo,
+            isFirstFloor: livePrice?.isFirstFloor,
             statusBadges: getListingStatusBadges(apt.id, livePrice),
           };
         }),

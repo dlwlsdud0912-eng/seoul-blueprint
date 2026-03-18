@@ -94,13 +94,14 @@ function formatProximityLabel(apartment: ExportApartment) {
 
 function buildRows(apartments: ExportApartment[], options: TierExportOptions) {
   return apartments
+    .filter((apartment) => typeof apartment.currentPrice === 'number')
     .map((apartment) => ({
       district: apartment.district,
       name: apartment.name,
-      priceLabel: formatPrice(apartment.currentPrice ?? apartment.basePrice),
+      priceLabel: formatPrice(apartment.currentPrice),
       sizeLabel: formatSizeLabel(apartment),
       proximityLabel: options.showProximityColumn ? formatProximityLabel(apartment) : undefined,
-      effectivePrice: apartment.currentPrice ?? apartment.basePrice,
+      effectivePrice: apartment.currentPrice as number,
     }))
     .sort(
       (a, b) =>
