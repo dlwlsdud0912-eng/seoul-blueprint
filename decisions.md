@@ -991,3 +991,22 @@
   - `지도` tab open success
   - desktop sticky bar rendered
   - measured sticky bar height `48px`
+### [2026-03-18 15:34] Riverbill remap + NAVER map-ready admin map
+- Type: data correction | admin map infrastructure
+- Fixed `용산구 리버빌아파트` wrong mapping:
+  - old `complexId 19073` (`영진리버빌`, 여주시)
+  - new `complexId 3802` (`리버빌아파트`, 용산구)
+- Added coordinate for `3802` and removed the stale `1.75억` price.
+- Re-crawled only `리버빌아파트`:
+  - `59㎡ 18억`
+  - `84㎡ 25억`
+  - `ownerVerified: true`
+- Replaced the admin map implementation so it is NAVER Maps-ready:
+  - if `NEXT_PUBLIC_NAVER_MAPS_CLIENT_ID` exists, load NAVER Maps JS API and use NAVER basemap
+  - if the key is missing or the SDK fails, fall back to the existing Leaflet/OpenStreetMap map
+- E2E/local verification:
+  - `npm run build` passed
+  - admin login success
+  - `지도` tab open success
+  - map visible
+  - provider badge currently shows `OpenStreetMap` because no NAVER Maps public client id is configured in the project/Vercel env yet

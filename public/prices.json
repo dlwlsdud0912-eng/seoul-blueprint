@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-03-18T04:39:42.546Z",
-  "updatedAtKR": "2026. 03. 18. 13:39",
+  "updatedAt": "2026-03-18T05:35:01.327Z",
+  "updatedAtKR": "2026. 03. 18. 14:35",
   "totalCount": 886,
   "successCount": 876,
   "failCount": 10,
@@ -4781,17 +4781,6 @@
       "articleCount": 21,
       "areaName": "23㎡",
       "sizes": {}
-    },
-    "yongsan-13z4kjg": {
-      "price": 1.75,
-      "articleCount": 25,
-      "areaName": "84㎡",
-      "sizes": {
-        "84": {
-          "price": 1.75,
-          "count": 25
-        }
-      }
     },
     "yongsan-hy1f33": {
       "price": 6.4,
@@ -11127,6 +11116,22 @@
         "84": {
           "price": 14.8,
           "count": 77
+        }
+      },
+      "ownerVerified": true
+    },
+    "yongsan-13z4kjg": {
+      "price": 18,
+      "articleCount": 6,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 18,
+          "count": 4
+        },
+        "84": {
+          "price": 25,
+          "count": 2
         }
       },
       "ownerVerified": true

@@ -1,8 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Apartment, MemoMap, TierKey } from '@/types';
+import type { Apartment, MemoMap, TierKey } from '@/types';
 import { getComplexCoordinate } from '@/data/complex-coordinates';
+
+declare global {
+  interface Window {
+    naver?: any;
+  }
+}
 
 type MapApartment = Apartment & {
   articleCount?: number;
@@ -27,7 +33,26 @@ type MarkerApartment = MapApartment & {
   memo: string;
 };
 
-const DEFAULT_CENTER: [number, number] = [37.5665, 126.978];
+type MapProvider = 'loading' | 'naver' | 'leaflet';
+
+type MapRuntime =
+  | {
+      provider: 'naver';
+      map: any;
+      naver: any;
+      overlays: any[];
+      infoWindow: any | null;
+    }
+  | {
+      provider: 'leaflet';
+      map: any;
+      leaflet: any;
+      layer: any;
+    };
+
+const DEFAULT_CENTER = { lat: 37.5665, lng: 126.978 };
+const NAVER_CLIENT_ID = process.env.NEXT_PUBLIC_NAVER_MAPS_CLIENT_ID ?? '';
+const NAVER_SCRIPT_ID = 'naver-maps-sdk';
 
 function formatPrice(value?: number) {
   if (typeof value !== 'number') return '--';
@@ -47,7 +72,7 @@ function formatPriceSummary(apartment: MarkerApartment) {
 
 function getMarkerColor(apartment: MarkerApartment) {
   if (apartment.statusBadges?.some((badge) => badge.includes('매매 0건'))) {
-    return '#9ea4b3';
+    return '#a1a8b8';
   }
   if (apartment.ownerVerified === false) {
     return '#f59e0b';
@@ -56,9 +81,79 @@ function getMarkerColor(apartment: MarkerApartment) {
     return '#2383e2';
   }
   if ((apartment.currentPrice ?? apartment.basePrice) <= 16) {
-    return '#7b3ff2';
+    return '#7c3aed';
   }
-  return '#1f9d7a';
+  return '#0f9d7a';
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function createNaverMarkerHtml(apartment: MarkerApartment, selected: boolean) {
+  const color = getMarkerColor(apartment);
+  const size = selected ? 26 : 20;
+  const border = selected ? '#111827' : '#ffffff';
+  return `
+    <div style="
+      width:${size}px;
+      height:${size}px;
+      border-radius:9999px;
+      background:${color};
+      border:3px solid ${border};
+      box-shadow:0 10px 24px rgba(15,23,42,0.18);
+    "></div>
+  `;
+}
+
+function createNaverTooltipHtml(apartment: MarkerApartment) {
+  return `
+    <div style="padding:10px 12px;min-width:190px;font-family:'Noto Sans KR',sans-serif;">
+      <div style="font-size:12px;color:#5b6f61;">${escapeHtml(apartment.district)}</div>
+      <div style="margin-top:4px;font-size:15px;font-weight:700;color:#132b1e;">${escapeHtml(apartment.name)}</div>
+      <div style="margin-top:6px;font-size:13px;color:#355847;">${escapeHtml(formatPriceSummary(apartment))}</div>
+    </div>
+  `;
+}
+
+function loadNaverMapsScript(clientId: string) {
+  return new Promise<any>((resolve, reject) => {
+    if (typeof window === 'undefined') {
+      reject(new Error('Window unavailable'));
+      return;
+    }
+
+    if (window.naver?.maps) {
+      resolve(window.naver);
+      return;
+    }
+
+    const existing = document.getElementById(NAVER_SCRIPT_ID) as HTMLScriptElement | null;
+    if (existing) {
+      existing.addEventListener('load', () => resolve(window.naver));
+      existing.addEventListener('error', () => reject(new Error('NAVER Maps load failed')));
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = NAVER_SCRIPT_ID;
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${clientId}`;
+    script.async = true;
+    script.onload = () => {
+      if (window.naver?.maps) {
+        resolve(window.naver);
+        return;
+      }
+      reject(new Error('NAVER Maps unavailable after load'));
+    };
+    script.onerror = () => reject(new Error('NAVER Maps load failed'));
+    document.head.appendChild(script);
+  });
 }
 
 export default function AdminMapView({
@@ -69,22 +164,20 @@ export default function AdminMapView({
   activeTier,
 }: AdminMapViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<any>(null);
-  const markerLayerRef = useRef<any>(null);
-  const leafletRef = useRef<any>(null);
-  const selectedMarkerRef = useRef<any>(null);
+  const runtimeRef = useRef<MapRuntime | null>(null);
   const didFitBoundsRef = useRef(false);
 
+  const [provider, setProvider] = useState<MapProvider>('loading');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [showOnlyWithPrice, setShowOnlyWithPrice] = useState(false);
-  const [leafletReady, setLeafletReady] = useState(false);
 
   const mappedApartments = useMemo<MarkerApartment[]>(() => {
     return apartments
       .map((apartment) => {
         const coordinate = getComplexCoordinate(apartment.naverComplexId);
         if (!coordinate) return null;
+
         return {
           ...apartment,
           lat: coordinate.lat,
@@ -105,7 +198,9 @@ export default function AdminMapView({
           return false;
         }
 
-        if (!keyword) return true;
+        if (!keyword) {
+          return true;
+        }
 
         return (
           apartment.district.toLowerCase().includes(keyword) ||
@@ -123,100 +218,8 @@ export default function AdminMapView({
   const missingCoordinateCount = apartments.length - mappedApartments.length;
 
   useEffect(() => {
-    let mounted = true;
-
-    async function initLeaflet() {
-      const L = await import('leaflet');
-      if (!mounted || !containerRef.current) return;
-
-      leafletRef.current = L;
-
-      if (!mapRef.current) {
-        const map = L.map(containerRef.current, {
-          center: DEFAULT_CENTER,
-          zoom: 11,
-          zoomControl: true,
-          scrollWheelZoom: true,
-        });
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; OpenStreetMap contributors',
-        }).addTo(map);
-
-        markerLayerRef.current = L.layerGroup().addTo(map);
-        mapRef.current = map;
-      }
-
-      setLeafletReady(true);
-    }
-
-    initLeaflet();
-
-    return () => {
-      mounted = false;
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
-      markerLayerRef.current = null;
-      selectedMarkerRef.current = null;
-      didFitBoundsRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!leafletReady || !leafletRef.current || !mapRef.current || !markerLayerRef.current) return;
-
-    const L = leafletRef.current;
-    const markerLayer = markerLayerRef.current;
-    markerLayer.clearLayers();
-    selectedMarkerRef.current = null;
-
-    if (!filteredApartments.length) return;
-
-    const bounds = L.latLngBounds([]);
-
-    filteredApartments.forEach((apartment) => {
-      const marker = L.circleMarker([apartment.lat, apartment.lng], {
-        radius: apartment.id === selectedApartment?.id ? 9 : 7,
-        weight: apartment.id === selectedApartment?.id ? 3 : 2,
-        color: apartment.id === selectedApartment?.id ? '#1d1d1f' : '#ffffff',
-        fillColor: getMarkerColor(apartment),
-        fillOpacity: 0.92,
-      });
-
-      marker.on('click', () => {
-        setSelectedId(apartment.id);
-      });
-      marker.bindTooltip(
-        `${apartment.district} · ${apartment.name}<br/>${formatPriceSummary(apartment)}`,
-        { direction: 'top' }
-      );
-      marker.addTo(markerLayer);
-      bounds.extend([apartment.lat, apartment.lng]);
-
-      if (apartment.id === selectedApartment?.id) {
-        selectedMarkerRef.current = marker;
-      }
-    });
-
-    if (!didFitBoundsRef.current) {
-      if (filteredApartments.length === 1) {
-        mapRef.current.setView([filteredApartments[0].lat, filteredApartments[0].lng], 14);
-      } else {
-        mapRef.current.fitBounds(bounds.pad(0.12));
-      }
-      didFitBoundsRef.current = true;
-    }
-  }, [filteredApartments, leafletReady, selectedApartment]);
-
-  useEffect(() => {
-    if (!leafletReady || !mapRef.current || !selectedApartment) return;
-    mapRef.current.panTo([selectedApartment.lat, selectedApartment.lng], {
-      animate: true,
-      duration: 0.6,
-    });
-  }, [leafletReady, selectedApartment]);
+    didFitBoundsRef.current = false;
+  }, [activeTier, query, showOnlyWithPrice]);
 
   useEffect(() => {
     if (!filteredApartments.length) {
@@ -229,15 +232,256 @@ export default function AdminMapView({
     }
   }, [filteredApartments, selectedId]);
 
-  function resetViewport() {
-    if (!leafletRef.current || !mapRef.current || !filteredApartments.length) return;
-    const L = leafletRef.current;
-    const bounds = L.latLngBounds(filteredApartments.map((apartment) => [apartment.lat, apartment.lng]));
-    if (filteredApartments.length === 1) {
-      mapRef.current.setView([filteredApartments[0].lat, filteredApartments[0].lng], 14);
+  useEffect(() => {
+    let mounted = true;
+
+    async function initMap() {
+      if (!containerRef.current) {
+        return;
+      }
+
+      if (NAVER_CLIENT_ID) {
+        try {
+          const naver = await loadNaverMapsScript(NAVER_CLIENT_ID);
+          if (!mounted || !containerRef.current) {
+            return;
+          }
+
+          const map = new naver.maps.Map(containerRef.current, {
+            center: new naver.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
+            zoom: 11,
+            mapDataControl: false,
+            scaleControl: false,
+            logoControl: true,
+            zoomControl: true,
+            zoomControlOptions: {
+              position: naver.maps.Position.TOP_LEFT,
+            },
+          });
+
+          runtimeRef.current = {
+            provider: 'naver',
+            map,
+            naver,
+            overlays: [],
+            infoWindow: null,
+          };
+          setProvider('naver');
+          return;
+        } catch {
+          // Fallback below.
+        }
+      }
+
+      const leaflet = await import('leaflet');
+      if (!mounted || !containerRef.current) {
+        return;
+      }
+
+      const map = leaflet.map(containerRef.current, {
+        center: [DEFAULT_CENTER.lat, DEFAULT_CENTER.lng],
+        zoom: 11,
+        zoomControl: true,
+        scrollWheelZoom: true,
+      });
+
+      leaflet
+        .tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors',
+        })
+        .addTo(map);
+
+      const layer = leaflet.layerGroup().addTo(map);
+
+      runtimeRef.current = {
+        provider: 'leaflet',
+        map,
+        leaflet,
+        layer,
+      };
+      setProvider('leaflet');
+    }
+
+    initMap();
+
+    return () => {
+      mounted = false;
+      if (runtimeRef.current?.provider === 'leaflet') {
+        runtimeRef.current.layer?.clearLayers?.();
+        runtimeRef.current.map?.remove?.();
+      }
+      if (runtimeRef.current?.provider === 'naver') {
+        runtimeRef.current.overlays.forEach((overlay) => overlay.setMap?.(null));
+        runtimeRef.current.infoWindow?.close?.();
+      }
+      runtimeRef.current = null;
+      didFitBoundsRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const runtime = runtimeRef.current;
+    if (!runtime) {
       return;
     }
-    mapRef.current.fitBounds(bounds.pad(0.12));
+
+    if (!filteredApartments.length) {
+      if (runtime.provider === 'leaflet') {
+        runtime.layer.clearLayers();
+      } else {
+        runtime.overlays.forEach((overlay) => overlay.setMap(null));
+        runtime.overlays = [];
+        runtime.infoWindow?.close();
+      }
+      return;
+    }
+
+    if (runtime.provider === 'leaflet') {
+      runtime.layer.clearLayers();
+      const bounds = runtime.leaflet.latLngBounds([]);
+
+      filteredApartments.forEach((apartment) => {
+        const marker = runtime.leaflet.circleMarker([apartment.lat, apartment.lng], {
+          radius: apartment.id === selectedApartment?.id ? 9 : 7,
+          weight: apartment.id === selectedApartment?.id ? 3 : 2,
+          color: apartment.id === selectedApartment?.id ? '#1d1d1f' : '#ffffff',
+          fillColor: getMarkerColor(apartment),
+          fillOpacity: 0.92,
+        });
+
+        marker.on('click', () => setSelectedId(apartment.id));
+        marker.bindTooltip(
+          `${apartment.district} · ${apartment.name}<br/>${formatPriceSummary(apartment)}`,
+          { direction: 'top' }
+        );
+        marker.addTo(runtime.layer);
+        bounds.extend([apartment.lat, apartment.lng]);
+      });
+
+      if (!didFitBoundsRef.current) {
+        if (filteredApartments.length === 1) {
+          runtime.map.setView([filteredApartments[0].lat, filteredApartments[0].lng], 14);
+        } else {
+          runtime.map.fitBounds(bounds.pad(0.12));
+        }
+        didFitBoundsRef.current = true;
+      }
+      return;
+    }
+
+    runtime.overlays.forEach((overlay) => overlay.setMap(null));
+    runtime.overlays = [];
+    runtime.infoWindow?.close();
+
+    const bounds = new runtime.naver.maps.LatLngBounds();
+    const infoWindow = new runtime.naver.maps.InfoWindow({
+      backgroundColor: '#ffffff',
+      borderColor: '#dce6dd',
+      borderWidth: 1,
+      disableAnchor: false,
+      pixelOffset: new runtime.naver.maps.Point(0, -10),
+    });
+
+    filteredApartments.forEach((apartment) => {
+      const marker = new runtime.naver.maps.Marker({
+        position: new runtime.naver.maps.LatLng(apartment.lat, apartment.lng),
+        map: runtime.map,
+        icon: {
+          content: createNaverMarkerHtml(apartment, apartment.id === selectedApartment?.id),
+          anchor: new runtime.naver.maps.Point(
+            apartment.id === selectedApartment?.id ? 13 : 10,
+            apartment.id === selectedApartment?.id ? 13 : 10
+          ),
+        },
+      });
+
+      runtime.naver.maps.Event.addListener(marker, 'click', () => {
+        setSelectedId(apartment.id);
+      });
+
+      runtime.naver.maps.Event.addListener(marker, 'mouseover', () => {
+        infoWindow.setContent(createNaverTooltipHtml(apartment));
+        infoWindow.open(runtime.map, marker);
+      });
+
+      runtime.naver.maps.Event.addListener(marker, 'mouseout', () => {
+        infoWindow.close();
+      });
+
+      runtime.overlays.push(marker);
+      bounds.extend(marker.getPosition());
+    });
+
+    runtime.infoWindow = infoWindow;
+
+    if (!didFitBoundsRef.current) {
+      if (filteredApartments.length === 1) {
+        runtime.map.setCenter(new runtime.naver.maps.LatLng(filteredApartments[0].lat, filteredApartments[0].lng));
+        runtime.map.setZoom(14);
+      } else {
+        runtime.map.fitBounds(bounds, {
+          top: 48,
+          right: 48,
+          bottom: 48,
+          left: 48,
+        });
+      }
+      didFitBoundsRef.current = true;
+    }
+  }, [filteredApartments, selectedApartment]);
+
+  useEffect(() => {
+    const runtime = runtimeRef.current;
+    if (!runtime || !selectedApartment) {
+      return;
+    }
+
+    if (runtime.provider === 'leaflet') {
+      runtime.map.panTo([selectedApartment.lat, selectedApartment.lng], {
+        animate: true,
+        duration: 0.6,
+      });
+      return;
+    }
+
+    runtime.map.panTo(new runtime.naver.maps.LatLng(selectedApartment.lat, selectedApartment.lng), {
+      duration: 300,
+    });
+  }, [selectedApartment]);
+
+  function resetViewport() {
+    const runtime = runtimeRef.current;
+    if (!runtime || !filteredApartments.length) {
+      return;
+    }
+
+    if (runtime.provider === 'leaflet') {
+      const bounds = runtime.leaflet.latLngBounds(filteredApartments.map((apartment) => [apartment.lat, apartment.lng]));
+      if (filteredApartments.length === 1) {
+        runtime.map.setView([filteredApartments[0].lat, filteredApartments[0].lng], 14);
+      } else {
+        runtime.map.fitBounds(bounds.pad(0.12));
+      }
+      return;
+    }
+
+    const bounds = new runtime.naver.maps.LatLngBounds();
+    filteredApartments.forEach((apartment) => {
+      bounds.extend(new runtime.naver.maps.LatLng(apartment.lat, apartment.lng));
+    });
+
+    if (filteredApartments.length === 1) {
+      runtime.map.setCenter(new runtime.naver.maps.LatLng(filteredApartments[0].lat, filteredApartments[0].lng));
+      runtime.map.setZoom(14);
+      return;
+    }
+
+    runtime.map.fitBounds(bounds, {
+      top: 48,
+      right: 48,
+      bottom: 48,
+      left: 48,
+    });
   }
 
   return (
@@ -251,7 +495,7 @@ export default function AdminMapView({
             <div>
               <h2 className="text-xl font-semibold text-[#163325]">{title}</h2>
               <p className="mt-1 text-sm text-[#557260]">
-                {subtitle || '단지 좌표와 현재 가격 데이터를 지도 위에서 함께 확인합니다.'}
+                {subtitle || '네이버 단지 좌표와 현재 가격 데이터를 지도 위에서 함께 검수합니다.'}
               </p>
             </div>
           </div>
@@ -281,10 +525,7 @@ export default function AdminMapView({
               <input
                 type="text"
                 value={query}
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                  didFitBoundsRef.current = false;
-                }}
+                onChange={(event) => setQuery(event.target.value)}
                 placeholder="구, 아파트명, 메모, 상태 배지 검색"
                 className="w-full rounded-2xl border border-[#d9e6db] bg-white px-4 py-3 text-sm text-[#173325] outline-none transition focus:border-[#1f8f5f] focus:ring-2 focus:ring-[#d4efde] sm:max-w-md"
               />
@@ -292,10 +533,7 @@ export default function AdminMapView({
                 <input
                   type="checkbox"
                   checked={showOnlyWithPrice}
-                  onChange={(event) => {
-                    setShowOnlyWithPrice(event.target.checked);
-                    didFitBoundsRef.current = false;
-                  }}
+                  onChange={(event) => setShowOnlyWithPrice(event.target.checked)}
                   className="h-4 w-4 rounded border-[#c6d8cb] text-[#1f8f5f]"
                 />
                 가격 있는 단지만
@@ -307,7 +545,6 @@ export default function AdminMapView({
                 onClick={() => {
                   setQuery('');
                   setShowOnlyWithPrice(false);
-                  didFitBoundsRef.current = false;
                 }}
                 className="rounded-2xl border border-[#d9e6db] bg-white px-4 py-3 text-sm text-[#355847] transition hover:bg-[#f4fbf4]"
               >
@@ -324,9 +561,19 @@ export default function AdminMapView({
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-xs text-[#4f6857]">
-            <span className="rounded-full bg-white px-3 py-1.5">지도 베이스: OpenStreetMap</span>
+            <span
+              data-testid="admin-map-provider"
+              className="rounded-full bg-white px-3 py-1.5"
+            >
+              지도 베이스: {provider === 'naver' ? '네이버 지도' : provider === 'leaflet' ? 'OpenStreetMap' : '불러오는 중'}
+            </span>
             <span className="rounded-full bg-white px-3 py-1.5">좌표 기준: 네이버 단지 좌표</span>
             <span className="rounded-full bg-white px-3 py-1.5">클릭 시 우측 상세 + 네이버 링크</span>
+            {provider !== 'naver' ? (
+              <span className="rounded-full bg-[#fff4d9] px-3 py-1.5 text-[#8d6a12]">
+                네이버 지도 키가 없어서 기본 지도로 표시 중
+              </span>
+            ) : null}
           </div>
         </div>
       </section>
@@ -344,10 +591,7 @@ export default function AdminMapView({
               {filteredApartments.length ? `${filteredApartments.length}개 단지 표시 중` : '표시할 단지가 없습니다'}
             </div>
           </div>
-          <div
-            ref={containerRef}
-            className="h-[62vh] min-h-[520px] w-full bg-[#eef5ef]"
-          />
+          <div ref={containerRef} className="h-[62vh] min-h-[520px] w-full bg-[#eef5ef]" />
         </section>
 
         <aside className="flex flex-col overflow-hidden rounded-[28px] border border-[#e4ece5] bg-white shadow-[0_18px_45px_rgba(54,84,63,0.08)]">
@@ -405,9 +649,7 @@ export default function AdminMapView({
               {selectedApartment.memo ? (
                 <div className="rounded-[24px] border border-[#efe7bf] bg-[#fff8d9] p-4">
                   <div className="text-xs font-semibold text-[#8b6d18]">메모</div>
-                  <div className="mt-2 whitespace-pre-wrap text-sm text-[#6f5614]">
-                    {selectedApartment.memo}
-                  </div>
+                  <div className="mt-2 whitespace-pre-wrap text-sm text-[#6f5614]">{selectedApartment.memo}</div>
                 </div>
               ) : null}
 
@@ -443,7 +685,7 @@ export default function AdminMapView({
             </div>
           ) : (
             <div className="px-4 py-6 text-sm text-[#708576]">
-              {leafletReady ? '검색 조건에 맞는 단지가 없습니다.' : '지도를 불러오는 중입니다.'}
+              {provider === 'loading' ? '지도를 불러오는 중입니다.' : '검색 조건에 맞는 단지가 없습니다.'}
             </div>
           )}
         </aside>

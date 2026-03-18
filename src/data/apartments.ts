@@ -738,7 +738,7 @@ export const APARTMENTS: Apartment[] = [
 
   // 용산구
   { id: 'yongsan-1d889ne', name: '동빙고동우성', district: '용산구', size: '24평', basePrice: 15.2, tier: '16' },
-  { id: 'yongsan-13z4kjg', name: '리버빌아파트', district: '용산구', size: '25평', basePrice: 15.8, tier: '16', naverComplexId: '19073' },
+  { id: 'yongsan-13z4kjg', name: '리버빌아파트', district: '용산구', size: '25평', basePrice: 18, tier: '20', naverComplexId: '3802' },
   { id: 'yongsan-hy1f33', name: '보광중앙하이츠', district: '용산구', size: '24평', basePrice: 14.2, tier: '16', naverComplexId: '822' },
   { id: 'yongsan-1wh4zff', name: '삼성아파트', district: '용산구', size: '25평', basePrice: 14.5, tier: '16', naverComplexId: '3281' },
   { id: 'yongsan-unxti8', name: '용산KCC웰츠타워', district: '용산구', size: '34평', basePrice: 15.8, tier: '16', naverComplexId: '104168' },
