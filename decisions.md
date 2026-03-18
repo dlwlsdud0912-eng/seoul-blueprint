@@ -979,3 +979,15 @@
   - `지도` tab open success
   - mobile bottom tier bar rendered
   - scroll test passed (`deltaY = 0`)
+### [2026-03-18 15:09] Desktop tier bar reduced to single-line height
+- Type: admin UX refinement
+- The first desktop sticky version still looked too similar to a summary card.
+- Reduced the desktop selector into a true one-line control bar:
+  - title chip
+  - horizontal tier chips
+  - total count chip
+- Verified with desktop E2E:
+  - admin login success
+  - `지도` tab open success
+  - desktop sticky bar rendered
+  - measured sticky bar height `48px`

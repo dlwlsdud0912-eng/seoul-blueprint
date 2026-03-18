@@ -419,32 +419,31 @@ function TierStickyBar({
         data-testid="tier-sticky-bar"
         className="sticky top-[106px] z-[9] hidden md:block"
       >
-        <div className="-mx-1 rounded-[22px] border border-white/85 bg-[rgba(255,255,255,0.92)] px-3 py-2 shadow-[0_16px_38px_rgba(55,64,76,0.08)] backdrop-blur md:top-[114px] md:px-4">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-[#37352f]">{title}</h2>
-              <p className="mt-0.5 line-clamp-1 text-[11px] text-[#787774]">{description}</p>
+        <div className="-mx-1 rounded-[18px] border border-white/85 bg-[rgba(255,255,255,0.94)] px-3 py-2 shadow-[0_14px_32px_rgba(55,64,76,0.08)] backdrop-blur md:px-4">
+          <div className="flex items-center gap-3">
+            <div className="shrink-0 rounded-full bg-[#f7f7f5] px-3 py-1 text-[11px] font-medium text-[#5f5b53]">
+              {title}
+            </div>
+            <div className="-mx-1 min-w-0 flex-1 overflow-x-auto px-1">
+              <div className="flex min-w-max gap-2">
+                {TIERS.map((tier) => (
+                  <button
+                    key={tier.key}
+                    type="button"
+                    onClick={() => onSelect(tier.key)}
+                    className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                      activeTier === tier.key
+                        ? activeClass
+                        : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                    }`}
+                  >
+                    {tier.label}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="shrink-0 rounded-full bg-white px-3 py-1 text-[11px] text-[#787774] shadow-[0_8px_20px_rgba(39,43,54,0.05)]">
               총 {totalCount}개
-            </div>
-          </div>
-          <div className="-mx-1 overflow-x-auto px-1">
-            <div className="flex min-w-max gap-2">
-              {TIERS.map((tier) => (
-                <button
-                  key={tier.key}
-                  type="button"
-                  onClick={() => onSelect(tier.key)}
-                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                    activeTier === tier.key
-                      ? activeClass
-                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
-                  }`}
-                >
-                  {tier.label}
-                </button>
-              ))}
             </div>
           </div>
         </div>
