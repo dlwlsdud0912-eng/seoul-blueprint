@@ -23,9 +23,12 @@ import StatsBar from '@/components/StatsBar';
 import DistrictGrid from '@/components/DistrictGrid';
 import FolderChips from '@/components/FolderChips';
 import ApartmentManager from '@/components/ApartmentManager';
+import MindMapView from '@/components/MindMapView';
+import { TIERS } from '@/data/tiers';
 
 export default function Home() {
   const [activeTier, setActiveTier] = useState<TierKey>('12');
+  const [viewMode, setViewMode] = useState<'grid' | 'mindmap'>('grid');
   const [prices, setPrices] = useState<PriceMap>({});
   const [memos, setMemos] = useState<MemoMap>({});
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
@@ -222,6 +225,11 @@ export default function Home() {
     return (noteOverrides.additions ?? []).filter(n => n.tier === activeTier);
   }, [isFolderView, activeTier, noteOverrides]);
 
+  const activeTierMeta = useMemo(
+    () => TIERS.find((tier) => tier.key === activeTier),
+    [activeTier]
+  );
+
   // 실시간 가격이 있으면 반영한 아파트 목록
   const apartmentsWithPrices = useMemo(
     () =>
@@ -309,6 +317,28 @@ export default function Home() {
 
           <div className="flex items-center gap-2 flex-wrap">
             <StatsBar apartments={apartmentsWithPrices} />
+            <div className="inline-flex rounded-md border border-[#e8e5e0] bg-white p-0.5">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`rounded-[8px] px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  viewMode === 'grid'
+                    ? 'bg-[#f1f1ef] text-[#37352f]'
+                    : 'text-[#787774] hover:text-[#37352f]'
+                }`}
+              >
+                리스트
+              </button>
+              <button
+                onClick={() => setViewMode('mindmap')}
+                className={`rounded-[8px] px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  viewMode === 'mindmap'
+                    ? 'bg-[#efe9ff] text-[#6d4dff]'
+                    : 'text-[#787774] hover:text-[#37352f]'
+                }`}
+              >
+                마인드맵
+              </button>
+            </div>
             <button
               onClick={() => setShowProximity(p => !p)}
               className={`text-[11px] font-medium px-2.5 py-1 rounded-md border transition-colors whitespace-nowrap ${
@@ -320,28 +350,42 @@ export default function Home() {
               {showProximity ? '● 가격근접 ON' : '가격근접'}
             </button>
           </div>
-          <DistrictGrid
-            apartments={apartmentsWithPrices}
-            notes={filteredNotes}
-            memos={memos}
-            folders={folders}
-            onSaveMemo={handleSaveMemo}
-            onDeleteMemo={handleDeleteMemo}
-            onAddToFolder={handleAddToFolder}
-            onRemoveFromFolder={handleRemoveFromFolder}
-            onQuickToggleFolder={handleQuickToggleFolder}
-            isManageMode={isManageMode}
-            overlayChangedIds={overlayChangedIds}
-            customAddedIds={customAddedIds}
-            onOverlayChange={handleOverlayChange}
-            showProximity={showProximity}
-            highlightedApartmentId={highlightedApartmentId}
-            onSaveNote={handleSaveNote}
-            onDeleteNote={handleDeleteNote}
-            customNotes={filteredCustomNotes}
-            onAddNote={isFolderView ? undefined : handleAddNote}
-            newNoteId={newNoteId}
-          />
+          {viewMode === 'mindmap' ? (
+            <MindMapView
+              apartments={apartmentsWithPrices}
+              memos={memos}
+              activeTier={activeTier}
+              title={isFolderView && activeFolder ? `${activeFolder.name} 마인드맵` : `${activeTierMeta?.label ?? activeTier} 마인드맵`}
+              subtitle={
+                isFolderView && activeFolder
+                  ? '선택한 폴더 안 아파트를 구별로 펼쳐본 지도'
+                  : `${activeTierMeta?.maxPrice ?? activeTier} 기준 아파트를 구 → 아파트 흐름으로 정리`
+              }
+            />
+          ) : (
+            <DistrictGrid
+              apartments={apartmentsWithPrices}
+              notes={filteredNotes}
+              memos={memos}
+              folders={folders}
+              onSaveMemo={handleSaveMemo}
+              onDeleteMemo={handleDeleteMemo}
+              onAddToFolder={handleAddToFolder}
+              onRemoveFromFolder={handleRemoveFromFolder}
+              onQuickToggleFolder={handleQuickToggleFolder}
+              isManageMode={isManageMode}
+              overlayChangedIds={overlayChangedIds}
+              customAddedIds={customAddedIds}
+              onOverlayChange={handleOverlayChange}
+              showProximity={showProximity}
+              highlightedApartmentId={highlightedApartmentId}
+              onSaveNote={handleSaveNote}
+              onDeleteNote={handleDeleteNote}
+              customNotes={filteredCustomNotes}
+              onAddNote={isFolderView ? undefined : handleAddNote}
+              newNoteId={newNoteId}
+            />
+          )}
         </div>
       </main>
     </div>

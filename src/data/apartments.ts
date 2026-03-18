@@ -258,7 +258,7 @@ export const APARTMENTS: Apartment[] = [
   { id: 'eunpyeong-bulgwang-lotte', name: '불광롯데캐슬', district: '은평구', size: '24평', basePrice: 9.9, tier: '12', naverComplexId: '103025' },
   { id: 'eunpyeong-bukhansan-hyundai', name: '북한산현대홈타운', district: '은평구', size: '34평', basePrice: 9.7, tier: '12', naverComplexId: '9239' },
   { id: 'eunpyeong-nokbeon-daelim', name: '녹번대림이편한', district: '은평구', size: '34평', basePrice: 7.5, tier: '12', naverComplexId: '778' },
-  { id: 'eunpyeong-hongeun-byuksan', name: '홍은벽산', district: '은평구', size: '34평', basePrice: 7.5, tier: '12', naverComplexId: '432' },
+  { id: 'eunpyeong-hongeun-byuksan', name: '홍은벽산', district: '은평구', size: '34평', basePrice: 6.3, tier: '12', naverComplexId: '432' },
   { id: 'eunpyeong-hongjewon-hs', name: '홍제원힐스테이트', district: '은평구', size: '24평', basePrice: 9.5, tier: '12', naverComplexId: '26841' },
   { id: 'eunpyeong-baekryunsan-hills', name: '백련산힐스테이트', district: '은평구', size: '24평', basePrice: 8, tier: '12', naverComplexId: '27501' },
   { id: 'eunpyeong-baekryunsan-sk-ipk', name: '백련산SK뷰아이파크', district: '은평구', size: '24평', basePrice: 9.9, tier: '12', naverComplexId: '116158' },
@@ -378,7 +378,7 @@ export const APARTMENTS: Apartment[] = [
   // 동작구
   { id: 'dongjak-sadang-woosung', name: '사당우성', district: '동작구', size: '23평', basePrice: 16.8, tier: '20', naverComplexId: '380' },
   { id: 'dongjak-isu-riga', name: '이수역리가', district: '동작구', size: '34평', basePrice: 18.4, tier: '20', naverComplexId: '102715' },
-  { id: 'dongjak-sangdo-thesharp1', name: '상도더샵1차', district: '동작구', size: '24평', basePrice: 17.5, tier: '20', naverComplexId: '22789' },
+  { id: 'dongjak-sangdo-thesharp1', name: '상도더샵1차', district: '동작구', size: '24평', basePrice: 16.2, tier: '20', naverComplexId: '22789' },
   { id: 'dongjak-sindonga-riverpark', name: '신동아리버파크', district: '동작구', size: '43평', basePrice: 18, tier: '20', naverComplexId: '3280' },
 
   // 송파구
@@ -428,7 +428,7 @@ export const APARTMENTS: Apartment[] = [
   { id: 'yangcheon-mokdong1', name: '목동신시가지1단지', district: '양천구', size: '24평', basePrice: 20, tier: '20', naverComplexId: '652' },
   { id: 'yangcheon-mokdong4', name: '목동신시가지4단지', district: '양천구', size: '24평', basePrice: 22, tier: '24', naverComplexId: '655' },
   { id: 'yangcheon-mokdong8', name: '목동신시가지8단지', district: '양천구', size: '24평', basePrice: 22, tier: '24', naverComplexId: '440' },
-  { id: 'yangcheon-mokdong11', name: '목동신시가지11단지', district: '양천구', size: '24평', basePrice: 22, tier: '24', naverComplexId: '22959' },
+  { id: 'yangcheon-mokdong11', name: '목동신시가지11단지', district: '양천구', size: '24평', basePrice: 19.2, tier: '20', naverComplexId: '22959' },
   { id: 'yangcheon-mokdong12', name: '목동신시가지12단지', district: '양천구', size: '24평', basePrice: 22, tier: '24', naverComplexId: '666' },
 
   // 마포구
@@ -453,7 +453,7 @@ export const APARTMENTS: Apartment[] = [
   { id: 'songpa-raemian-pinetop', name: '래미안송파파인탑', district: '송파구', size: '35평', basePrice: 20, tier: '20', naverComplexId: '103139' },
 
   // 강동구
-  { id: 'gangdong-olympic-foreon', name: '올림픽파크포레온', district: '강동구', size: '24평', basePrice: 11.5, tier: '12', naverComplexId: '155817' },
+  { id: 'gangdong-olympic-foreon', name: '올림픽파크포레온', district: '강동구', size: '24평', basePrice: 24.7, tier: '28', naverComplexId: '155817' },
 
   // 용산구
   { id: 'yongsan-gangchon', name: '강촌', district: '용산구', size: '24평', basePrice: 27, tier: '28', naverComplexId: '761' },
@@ -758,7 +758,7 @@ export const APARTMENTS: Apartment[] = [
   { id: 'gangnam-1dwjkno', name: '강남더샵라르고', district: '강남구', size: '24평', basePrice: 18.5, tier: '20', naverComplexId: '106600' },
   { id: 'gangnam-1myjgec', name: '강남더샵포레스트', district: '강남구', size: '34평', basePrice: 19.5, tier: '20', naverComplexId: '108822' },
   { id: 'gangnam-f4qa3c', name: '도곡동대림', district: '강남구', size: '24평', basePrice: 28, tier: '28', naverComplexId: '315' },
-  { id: 'gangnam-nelug1', name: '도곡한신', district: '강남구', size: '31평', basePrice: 19.8, tier: '20', naverComplexId: '408' },
+  { id: 'gangnam-nelug1', name: '도곡한신', district: '강남구', size: '31평', basePrice: 24.5, tier: '28', naverComplexId: '408' },
   { id: 'gangnam-1tbwuab', name: '래미안강남힐즈', district: '강남구', size: '34평', basePrice: 17.8, tier: '20', naverComplexId: '104967' },
   { id: 'gangnam-2taavs', name: '수서한아름', district: '강남구', size: '24평', basePrice: 27, tier: '28', naverComplexId: '696' },
   { id: 'gangnam-1gutykv', name: '역삼푸르지오', district: '강남구', size: '24평', basePrice: 19.8, tier: '20', naverComplexId: '14142' },
@@ -804,7 +804,7 @@ export const APARTMENTS: Apartment[] = [
   { id: 'seocho-1xpndhh', name: '방배임광1,2차', district: '서초구', size: '25평', basePrice: 17.5, tier: '20', naverComplexId: '472' },
   { id: 'seocho-8wymex', name: '방배임광1차(재건축)', district: '서초구', size: '25평', basePrice: 25, tier: '28', naverComplexId: '472' },
   { id: 'seocho-1hqhikw', name: '방배현대홈타운1차', district: '서초구', size: '25평', basePrice: 17.2, tier: '20', naverComplexId: '464' },
-  { id: 'seocho-ei390c', name: '서초현대4차', district: '서초구', size: '24평', basePrice: 16.5, tier: '20', naverComplexId: '3013' },
+  { id: 'seocho-ei390c', name: '서초현대4차', district: '서초구', size: '24평', basePrice: 27.9, tier: '28', naverComplexId: '3013' },
   { id: 'seocho-1hq5co7', name: '잠원동킴스빌리지', district: '서초구', size: '21평', basePrice: 16.2, tier: '20', naverComplexId: '8219' },
 
   // 성동구
@@ -877,7 +877,7 @@ export const APARTMENTS: Apartment[] = [
   // ---------- 티어 28 ----------
 
   // 강남구
-  { id: 'gangnam-xmmvj9', name: '개포주공6단지', district: '강남구', size: '23평', basePrice: 25.5, tier: '28', naverComplexId: '1303' },
+  { id: 'gangnam-xmmvj9', name: '개포주공6단지', district: '강남구', size: '23평', basePrice: 31.5, tier: '32', naverComplexId: '1303' },
   { id: 'gangnam-c6qaco', name: '대치아이파크', district: '강남구', size: '23평', basePrice: 25.2, tier: '28', naverComplexId: '19418' },
   { id: 'gangnam-1m0ktgw', name: '래미안개포루체하임', district: '강남구', size: '25평', basePrice: 24.2, tier: '28', naverComplexId: '113125' },
   { id: 'gangnam-lzih2g', name: '은마아파트', district: '강남구', size: '31평', basePrice: 26, tier: '28', naverComplexId: '236' },
@@ -902,7 +902,7 @@ export const APARTMENTS: Apartment[] = [
   { id: 'seongdong-gmvjk5', name: '성수전략정비1구역(빌라등)', district: '성동구', size: '25평(예정)', basePrice: 25, tier: '28' },
 
   // 송파구
-  { id: 'songpa-1eudn04', name: '잠실주공5단지(재건축)', district: '송파구', size: '23평', basePrice: 41, tier: '50', naverComplexId: '639' },
+  { id: 'songpa-1eudn04', name: '잠실주공5단지(재건축)', district: '송파구', size: '23평', basePrice: 41.5, tier: '50', naverComplexId: '639' },
 
   // 영등포구
   { id: 'yeongdeungpo-1rf3s58', name: '광장아파트', district: '영등포구', size: '34평', basePrice: 24.5, tier: '28', naverComplexId: '19549' },
@@ -1029,7 +1029,7 @@ export const APARTMENTS: Apartment[] = [
   { id: 'guro-1jbieg0', name: '구로두산아파트', district: '구로구', size: '24평', basePrice: 8.5, tier: '12', naverComplexId: '912' },
   { id: 'guro-wv2der', name: '구로삼성래미안', district: '구로구', size: '24평', basePrice: 9.5, tier: '12', naverComplexId: '8073' },
   { id: 'guro-13jsafg', name: '구로신도림자이', district: '구로구', size: '24평', basePrice: 11, tier: '12', naverComplexId: '3353' },
-  { id: 'guro-vs4reo', name: '구로주공1차', district: '구로구', size: '22평', basePrice: 8.2, tier: '12', naverComplexId: '183037' },
+  { id: 'guro-vs4reo', name: '구로주공1차', district: '구로구', size: '22평', basePrice: 9, tier: '12', naverComplexId: '183037' },
   { id: 'guro-1u35sj0', name: '구로중앙하이츠', district: '구로구', size: '24평', basePrice: 7.8, tier: '12', naverComplexId: '10663' },
   { id: 'guro-1cuknic', name: '구로한신휴플러스', district: '구로구', size: '24평', basePrice: 8.8, tier: '12', naverComplexId: '18913' },
   { id: 'guro-17b71mc', name: '구로현대연예인', district: '구로구', size: '25평', basePrice: 5.3, tier: '12', naverComplexId: '147' },
@@ -1064,7 +1064,7 @@ export const APARTMENTS: Apartment[] = [
   { id: 'nowon-1gfhvqr', name: '상계주공7단지', district: '노원구', size: '24평', basePrice: 8.2, tier: '12', naverComplexId: '921' },
   { id: 'nowon-1gfhx85', name: '상계주공9단지', district: '노원구', size: '18평', basePrice: 5.5, tier: '12', naverComplexId: '206' },
   { id: 'nowon-ypidag', name: '월계동신(재건축진행)', district: '노원구', size: '21평', basePrice: 8.5, tier: '12', naverComplexId: '218' },
-  { id: 'nowon-4a7oqp', name: '월계주공2단지', district: '노원구', size: '24평', basePrice: 6.2, tier: '12', naverComplexId: '227' },
+  { id: 'nowon-4a7oqp', name: '월계주공2단지', district: '노원구', size: '24평', basePrice: 5.65, tier: '12', naverComplexId: '227' },
   { id: 'nowon-1fx9qbl', name: '월계풍림아이원', district: '노원구', size: '33평', basePrice: 8.3, tier: '12', naverComplexId: '9873' },
   { id: 'nowon-q34de3', name: '중계그린', district: '노원구', size: '21평', basePrice: 6.3, tier: '12', naverComplexId: '240' },
   { id: 'nowon-1gy1f3p', name: '중계동삼성아파트', district: '노원구', size: '33평', basePrice: 10.5, tier: '12', naverComplexId: '1113' },
@@ -1095,7 +1095,7 @@ export const APARTMENTS: Apartment[] = [
   { id: 'dongdaemun-1ph0y2n', name: '이문동현대아파트', district: '동대문구', size: '24평', basePrice: 7.8, tier: '12', naverComplexId: '1125' },
   { id: 'dongdaemun-py0519', name: '이문삼익', district: '동대문구', size: '24평', basePrice: 6.8, tier: '12', naverComplexId: '1124' },
   { id: 'dongdaemun-3bqizo', name: '이문푸르지오', district: '동대문구', size: '24평', basePrice: 9, tier: '12', naverComplexId: '22691' },
-  { id: 'dongdaemun-bir5bv', name: '장안래미안2차', district: '동대문구', size: '24평', basePrice: 9.8, tier: '12', naverComplexId: '8802' },
+  { id: 'dongdaemun-bir5bv', name: '장안래미안2차', district: '동대문구', size: '24평', basePrice: 10.5, tier: '12', naverComplexId: '8802' },
   { id: 'dongdaemun-1rlinc6', name: '장안삼성래미안2차', district: '동대문구', size: '34평', basePrice: 10.5, tier: '12', naverComplexId: '8802' },
   { id: 'dongdaemun-1bxj7e8', name: '장안삼성쉐르빌', district: '동대문구', size: '24평', basePrice: 8.5, tier: '12', naverComplexId: '9045' },
   { id: 'dongdaemun-pz52ny', name: '전농삼성', district: '동대문구', size: '25평', basePrice: 8.8, tier: '12', naverComplexId: '1254' },

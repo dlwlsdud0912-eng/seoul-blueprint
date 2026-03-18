@@ -812,3 +812,20 @@
   - `올림픽파크포레온` 단건 검증 성공
   - 기존: `29㎡ 11.5억`
   - 수정 후: `59㎡ 24.7억 / 84㎡ 26.8억 / 집주인인증X`
+### [2026-03-18 10:14] Suspicious 92-area recrawl + mind map view
+- Type: crawl accuracy | UI
+- Recrawl target:
+  - Rechecked 92 mapped apartments that had no 59/84 bucket and were likely dominated by smaller area listings.
+  - Ran 3 workers in parallel after reboot interruption.
+- Recrawl result:
+  - 92 total
+  - 11 apartments updated with valid 59/84 bucket pricing
+  - 81 remained no-listing for target buckets under current crawl rules
+  - This was mostly a correction run, so total success count stayed `881 / 891`
+- Notable effect:
+  - `public/prices.json` updated at `2026. 03. 18. 10:14`
+  - `ownerVerified: false` listings count is now `73`
+- UI:
+  - Added mind map mode toggle on the home page
+  - Added `MindMapView` to show tier/folder apartments in a district -> apartment flow layout
+  - Mind map nodes also show the `ownerVerified: false` badge
