@@ -15,6 +15,7 @@ import {
 } from '@/lib/folder-storage';
 import { getOverlay, ApartmentOverlay } from '@/lib/apartment-overlay';
 import { APARTMENTS } from '@/data/apartments';
+import { isRegionAllowedApartment } from '@/data/region-exclusions';
 import { NOTES } from '@/data/notes';
 import Header from '@/components/Header';
 import TierTabs from '@/components/TierTabs';
@@ -161,7 +162,7 @@ export default function Home() {
   // 기본 데이터 + 오버레이 병합
   const mergedApartments = useMemo((): Apartment[] => {
     // 1. 기존 아파트에 티어 변경 적용
-    const base = APARTMENTS.map((apt) => {
+    const base = APARTMENTS.filter((apt) => isRegionAllowedApartment(apt.id)).map((apt) => {
       const newTier = overlay.tierChanges[apt.id];
       if (newTier) {
         return { ...apt, tier: newTier };

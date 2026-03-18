@@ -881,3 +881,15 @@
   - `npm run build` passed
   - local browser E2E completed: admin -> mind map -> PDF save
   - downloaded file opened as a valid PDF and the filename was auto-generated correctly
+### [2026-03-18 13:18] Region audit for non-Seoul/Gyeonggi mis-matches
+- Type: data quality | filtering
+- Trigger:
+  - customer-facing export revealed apartments mapped to other provinces/cities
+  - examples included `마포구 성산동현대아파트 -> 전북도 고창군`, `강남구 상록수 -> 대전시 서구`
+- Audit:
+  - audited `798` unique `naverComplexId` values through Naver `overview + cortars` APIs in a browser session
+  - detected `13` apartments whose actual region is not `서울시` or `경기도`
+- Action:
+  - added a shared region exclusion list for those apartments
+  - applied the exclusion to home/admin apartment rendering
+  - applied the same exclusion to customer-facing tier HTML generation
