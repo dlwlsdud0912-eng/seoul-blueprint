@@ -60,34 +60,57 @@ const apartments = APARTMENTS.filter(
       a.currentPrice - b.currentPrice || a.district.localeCompare(b.district, 'ko')
   );
 
-const rows = apartments
+const cards = apartments
   .map(
     (apt) => `
-    <tr>
-      <td>${escapeHtml(apt.district)}</td>
-      <td>${escapeHtml(apt.name)}</td>
-      <td>${formatPrice(apt.currentPrice)}</td>
-      <td>${escapeHtml(formatSizeLabel(apt))}</td>
-    </tr>`
+    <article class="apt-card">
+      <div class="apt-card__top">
+        <span class="apt-chip">${escapeHtml(apt.district)}</span>
+      </div>
+      <h2 class="apt-card__name">${escapeHtml(apt.name)}</h2>
+      <div class="apt-card__meta">
+        <div class="apt-card__meta-item">
+          <span class="apt-card__label">${LABEL_PRICE}</span>
+          <strong class="apt-card__value">${formatPrice(apt.currentPrice)}</strong>
+        </div>
+        <div class="apt-card__meta-item">
+          <span class="apt-card__label">${LABEL_SIZE}</span>
+          <strong class="apt-card__value">${escapeHtml(formatSizeLabel(apt))}</strong>
+        </div>
+      </div>
+    </article>`
   )
   .join('');
 
+const sharedStyles = `
+  .apt-wrap { display: grid; gap: 12px; }
+  .apt-card { border: 1px solid #e5e7eb; border-radius: 16px; padding: 14px 16px; background: #fff; box-sizing: border-box; }
+  .apt-card__top { margin-bottom: 8px; }
+  .apt-chip { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #f3f6fb; color: #516072; font-size: 12px; font-weight: 700; }
+  .apt-card__name { margin: 0; font-size: 18px; line-height: 1.4; color: #1f2937; word-break: keep-all; }
+  .apt-card__meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+  .apt-card__meta-item { border-radius: 12px; background: #f9fafb; padding: 10px 12px; }
+  .apt-card__label { display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+  .apt-card__value { display: block; font-size: 16px; color: #111827; line-height: 1.35; word-break: break-word; }
+  @media (min-width: 768px) {
+    .apt-wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 479px) {
+    .apt-card { padding: 12px 13px; }
+    .apt-card__name { font-size: 17px; }
+    .apt-card__meta { gap: 8px; }
+    .apt-card__meta-item { padding: 9px 10px; }
+    .apt-card__value { font-size: 15px; }
+  }
+`;
+
 const bodyHtml = `
 <section>
+  <style>${sharedStyles}</style>
   <h1>${LABEL_TITLE}</h1>
   <p>${LABEL_DESC} / \uC5C5\uB370\uC774\uD2B8: ${escapeHtml(updatedAtKR)}</p>
-  <table>
-    <thead>
-      <tr>
-        <th>${LABEL_DISTRICT}</th>
-        <th>${LABEL_NAME}</th>
-        <th>${LABEL_PRICE}</th>
-        <th>${LABEL_SIZE}</th>
-      </tr>
-    </thead>
-    <tbody>${rows}
-    </tbody>
-  </table>
+  <div class="apt-wrap">${cards}
+  </div>
 </section>
 `.trim();
 
@@ -101,10 +124,13 @@ const fullHtml = `<!doctype html>
     body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #222; line-height: 1.6; margin: 32px auto; max-width: 920px; padding: 0 20px; }
     h1 { font-size: 30px; margin: 0 0 12px; }
     p { margin: 8px 0 20px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { border: 1px solid #d9d9d9; padding: 10px 12px; text-align: left; }
-    th { background: #f5f7fb; }
-    tr:nth-child(even) td { background: #fcfcfc; }
+${sharedStyles}
+    @media (min-width: 768px) {
+      body { padding: 0 14px; }
+    }
+    @media (max-width: 479px) {
+      h1 { font-size: 26px; }
+    }
   </style>
 </head>
 <body>

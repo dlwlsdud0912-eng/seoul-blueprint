@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import ApartmentCard from '@/components/ApartmentCard';
 import AdminMapView from '@/components/AdminMapView';
+import AdminTierExportView from '@/components/AdminTierExportView';
 import MindMapView from '@/components/MindMapView';
 import {
   isAdminAuthenticated,
@@ -391,7 +392,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 // DSR 계산기 (인증 후 메인)
 // ─────────────────────────────────────────────────────────────────────────────
 
-type AdminTab = 'dsr' | 'funding' | 'guide' | 'mindmap' | 'map';
+type AdminTab = 'dsr' | 'funding' | 'guide' | 'mindmap' | 'map' | 'export';
 
 function TierStickyBar({
   title,
@@ -500,6 +501,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   const [dsrResult, setDsrResult] = useState<DsrResult | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [prices, setPrices] = useState<PriceMap>({});
+  const [pricesUpdatedAtKR, setPricesUpdatedAtKR] = useState('');
   const [memos, setMemos] = useState<MemoMap>({});
   const hasCalculated = useRef(false);
   const prevLtv = useRef(inputs.ltvPercent);
@@ -516,6 +518,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.prices) setPrices(data.prices);
+        if (data?.updatedAtKR) setPricesUpdatedAtKR(data.updatedAtKR);
       })
       .catch(() => {});
   }, []);
@@ -670,6 +673,12 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
               마인드맵
             </button>
             <button
+              onClick={() => setActiveTab('export')}
+              className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#d6dff8] rounded-md text-[#2f6feb] bg-[#f3f7ff] hover:bg-[#ebf2ff] transition-colors"
+            >
+              자료내보내기
+            </button>
+            <button
               onClick={() => setShowPasswordModal(true)}
               className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
             >
@@ -691,6 +700,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             { key: 'guide' as AdminTab, label: '가이드' },
             { key: 'map' as AdminTab, label: '지도' },
             { key: 'mindmap' as AdminTab, label: '마인드맵' },
+            { key: 'export' as AdminTab, label: '자료내보내기' },
           ]).map((tab) => (
             <button
               key={tab.key}
@@ -726,6 +736,22 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             activeTier={mindMapTier}
             title={`${mindMapTierMeta?.label ?? mindMapTier} 관리자 지도`}
             subtitle={`${mindMapTierMeta?.maxPrice ?? mindMapTier} 기준 단지를 지도 위에서 검수하고 비교합니다.`}
+          />
+        </div>
+      ) : activeTab === 'export' ? (
+        <div className="space-y-4 pb-28 md:pb-0">
+          <TierStickyBar
+            title="티어별 표 내보내기"
+            description="복붙용 HTML 표와 PDF를 티어별로 바로 뽑는 전용 탭입니다."
+            activeTier={mindMapTier}
+            totalCount={mindMapApartments.length}
+            accent="green"
+            onSelect={setMindMapTier}
+          />
+          <AdminTierExportView
+            apartments={mindMapApartments}
+            activeTier={mindMapTier}
+            updatedAtKR={pricesUpdatedAtKR}
           />
         </div>
       ) : activeTab === 'mindmap' ? (

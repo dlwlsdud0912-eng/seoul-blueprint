@@ -1010,3 +1010,23 @@
   - `지도` tab open success
   - map visible
   - provider badge currently shows `OpenStreetMap` because no NAVER Maps public client id is configured in the project/Vercel env yet
+### [2026-03-18 16:12] Admin tier export tab with copy + PDF
+- Type: admin tooling | content export
+- Added a dedicated `자료내보내기` tab inside admin.
+- The tab now supports:
+  - tier switch buttons using the same sticky selector pattern
+  - preview of the current tier table
+  - one-click HTML copy for Naver Premium Studio
+  - one-click PDF download via `/api/tier-export-pdf`
+- Export format intentionally uses the original table layout:
+  - `구`
+  - `아파트명`
+  - `가격`
+  - `평수`
+- Added server-side PDF generator for tier export tables with Korean font embedding.
+- Local E2E verification:
+  - admin login success
+  - `자료내보내기` tab open success
+  - preview iframe rendered
+  - HTML copy button wrote export HTML to clipboard
+  - PDF download succeeded with generated filename
