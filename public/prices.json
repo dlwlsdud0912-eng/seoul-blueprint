@@ -10810,16 +10810,18 @@
       "isFirstFloor": false
     },
     "yongsan-hangangtown": {
-      "price": 13,
-      "articleCount": 6,
+      "price": 15,
+      "articleCount": 4,
       "areaName": "80",
-      "floorInfo": "3/14",
+      "ownerVerified": true,
+      "floorInfo": "고/11",
       "isFirstFloor": false,
       "sizes": {
         "59": {
-          "price": 13,
-          "count": 6,
-          "floorInfo": "3/14",
+          "price": 15,
+          "count": 4,
+          "ownerVerified": true,
+          "floorInfo": "고/11",
           "isFirstFloor": false
         }
       }

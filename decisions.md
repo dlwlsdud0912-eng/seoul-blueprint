@@ -1092,3 +1092,16 @@
   - `59㎡` only
   - no `84㎡` bucket returned
   - lowest tracked floor `3/14`
+### [2026-03-18 17:24] Yongsan Hangangtown price correction
+- Type: data correction | parsing bug fix
+- Follow-up live verification showed the previous manual correction undercounted `13억 5,000` as `13억`.
+- Live Naver article check for `complexId 3804` currently shows:
+  - overall lowest sale: `13억 5,000` (`verificationTypeCode: NONE`)
+  - lowest non-owner-doc sale visible in the list: `14억` (`verificationTypeCode: NDOC1`)
+  - lowest `OWNER`-verified sale: `15억`
+- Service rule remains `집주인인증 우선, 없으면 일반 매매 fallback`, so the stored app price was corrected to:
+  - `59㎡ 15억`
+  - `84㎡ 없음`
+- Also updated the apartment baseline/tier:
+  - `basePrice: 15`
+  - `tier: 16`
