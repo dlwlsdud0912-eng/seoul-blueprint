@@ -281,7 +281,9 @@ function parsePrice(priceStr) {
 const delay = (ms) => new Promise(r => setTimeout(r, ms));
 
 // ─── API URL 빌더 (가격순 정렬) ───
-function buildArticleApiUrl(complexId, pageNum) {
+function buildArticleApiUrl(complexId, pageNum, areaFilter = null) {
+  const areaMin = areaFilter?.min ?? 0;
+  const areaMax = areaFilter?.max ?? 900000000;
   const params = new URLSearchParams({
     realEstateType: 'APT',
     tradeType: 'A1',
@@ -290,8 +292,8 @@ function buildArticleApiUrl(complexId, pageNum) {
     rentPriceMax: '900000000',
     priceMin: '0',
     priceMax: '900000000',
-    areaMin: '0',
-    areaMax: '900000000',
+    areaMin: String(areaMin),
+    areaMax: String(areaMax),
     showArticle: 'false',
     sameAddressGroup: 'false',
     priceType: 'RETAIL',
@@ -304,6 +306,100 @@ function buildArticleApiUrl(complexId, pageNum) {
 }
 
 const MAX_PAGES = 10; // 안전 상한: 최대 200매물
+const SUPPLY_AREA_RATIO = 1.35;
+
+function getSupplyAreaFilter(bucket) {
+  return {
+    min: Math.max(0, Math.round((bucket.center - bucket.tolerance) * SUPPLY_AREA_RATIO)),
+    max: Math.round((bucket.center + bucket.tolerance) * SUPPLY_AREA_RATIO),
+  };
+}
+
+async function fetchArticlePage(page, apiUrl, headers) {
+  const result = await page.evaluate(async (requestUrl, requestHeaders) => {
+    const res = await fetch(requestUrl, { headers: requestHeaders });
+    if (!res.ok) return { articles: [], isMoreData: false, httpStatus: res.status };
+    const data = await res.json();
+    return {
+      articles: data?.articleList || [],
+      isMoreData: data?.isMoreData || false,
+      httpStatus: res.status,
+    };
+  }, apiUrl, headers);
+
+  if (result.httpStatus !== 401) {
+    return result;
+  }
+
+  console.warn(`  HTTP 401, Accept 헤더만으로 재시도`);
+  return page.evaluate(async (requestUrl) => {
+    const res = await fetch(requestUrl, { headers: { Accept: 'application/json, text/plain, */*' } });
+    if (!res.ok) return { articles: [], isMoreData: false, httpStatus: res.status };
+    const data = await res.json();
+    return {
+      articles: data?.articleList || [],
+      isMoreData: data?.isMoreData || false,
+      httpStatus: res.status,
+    };
+  }, apiUrl);
+}
+
+async function fetchMissingBucketPrice(page, complexId, headers, bucket) {
+  const areaFilter = getSupplyAreaFilter(bucket);
+
+  for (let pageNum = 1; pageNum <= MAX_PAGES; pageNum++) {
+    const result = await fetchArticlePage(page, buildArticleApiUrl(complexId, pageNum, areaFilter), headers);
+
+    if (result.httpStatus === 429 || result.httpStatus === 403) {
+      return null;
+    }
+    if (result.httpStatus !== 200 || result.articles.length === 0) {
+      return null;
+    }
+
+    const saleOnly = result.articles.filter((article) => {
+      const tradeType = (article.tradeTypeName || '').trim();
+      const tradeCode = article.tradeTypeCode || '';
+      const exArea = parseFloat(article.area2 || article.exclusiveArea || 0);
+      return (tradeType === '매매' || tradeCode === 'A1')
+        && Math.abs(exArea - bucket.center) <= bucket.tolerance;
+    });
+
+    if (saleOnly.length === 0) {
+      if (!result.isMoreData) return null;
+      await delay(300);
+      continue;
+    }
+
+    const ownerOnly = saleOnly.filter((article) => article.verificationTypeCode === 'OWNER');
+    const candidateArticles = ownerOnly.length > 0 ? ownerOnly : saleOnly;
+
+    let minPrice = null;
+    for (const article of candidateArticles) {
+      const dealPrice = article.dealPrc != null ? article.dealPrc : article.dealOrWarrantPrc;
+      if (!dealPrice) continue;
+      const parsed = parsePrice(dealPrice);
+      if (parsed === null || parsed <= 0) continue;
+      const rounded = Math.round(parsed * 100) / 100;
+      if (minPrice === null || rounded < minPrice) {
+        minPrice = rounded;
+      }
+    }
+
+    if (minPrice !== null) {
+      return {
+        price: minPrice,
+        count: candidateArticles.length,
+        ownerVerified: ownerOnly.length > 0,
+      };
+    }
+
+    if (!result.isMoreData) return null;
+    await delay(300);
+  }
+
+  return null;
+}
 
 // ─── 단일 아파트: 직접 fetch 방식 (세션 확보 후 page 1부터 전체 면적 수집) ───
 async function fetchPriceByNavigation(page, apt) {
@@ -398,33 +494,7 @@ async function fetchPriceByNavigation(page, apt) {
   // isMoreData 기반 페이지네이션: page 1부터 isMoreData=false가 될 때까지
   for (let p = 1; p <= MAX_PAGES; p++) {
     try {
-      const result = await page.evaluate(async (apiUrl, headers) => {
-        const res = await fetch(apiUrl, { headers });
-        if (!res.ok) return { articles: [], isMoreData: false, httpStatus: res.status };
-        const data = await res.json();
-        return {
-          articles: data?.articleList || [],
-          isMoreData: data?.isMoreData || false,
-          httpStatus: res.status,
-        };
-      }, buildArticleApiUrl(complexId, p), capturedHeaders);
-
-      if (result.httpStatus === 401) {
-        // 헤더 캡처 실패 시 fallback: Accept만으로 재시도
-        console.warn(`  HTTP 401 (page ${p}), Accept 헤더만으로 재시도`);
-        const retry = await page.evaluate(async (apiUrl) => {
-          const res = await fetch(apiUrl, { headers: { 'Accept': 'application/json, text/plain, */*' } });
-          if (!res.ok) return { articles: [], isMoreData: false, httpStatus: res.status };
-          const data = await res.json();
-          return { articles: data?.articleList || [], isMoreData: data?.isMoreData || false, httpStatus: res.status };
-        }, buildArticleApiUrl(complexId, p));
-        if (retry.httpStatus === 200 && retry.articles.length > 0) {
-          allArticles.push(...retry.articles);
-          if (!retry.isMoreData) break;
-          await delay(500);
-          continue;
-        }
-      }
+      const result = await fetchArticlePage(page, buildArticleApiUrl(complexId, p), capturedHeaders);
 
       if (result.httpStatus === 429 || result.httpStatus === 403) {
         console.warn(`  API 차단 (HTTP ${result.httpStatus}), 페이지네이션 중단`);
@@ -479,8 +549,7 @@ async function fetchPriceByNavigation(page, apt) {
   const sizes = {};
   const bucketCounts = {};
 
-  let bestPrice = null;
-  let bestAreaName = apt.size;
+  let usedFallbackListing = !ownerVerified;
 
   // 면적 존재 여부 확인
   const bucketExists = {};
@@ -504,11 +573,6 @@ async function fetchPriceByNavigation(page, apt) {
 
     const rounded = Math.round(parsed * 100) / 100;
 
-    if (bestPrice === null || rounded < bestPrice) {
-      bestPrice = rounded;
-      if (exArea > 0) bestAreaName = `${Math.round(exArea)}㎡`;
-    }
-
     for (const bucket of SIZE_BUCKETS) {
       if (Math.abs(exArea - bucket.center) <= bucket.tolerance) {
         bucketCounts[bucket.key] = (bucketCounts[bucket.key] || 0) + 1;
@@ -530,23 +594,48 @@ async function fetchPriceByNavigation(page, apt) {
     // bucketExists에 없으면 → sizes에 안 들어감 → UI에서 "—" 표시
   }
 
-  // sizes 버킷 중 최저가로 bestAreaName 보정
+  for (const bucket of SIZE_BUCKETS) {
+    if (sizes[bucket.key] && sizes[bucket.key] !== null) continue;
+    const supplemental = await fetchMissingBucketPrice(page, complexId, capturedHeaders, bucket);
+    if (supplemental) {
+      sizes[bucket.key] = {
+        price: supplemental.price,
+        count: supplemental.count,
+      };
+      if (!supplemental.ownerVerified) {
+        usedFallbackListing = true;
+      }
+    }
+  }
+
+  let bestPrice = null;
+  let bestAreaName = apt.size;
+  let trackedArticleCount = 0;
+
   for (const [key, data] of Object.entries(sizes)) {
-    if (data !== null && data.price === bestPrice) {
+    if (data === null || !data) continue;
+    trackedArticleCount += data.count || 0;
+    if (bestPrice === null || data.price < bestPrice) {
+      bestPrice = data.price;
       bestAreaName = `${key}㎡`;
     }
   }
 
   if (bestPrice === null) {
-    return { price: null, articleCount: candidateArticles.length, areaName: apt.size, ownerVerified };
+    return {
+      price: null,
+      articleCount: candidateArticles.length,
+      areaName: apt.size,
+      ownerVerified: !usedFallbackListing,
+    };
   }
 
   return {
     price: bestPrice,
-    articleCount: candidateArticles.length,
+    articleCount: trackedArticleCount || candidateArticles.length,
     areaName: bestAreaName,
     sizes,
-    ownerVerified,
+    ownerVerified: !usedFallbackListing,
   };
 }
 

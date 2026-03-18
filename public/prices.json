@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-03-18T00:27:16.665Z",
-  "updatedAtKR": "2026. 03. 18. 09:27",
+  "updatedAt": "2026-03-18T00:49:10.508Z",
+  "updatedAtKR": "2026. 03. 18. 09:49",
   "totalCount": 891,
   "successCount": 881,
   "failCount": 10,
@@ -10883,10 +10883,19 @@
       "ownerVerified": false
     },
     "gangdong-olympic-foreon": {
-      "price": 11.5,
-      "articleCount": 200,
-      "areaName": "29㎡",
-      "sizes": {},
+      "price": 24.7,
+      "articleCount": 23,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 24.7,
+          "count": 3
+        },
+        "84": {
+          "price": 26.8,
+          "count": 20
+        }
+      },
       "ownerVerified": false
     },
     "gangnam-daechi-samsung1": {
