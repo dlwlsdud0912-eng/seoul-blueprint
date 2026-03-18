@@ -517,6 +517,12 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             <span className="text-sm sm:text-base font-semibold text-[#37352f] truncate">관리자</span>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <Link
+              href="/?view=mindmap"
+              className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#d9cff8] rounded-md text-[#6d4dff] bg-[#f5f1ff] hover:bg-[#efe9ff] transition-colors"
+            >
+              마인드맵
+            </Link>
             <button
               onClick={() => setShowPasswordModal(true)}
               className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"

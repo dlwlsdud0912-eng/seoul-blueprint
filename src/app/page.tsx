@@ -14,6 +14,7 @@ import {
   removeFromFolder as removeFromFolderStorage,
 } from '@/lib/folder-storage';
 import { getOverlay, ApartmentOverlay } from '@/lib/apartment-overlay';
+import { isAdminAuthenticated } from '@/lib/admin-auth';
 import { APARTMENTS } from '@/data/apartments';
 import { NOTES } from '@/data/notes';
 import Header from '@/components/Header';
@@ -29,6 +30,7 @@ import { TIERS } from '@/data/tiers';
 export default function Home() {
   const [activeTier, setActiveTier] = useState<TierKey>('12');
   const [viewMode, setViewMode] = useState<'grid' | 'mindmap'>('grid');
+  const [mindMapEnabled, setMindMapEnabled] = useState(false);
   const [prices, setPrices] = useState<PriceMap>({});
   const [memos, setMemos] = useState<MemoMap>({});
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
@@ -55,6 +57,14 @@ export default function Home() {
     setFolders(getFolders());
     setOverlay(getOverlay());
     setNoteOverrides(getNoteOverrides());
+    const adminEnabled = isAdminAuthenticated();
+    setMindMapEnabled(adminEnabled);
+    if (adminEnabled) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('view') === 'mindmap') {
+        setViewMode('mindmap');
+      }
+    }
 
     // 1순위: prices.json (크롤링 데이터)
     fetch('/prices.json')
@@ -317,28 +327,30 @@ export default function Home() {
 
           <div className="flex items-center gap-2 flex-wrap">
             <StatsBar apartments={apartmentsWithPrices} />
-            <div className="inline-flex rounded-md border border-[#e8e5e0] bg-white p-0.5">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`rounded-[8px] px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-[#f1f1ef] text-[#37352f]'
-                    : 'text-[#787774] hover:text-[#37352f]'
-                }`}
-              >
-                리스트
-              </button>
-              <button
-                onClick={() => setViewMode('mindmap')}
-                className={`rounded-[8px] px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                  viewMode === 'mindmap'
-                    ? 'bg-[#efe9ff] text-[#6d4dff]'
-                    : 'text-[#787774] hover:text-[#37352f]'
-                }`}
-              >
-                마인드맵
-              </button>
-            </div>
+            {mindMapEnabled ? (
+              <div className="inline-flex rounded-md border border-[#e8e5e0] bg-white p-0.5">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`rounded-[8px] px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                    viewMode === 'grid'
+                      ? 'bg-[#f1f1ef] text-[#37352f]'
+                      : 'text-[#787774] hover:text-[#37352f]'
+                  }`}
+                >
+                  리스트
+                </button>
+                <button
+                  onClick={() => setViewMode('mindmap')}
+                  className={`rounded-[8px] px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                    viewMode === 'mindmap'
+                      ? 'bg-[#efe9ff] text-[#6d4dff]'
+                      : 'text-[#787774] hover:text-[#37352f]'
+                  }`}
+                >
+                  마인드맵
+                </button>
+              </div>
+            ) : null}
             <button
               onClick={() => setShowProximity(p => !p)}
               className={`text-[11px] font-medium px-2.5 py-1 rounded-md border transition-colors whitespace-nowrap ${
@@ -350,7 +362,7 @@ export default function Home() {
               {showProximity ? '● 가격근접 ON' : '가격근접'}
             </button>
           </div>
-          {viewMode === 'mindmap' ? (
+          {mindMapEnabled && viewMode === 'mindmap' ? (
             <MindMapView
               apartments={apartmentsWithPrices}
               memos={memos}

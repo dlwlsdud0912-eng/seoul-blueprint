@@ -278,8 +278,16 @@ export default function MindMapView({
 }: MindMapViewProps) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const districtRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const dragStateRef = useRef({
+    active: false,
+    startX: 0,
+    startY: 0,
+    startScrollLeft: 0,
+    startScrollTop: 0,
+  });
   const [zoom, setZoom] = useState(1);
   const [collapsedDistricts, setCollapsedDistricts] = useState<Record<string, boolean>>({});
+  const [isDragging, setIsDragging] = useState(false);
 
   const districts = useMemo(() => {
     const grouped = apartments.reduce<Record<string, MindMapApartment[]>>((acc, apartment) => {
@@ -343,6 +351,45 @@ export default function MindMapView({
     printWindow.document.open();
     printWindow.document.write(html);
     printWindow.document.close();
+  }
+
+  function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    const target = event.target as HTMLElement;
+    if (target.closest('a, button')) return;
+
+    const container = scrollRef.current;
+    if (!container) return;
+
+    dragStateRef.current = {
+      active: true,
+      startX: event.clientX,
+      startY: event.clientY,
+      startScrollLeft: container.scrollLeft,
+      startScrollTop: container.scrollTop,
+    };
+    setIsDragging(true);
+    container.setPointerCapture(event.pointerId);
+  }
+
+  function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    const container = scrollRef.current;
+    const dragState = dragStateRef.current;
+    if (!container || !dragState.active) return;
+
+    const deltaX = event.clientX - dragState.startX;
+    const deltaY = event.clientY - dragState.startY;
+
+    container.scrollLeft = dragState.startScrollLeft - deltaX;
+    container.scrollTop = dragState.startScrollTop - deltaY;
+  }
+
+  function handlePointerEnd(event: React.PointerEvent<HTMLDivElement>) {
+    const container = scrollRef.current;
+    if (container && container.hasPointerCapture(event.pointerId)) {
+      container.releasePointerCapture(event.pointerId);
+    }
+    dragStateRef.current.active = false;
+    setIsDragging(false);
   }
 
   return (
@@ -435,7 +482,15 @@ export default function MindMapView({
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-10 bg-gradient-to-r from-[#f4f0ff] to-transparent md:block" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden w-10 bg-gradient-to-l from-[#f4f0ff] to-transparent md:block" />
 
-        <div ref={scrollRef} className="overflow-x-auto px-1 pb-4">
+        <div
+          ref={scrollRef}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
+          onPointerLeave={handlePointerEnd}
+          className={`overflow-x-auto px-1 pb-4 ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
+        >
           <div
             className="mx-auto w-max min-w-full px-8 py-4 pr-16"
             style={{ zoom } as React.CSSProperties}

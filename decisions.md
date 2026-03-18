@@ -844,3 +844,12 @@
 - UX polish:
   - horizontal scroll hint retained
   - right edge clipping feeling reduced with extra canvas padding and edge fades
+### [2026-03-18 10:39] Admin-only mind map access + drag pan
+- Type: UI | admin
+- Access control:
+  - hid the mind map toggle from the public home view
+  - mind map opens only when admin auth is active
+  - added a direct `마인드맵` button in the admin header that links to `/?view=mindmap`
+- Interaction:
+  - added drag-to-pan on the mind map canvas
+  - buttons and apartment links still behave normally; only the background canvas starts dragging
