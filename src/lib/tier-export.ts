@@ -1,4 +1,5 @@
 import { TIERS } from '@/data/tiers';
+import { checkPriceProximity } from '@/lib/price-proximity';
 import type { TierKey } from '@/types';
 
 type ExportApartment = {
@@ -17,6 +18,7 @@ export type TierExportRow = {
   name: string;
   priceLabel: string;
   sizeLabel: string;
+  proximityLabel?: string;
 };
 
 export type TierExportPayload = {
@@ -32,14 +34,16 @@ export type TierExportPayload = {
 type TierExportOptions = {
   titleSuffix?: string;
   filenamePrefix?: string;
+  showProximityColumn?: boolean;
 };
 
 const LABEL_TITLE_SUFFIX = '티어 아파트 리스트';
-const LABEL_DESC = '네이버부동산 기준 실시간 최저 매물가 반영';
+const LABEL_DESC = '네이버부동산 기준 실시간 최저가 반영';
 const LABEL_DISTRICT = '구';
 const LABEL_NAME = '아파트명';
 const LABEL_PRICE = '가격';
 const LABEL_SIZE = '평수';
+const LABEL_PROXIMITY = '가격근접';
 
 function escapeHtml(value: string) {
   return String(value)
@@ -69,18 +73,33 @@ function formatSizeLabel(apartment: ExportApartment) {
 
   if (size59) return '59㎡';
   if (size84) return '84㎡';
-  if (apartment.areaName) return apartment.areaName.replaceAll('??', '㎡');
-  if (apartment.size) return apartment.size.replaceAll('??', '평');
+  if (apartment.areaName) return apartment.areaName;
+  if (apartment.size) return apartment.size;
   return '--';
 }
 
-function buildRows(apartments: ExportApartment[]) {
+function formatProximityLabel(apartment: ExportApartment) {
+  const result = checkPriceProximity(apartment.sizes);
+  if (!result.hasProximity) {
+    return '';
+  }
+
+  return result.pairs
+    .map(
+      (pair) =>
+        `${pair.smallSize}㎡ ${pair.smallPrice}억 / ${pair.largeSize}㎡ ${pair.largePrice}억 · 차이 ${pair.diff}억 (${pair.diffPercent}%)`
+    )
+    .join(' / ');
+}
+
+function buildRows(apartments: ExportApartment[], options: TierExportOptions) {
   return apartments
     .map((apartment) => ({
       district: apartment.district,
       name: apartment.name,
       priceLabel: formatPrice(apartment.currentPrice ?? apartment.basePrice),
       sizeLabel: formatSizeLabel(apartment),
+      proximityLabel: options.showProximityColumn ? formatProximityLabel(apartment) : undefined,
       effectivePrice: apartment.currentPrice ?? apartment.basePrice,
     }))
     .sort(
@@ -92,7 +111,7 @@ function buildRows(apartments: ExportApartment[]) {
     .map(({ effectivePrice, ...row }) => row);
 }
 
-function getTableStyles() {
+function getTableStyles(showProximityColumn: boolean) {
   return `
     .tier-export-wrap { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #222; }
     .tier-export-headline { margin: 0 0 12px; font-size: 30px; line-height: 1.3; color: #1f2937; }
@@ -105,10 +124,11 @@ function getTableStyles() {
     .tier-export-table th { background: #f5f7fb; color: #374151; font-weight: 700; }
     .tier-export-table td { color: #111827; }
     .tier-export-table tr:nth-child(even) td { background: #fcfcfc; }
-    .tier-export-table .col-district { width: 18%; }
-    .tier-export-table .col-name { width: 48%; }
-    .tier-export-table .col-price { width: 17%; }
-    .tier-export-table .col-size { width: 17%; }
+    .tier-export-table .col-district { width: ${showProximityColumn ? '13%' : '18%'}; }
+    .tier-export-table .col-name { width: ${showProximityColumn ? '29%' : '48%'}; }
+    .tier-export-table .col-price { width: ${showProximityColumn ? '13%' : '17%'}; }
+    .tier-export-table .col-size { width: ${showProximityColumn ? '11%' : '17%'}; }
+    .tier-export-table .col-proximity { width: 34%; }
     @media (max-width: 720px) {
       .tier-export-headline { font-size: 24px; }
       .tier-export-subtitle { font-size: 14px; }
@@ -124,23 +144,33 @@ function buildBodyHtml(
   title: string,
   subtitle: string,
   totalCount: number,
-  rows: TierExportRow[]
+  rows: TierExportRow[],
+  showProximityColumn: boolean
 ) {
   const tableRows = rows
-    .map(
-      (row) => `
+    .map((row) => {
+      const proximityCell = showProximityColumn
+        ? `<td>${escapeHtml(row.proximityLabel || '--')}</td>`
+        : '';
+
+      return `
       <tr>
         <td>${escapeHtml(row.district)}</td>
         <td>${escapeHtml(row.name)}</td>
         <td>${escapeHtml(row.priceLabel)}</td>
         <td>${escapeHtml(row.sizeLabel)}</td>
-      </tr>`
-    )
+        ${proximityCell}
+      </tr>`;
+    })
     .join('');
+
+  const proximityHeader = showProximityColumn
+    ? `<th class="col-proximity">${LABEL_PROXIMITY}</th>`
+    : '';
 
   return `
 <section class="tier-export-wrap">
-  <style>${getTableStyles()}</style>
+  <style>${getTableStyles(showProximityColumn)}</style>
   <h1 class="tier-export-headline">${escapeHtml(title)}</h1>
   <p class="tier-export-subtitle">${escapeHtml(subtitle)}</p>
   <p class="tier-export-summary">총 ${totalCount}개 단지</p>
@@ -152,6 +182,7 @@ function buildBodyHtml(
           <th class="col-name">${LABEL_NAME}</th>
           <th class="col-price">${LABEL_PRICE}</th>
           <th class="col-size">${LABEL_SIZE}</th>
+          ${proximityHeader}
         </tr>
       </thead>
       <tbody>${tableRows}
@@ -175,7 +206,7 @@ function buildDocumentHtml(title: string, bodyHtml: string) {
       color: #222;
       line-height: 1.6;
       margin: 32px auto;
-      max-width: 980px;
+      max-width: 1180px;
       padding: 0 18px;
       background: #ffffff;
     }
@@ -203,8 +234,8 @@ export function buildTierExportPayload(
   const tierLabel = tierMeta?.label ?? `${tier}티어`;
   const title = `${tierLabel} ${LABEL_TITLE_SUFFIX}${options.titleSuffix ? ` ${options.titleSuffix}` : ''}`;
   const subtitle = `${LABEL_DESC} / 업데이트: ${updatedAtKR || '-'}`;
-  const rows = buildRows(apartments);
-  const bodyHtml = buildBodyHtml(title, subtitle, rows.length, rows);
+  const rows = buildRows(apartments, options);
+  const bodyHtml = buildBodyHtml(title, subtitle, rows.length, rows, !!options.showProximityColumn);
   const documentHtml = buildDocumentHtml(title, bodyHtml);
   const filenameBase = options.filenamePrefix ? `${options.filenamePrefix}-${tierLabel}` : tierLabel;
   const safeLabel = slugifyFilename(filenameBase) || `tier-${tier}`;

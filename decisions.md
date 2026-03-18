@@ -1046,3 +1046,18 @@
   - `가격근접 ON만` toggle clickable
   - copied HTML stayed table-based
   - PDF download succeeded with filename like `가격근접ON-...pdf`
+### [2026-03-18 16:41] Price proximity export detail column
+- Type: admin tooling | export clarity
+- Enhanced the `가격근접 ON만` export so the table now includes a `가격근접` column.
+- Each row now shows the actual 59㎡/84㎡ comparison in the export itself:
+  - example format: `59㎡ 12억 / 84㎡ 12.5억 · 차이 0.5억 (4.2%)`
+- The same detail is now kept in sync across:
+  - preview iframe
+  - copied HTML
+  - generated PDF
+- Local E2E verification:
+  - admin login success
+  - export tab open success
+  - proximity mode preview showed the new `가격근접` column
+  - clipboard HTML contained `가격근접` and `차이`
+  - PDF download still succeeded in proximity mode

@@ -49,6 +49,7 @@ export default function AdminTierExportView({
       buildTierExportPayload(activeTier, filteredApartments, updatedAtKR, {
         titleSuffix: mode === 'proximity' ? '(가격근접 ON)' : '',
         filenamePrefix: mode === 'proximity' ? '가격근접ON' : undefined,
+        showProximityColumn: mode === 'proximity',
       }),
     [activeTier, filteredApartments, mode, updatedAtKR]
   );
@@ -101,6 +102,7 @@ export default function AdminTierExportView({
     if (!preview) {
       return;
     }
+
     preview.document.open();
     preview.document.write(exportData.documentHtml);
     preview.document.close();
@@ -112,12 +114,12 @@ export default function AdminTierExportView({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-2">
             <div className="inline-flex items-center rounded-full bg-[#2f6feb] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(47,111,235,0.18)]">
-              티어별 표 내보내기
+              자료내보내기
             </div>
             <div>
               <h2 className="text-xl font-semibold text-[#1b2b40]">{exportData.title}</h2>
               <p className="mt-1 text-sm text-[#5d7088]">
-                네이버 프리미엄 스튜디오 복붙용 HTML과 PDF를 같은 화면에서 바로 뽑습니다.
+                네이버 프리미엄 스튜디오에 바로 붙여 넣을 HTML과 PDF를 같은 화면에서 내보냅니다.
               </p>
             </div>
           </div>
@@ -127,10 +129,10 @@ export default function AdminTierExportView({
               <div className="mt-1 font-semibold text-[#1b2b40]">{activeTier} 티어</div>
             </div>
             <div className="rounded-2xl border border-white/80 bg-white/80 px-3 py-2">
-              <div className="text-[11px] text-[#7b8aa0]">표 행 수</div>
+              <div className="text-[11px] text-[#7b8aa0]">대상 단지</div>
               <div className="mt-1 font-semibold text-[#1b2b40]">{exportData.totalCount}개</div>
             </div>
-            <div className="rounded-2xl border border-white/80 bg-white/80 px-3 py-2 col-span-2 sm:col-span-1">
+            <div className="col-span-2 rounded-2xl border border-white/80 bg-white/80 px-3 py-2 sm:col-span-1">
               <div className="text-[11px] text-[#7b8aa0]">업데이트</div>
               <div className="mt-1 font-semibold text-[#1b2b40]">{updatedAtKR || '-'}</div>
             </div>
@@ -168,8 +170,8 @@ export default function AdminTierExportView({
           <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
             <div className="text-sm text-[#516277]">
               {mode === 'proximity'
-                ? '59㎡/84㎡ 가격 차이가 가까운 단지만 따로 골라 표와 PDF로 내보냅니다.'
-                : '표 형식으로 유지한 상태에서 바로 복사하거나 PDF로 저장할 수 있습니다.'}
+                ? '59㎡와 84㎡ 가격이 붙어 있는 단지만 모아 차이 금액과 비율까지 함께 내보냅니다.'
+                : '현재 티어 기준 전체 단지를 표 형태로 복사하거나 PDF로 저장할 수 있습니다.'}
             </div>
             <div className="flex flex-wrap gap-2">
               <button
@@ -205,7 +207,7 @@ export default function AdminTierExportView({
           </div>
 
           <div className="rounded-[20px] border border-[#e5ecf4] bg-[#fbfdff] px-4 py-3 text-sm text-[#5d7088]">
-            파일명: <span className="font-medium text-[#23364f]">{exportData.filename}</span>
+            파일명 <span className="font-medium text-[#23364f]">{exportData.filename}</span>
           </div>
         </div>
       </section>
@@ -213,7 +215,7 @@ export default function AdminTierExportView({
       <section className="overflow-hidden rounded-[28px] border border-[#e3eaf2] bg-white shadow-[0_18px_45px_rgba(54,84,63,0.08)]">
         <div className="border-b border-[#edf2ee] px-4 py-3">
           <h3 className="text-sm font-semibold text-[#163325]">미리보기</h3>
-          <p className="mt-1 text-xs text-[#708576]">실제 복사되는 HTML 표를 그대로 미리 봅니다.</p>
+          <p className="mt-1 text-xs text-[#708576]">실제 복사되는 HTML 표를 그대로 보여줍니다.</p>
         </div>
         <iframe
           title={`${exportData.title} preview`}
