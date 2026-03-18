@@ -393,6 +393,63 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 
 type AdminTab = 'dsr' | 'funding' | 'guide' | 'mindmap' | 'map';
 
+function TierStickyBar({
+  title,
+  description,
+  activeTier,
+  totalCount,
+  accent,
+  onSelect,
+}: {
+  title: string;
+  description: string;
+  activeTier: TierKey;
+  totalCount: number;
+  accent: 'green' | 'purple';
+  onSelect: (tier: TierKey) => void;
+}) {
+  const activeClass =
+    accent === 'green'
+      ? 'border-[#1f8f5f] bg-[#eef8f0] text-[#1f8f5f] shadow-[0_10px_24px_rgba(31,143,95,0.10)]'
+      : 'border-[#6d4dff] bg-[#efe9ff] text-[#6d4dff] shadow-[0_10px_24px_rgba(109,77,255,0.10)]';
+
+  return (
+    <div
+      data-testid="tier-sticky-bar"
+      className="sticky top-[106px] z-[9] -mx-1 rounded-[24px] border border-white/80 bg-[rgba(255,255,255,0.88)] px-3 py-3 shadow-[0_18px_40px_rgba(55,64,76,0.08)] backdrop-blur md:top-[114px] md:px-4"
+    >
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold text-[#37352f]">{title}</h2>
+          <p className="mt-1 text-xs text-[#787774]">{description}</p>
+        </div>
+        <div className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs text-[#787774] shadow-[0_8px_20px_rgba(39,43,54,0.05)]">
+          총 {totalCount}개 단지
+        </div>
+      </div>
+
+      <div className="-mx-1 overflow-x-auto px-1 pb-1">
+        <div className="flex min-w-max gap-2">
+          {TIERS.map((tier) => (
+            <button
+              key={tier.key}
+              type="button"
+              onClick={() => onSelect(tier.key)}
+              className={`shrink-0 rounded-full border px-3 py-2 text-xs font-medium transition-colors sm:px-4 ${
+                activeTier === tier.key
+                  ? activeClass
+                  : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+              }`}
+            >
+              {tier.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   const [activeTab, setActiveTab] = useState<AdminTab>('dsr');
   const [mindMapTier, setMindMapTier] = useState<TierKey>('12');
@@ -612,34 +669,14 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
         <GuideContent />
       ) : activeTab === 'map' ? (
         <div className="space-y-4">
-          <div className="rounded-lg border border-[#e8e5e0] bg-white p-4">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-semibold text-[#37352f]">관리자 지도</h2>
-                <p className="mt-1 text-xs text-[#787774]">
-                  네이버 단지 좌표를 기반으로, 현재 티어 아파트를 지도에서 검수하는 전용 뷰입니다.
-                </p>
-              </div>
-              <div className="text-xs text-[#787774]">
-                총 {mindMapApartments.length}개 단지
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {TIERS.map((tier) => (
-                <button
-                  key={tier.key}
-                  onClick={() => setMindMapTier(tier.key)}
-                  className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                    mindMapTier === tier.key
-                      ? 'border-[#1f8f5f] bg-[#eef8f0] text-[#1f8f5f]'
-                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
-                  }`}
-                >
-                  {tier.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <TierStickyBar
+            title="관리자 지도"
+            description="네이버 단지 좌표를 기반으로, 현재 티어 아파트를 지도에서 검수하는 전용 뷰입니다."
+            activeTier={mindMapTier}
+            totalCount={mindMapApartments.length}
+            accent="green"
+            onSelect={setMindMapTier}
+          />
           <AdminMapView
             apartments={mindMapApartments}
             memos={memos}
@@ -650,34 +687,14 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
         </div>
       ) : activeTab === 'mindmap' ? (
         <div className="space-y-4">
-          <div className="rounded-lg border border-[#e8e5e0] bg-white p-4">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-semibold text-[#37352f]">관리자 마인드맵</h2>
-                <p className="mt-1 text-xs text-[#787774]">
-                  홈에서는 숨기고, 관리자 안에서만 보는 전용 뷰입니다.
-                </p>
-              </div>
-              <div className="text-xs text-[#787774]">
-                총 {mindMapApartments.length}개 단지
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {TIERS.map((tier) => (
-                <button
-                  key={tier.key}
-                  onClick={() => setMindMapTier(tier.key)}
-                  className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
-                    mindMapTier === tier.key
-                      ? 'border-[#6d4dff] bg-[#efe9ff] text-[#6d4dff]'
-                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
-                  }`}
-                >
-                  {tier.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <TierStickyBar
+            title="관리자 마인드맵"
+            description="홈에서는 숨기고, 관리자 안에서만 보는 전용 뷰입니다."
+            activeTier={mindMapTier}
+            totalCount={mindMapApartments.length}
+            accent="purple"
+            onSelect={setMindMapTier}
+          />
           <MindMapView
             apartments={mindMapApartments}
             memos={memos}

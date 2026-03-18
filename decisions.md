@@ -955,3 +955,15 @@
   - tile images rendered
   - interactive markers rendered
   - current `12` tier example: `388` markers visible, `31` apartments still missing coordinates
+### [2026-03-18 14:52] Sticky tier selector for admin map and mind map
+- Type: admin UX | mobile improvement
+- Replaced the large tier selection block with a compact sticky selector bar for both `지도` and `마인드맵`.
+- The tier bar now:
+  - stays fixed beneath the sticky admin header while scrolling
+  - supports horizontal chip scrolling on mobile
+  - keeps total count visible without forcing the user back to the top
+- Verified with mobile E2E:
+  - admin login success
+  - `지도` tab open success
+  - sticky bar selector rendered
+  - scroll test passed (`deltaY ≈ 3px` after deep scroll)
