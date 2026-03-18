@@ -868,3 +868,16 @@
   - automatic filename now includes the current mind map title and date
 - Result:
   - downloaded file is now a real PDF binary instead of a saved HTML/print helper document
+### [2026-03-18 11:22] Mind map PDF 500 fix after browser E2E
+- Type: admin UI | export | bugfix
+- Root cause:
+  - the PDF API worked with small manual tests but failed in the real admin flow
+  - browser E2E reproduced a `500` on `/api/mindmap-pdf`
+  - the failure came from putting a Korean filename directly into the `Content-Disposition` header
+- Fix:
+  - changed the response header to use an ASCII fallback filename plus `filename*` UTF-8 encoding
+  - kept the visible downloaded filename in Korean for modern browsers
+- Verification:
+  - `npm run build` passed
+  - local browser E2E completed: admin -> mind map -> PDF save
+  - downloaded file opened as a valid PDF and the filename was auto-generated correctly

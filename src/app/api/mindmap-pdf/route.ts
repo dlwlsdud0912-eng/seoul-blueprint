@@ -7,17 +7,27 @@ function sanitizeFilename(filename: string) {
   return filename.replace(/[<>:"/\\|?*\u0000-\u001F]/g, '-');
 }
 
+function toAsciiFilename(filename: string) {
+  return sanitizeFilename(filename)
+    .replace(/[^\x20-\x7E]/g, '-')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '') || 'mindmap.pdf';
+}
+
 export async function POST(request: NextRequest) {
   try {
     const input: MindMapPdfInput = await request.json();
     const pdfBytes = await generateMindMapPdf(input);
     const filename = sanitizeFilename(input.filename || 'mindmap.pdf');
+    const asciiFilename = toAsciiFilename(filename);
+    const encodedFilename = encodeURIComponent(filename);
 
     return new NextResponse(Buffer.from(pdfBytes), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Disposition': `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`,
       },
     });
   } catch (err) {
