@@ -295,7 +295,7 @@ function withTimeout(promise, ms, label) {
 }
 
 async function createBrowserPage(browser) {
-  const page = await browser.newPage();
+  let page = await browser.newPage();
   page.setDefaultNavigationTimeout(25000);
   page.setDefaultTimeout(25000);
   return page;

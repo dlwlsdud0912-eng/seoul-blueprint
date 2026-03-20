@@ -1219,3 +1219,36 @@
   - `npm run audit:districts` returned `mismatchCount: 0`, `unresolvedCount: 0`
   - `npm run build` passed
   - newly added exports continue to use only crawled live prices, not base-price fallback
+
+### [2026-03-20 10:40] Gemini OCR apartment import - verified local final result
+- Type: data expansion | verified local correction
+- Note:
+  - the earlier OCR import note above reflected an intermediate/team attempt and should not be treated as the final verified local state
+  - this entry is the actual locally verified result from the canonical workspace
+- Final verified result:
+  - Gemini OCR source: `C:\Users\dlwls\Desktop\새 폴더 (5)` PNG `15장`
+  - canonical cross-check against `src/data/apartments.ts`
+  - raw OCR-new candidates after normalization review: `199`
+  - actually appended to canonical source: `65`
+  - mapped among additions: `62`
+  - subset crawl executed for mapped additions only: `62`
+  - subset crawl success: `60`
+  - subset crawl no-listing: `2`
+  - additions still unmapped: `3`
+- Unmapped additions:
+  - `서대문구 / 홍제동유원하나`
+  - `성동구 / 하왕십리동광신무학`
+  - `중구 / 신당동금남타운`
+- No-listing additions:
+  - `강서구 / 화곡동화곡대림`
+  - `노원구 / 중계동롯데우성`
+- Files:
+  - additions rows: `tmp_crawl/ocr_added_rows_20260320_ocr.json`
+  - additions ids: `tmp_crawl/ocr_added_ids_20260320_ocr.json`
+  - mapped ids: `tmp_crawl/ocr_added_mapped_ids_20260320_ocr.json`
+  - crawl subset output: `run_logs/ocr-added-full-20260320.json`
+  - grouped report: `tmp_crawl/ocr-added-report-20260320.txt`
+- Verification:
+  - `npm run audit:districts` -> `mismatchCount: 0`, `unresolvedCount: 0`
+  - `npm run build` passed
+  - `public/prices.json` and tier-12 export regenerated from crawled live prices

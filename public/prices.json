@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-03-20T01:19:11.595Z",
-  "updatedAtKR": "2026. 03. 20. 10:19",
-  "totalCount": 1429,
-  "successCount": 926,
-  "failCount": 503,
+  "updatedAt": "2026-03-20T01:38:48.434Z",
+  "updatedAtKR": "2026. 03. 20. 10:38",
+  "totalCount": 1224,
+  "successCount": 983,
+  "failCount": 241,
   "prices": {
     "seongbuk-jangwi-ipk": {
       "price": 12.6,
@@ -18335,6 +18335,1182 @@
       },
       "ownerVerified": true,
       "floorInfo": "중/23",
+      "isFirstFloor": false
+    },
+    "nowon-hrfw2y": {
+      "price": 4.8,
+      "articleCount": 8,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.8,
+          "count": 4,
+          "floorInfo": "13/22",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6.7,
+          "count": 4,
+          "floorInfo": "10/19",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "13/22",
+      "isFirstFloor": false
+    },
+    "gangbuk-jw6lj9": {
+      "price": 4.9,
+      "articleCount": 30,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.9,
+          "count": 15,
+          "floorInfo": "2/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6,
+          "count": 15,
+          "floorInfo": "저/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/20",
+      "isFirstFloor": false
+    },
+    "gangbuk-1wwbl07": {
+      "price": 5.1,
+      "articleCount": 18,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5.1,
+          "count": 18,
+          "floorInfo": "12/13",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "12/13",
+      "isFirstFloor": false
+    },
+    "gwanak-10ynfk": {
+      "price": 4.3,
+      "articleCount": 60,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.3,
+          "count": 30,
+          "floorInfo": "3/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5,
+          "count": 30,
+          "floorInfo": "6/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/15",
+      "isFirstFloor": false
+    },
+    "jungnang-vashbk": {
+      "price": 4.9,
+      "articleCount": 17,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.9,
+          "count": 10,
+          "floorInfo": "12/26",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.15,
+          "count": 7,
+          "floorInfo": "5/23",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "12/26",
+      "isFirstFloor": false
+    },
+    "nowon-111gtg1": {
+      "price": 4.85,
+      "articleCount": 16,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.85,
+          "count": 9,
+          "floorInfo": "1/19",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 7.85,
+          "count": 7,
+          "floorInfo": "3/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/19",
+      "isFirstFloor": true
+    },
+    "jungnang-bp9fsc": {
+      "price": 5.5,
+      "articleCount": 14,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.5,
+          "count": 11,
+          "floorInfo": "18/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.2,
+          "count": 3,
+          "floorInfo": "10/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "18/20",
+      "isFirstFloor": false
+    },
+    "jungnang-9iqt11": {
+      "price": 5,
+      "articleCount": 23,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5,
+          "count": 15,
+          "floorInfo": "12/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6.3,
+          "count": 8,
+          "floorInfo": "10/24",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "12/20",
+      "isFirstFloor": false
+    },
+    "dobong-hj358v": {
+      "price": 5.1,
+      "articleCount": 8,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5.1,
+          "count": 8,
+          "floorInfo": "2/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/15",
+      "isFirstFloor": false
+    },
+    "dobong-1p510v": {
+      "price": 5,
+      "articleCount": 9,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5,
+          "count": 9,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "dobong-1j5axc": {
+      "price": 5.4,
+      "articleCount": 4,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5.4,
+          "count": 4,
+          "floorInfo": "13/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "13/15",
+      "isFirstFloor": false
+    },
+    "dobong-1hgvvfm": {
+      "price": 4.3,
+      "articleCount": 7,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.3,
+          "count": 6,
+          "floorInfo": "2/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5.5,
+          "count": 1,
+          "floorInfo": "9/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/15",
+      "isFirstFloor": false
+    },
+    "dobong-1qu7yjx": {
+      "price": 5.4,
+      "articleCount": 129,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5.4,
+          "count": 129,
+          "floorInfo": "저/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/17",
+      "isFirstFloor": false
+    },
+    "dobong-abduzr": {
+      "price": 4.2,
+      "articleCount": 3,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.2,
+          "count": 1,
+          "floorInfo": "8/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5.7,
+          "count": 2,
+          "floorInfo": "14/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "8/15",
+      "isFirstFloor": false
+    },
+    "nowon-1mianl8": {
+      "price": 5.7,
+      "articleCount": 14,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.7,
+          "count": 2,
+          "floorInfo": "8/25",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8,
+          "count": 12,
+          "floorInfo": "1/26",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "8/25",
+      "isFirstFloor": false
+    },
+    "dobong-2klx08": {
+      "price": 3.8,
+      "articleCount": 27,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 3.8,
+          "count": 15,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 5.05,
+          "count": 12,
+          "floorInfo": "2/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "dobong-4up5eq": {
+      "price": 5.3,
+      "articleCount": 13,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5.3,
+          "count": 13,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "guro-17itzqi": {
+      "price": 4.5,
+      "articleCount": 40,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.5,
+          "count": 20,
+          "floorInfo": "2/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5.8,
+          "count": 20,
+          "floorInfo": "16/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/20",
+      "isFirstFloor": false
+    },
+    "yeongdeungpo-1ff3cg": {
+      "price": 7,
+      "articleCount": 4,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 7,
+          "count": 4,
+          "floorInfo": "14/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "14/15",
+      "isFirstFloor": false
+    },
+    "nowon-9vixk3": {
+      "price": 4.6,
+      "articleCount": 39,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.6,
+          "count": 19,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 7.4,
+          "count": 20,
+          "floorInfo": "저/12",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "guro-1787zxv": {
+      "price": 5.7,
+      "articleCount": 25,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.7,
+          "count": 25,
+          "floorInfo": "1/21",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/21",
+      "isFirstFloor": true
+    },
+    "nowon-106x7pn": {
+      "price": 4.3,
+      "articleCount": 45,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.3,
+          "count": 23,
+          "floorInfo": "2/22",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6.1,
+          "count": 22,
+          "floorInfo": "3/22",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/22",
+      "isFirstFloor": false
+    },
+    "nowon-qjvm40": {
+      "price": 6.1,
+      "articleCount": 22,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.1,
+          "count": 11,
+          "floorInfo": "1/10",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 7.1,
+          "count": 11,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/10",
+      "isFirstFloor": true
+    },
+    "guro-n4hu5g": {
+      "price": 6.3,
+      "articleCount": 16,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.3,
+          "count": 8,
+          "floorInfo": "8/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6.6,
+          "count": 8,
+          "floorInfo": "1/20",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "8/20",
+      "isFirstFloor": false
+    },
+    "nowon-163bdnm": {
+      "price": 6.8,
+      "articleCount": 4,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.8,
+          "count": 4,
+          "floorInfo": "8/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "8/15",
+      "isFirstFloor": false
+    },
+    "nowon-5423mv": {
+      "price": 4.45,
+      "articleCount": 18,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.45,
+          "count": 13,
+          "floorInfo": "2/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5.9,
+          "count": 5,
+          "floorInfo": "3/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "2/15",
+      "isFirstFloor": false
+    },
+    "geumcheon-13fbj9z": {
+      "price": 6.5,
+      "articleCount": 41,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.5,
+          "count": 27,
+          "floorInfo": "5/19",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6.7,
+          "count": 14,
+          "floorInfo": "1/25",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "5/19",
+      "isFirstFloor": false
+    },
+    "jungnang-1n72oyo": {
+      "price": 6,
+      "articleCount": 46,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 6,
+          "count": 46,
+          "floorInfo": "1/22",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/22",
+      "isFirstFloor": true
+    },
+    "guro-1fgihrp": {
+      "price": 6.1,
+      "articleCount": 32,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.1,
+          "count": 6,
+          "floorInfo": "중/24",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6.4,
+          "count": 26,
+          "floorInfo": "12/25",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/24",
+      "isFirstFloor": false
+    },
+    "seongbuk-1gk3epj": {
+      "price": 5,
+      "articleCount": 23,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5,
+          "count": 19,
+          "floorInfo": "1/16",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 6.5,
+          "count": 4,
+          "floorInfo": "12/16",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/16",
+      "isFirstFloor": true
+    },
+    "seongbuk-27b6t0": {
+      "price": 6.9,
+      "articleCount": 11,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 6.9,
+          "count": 11,
+          "floorInfo": "2/19",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/19",
+      "isFirstFloor": false
+    },
+    "jungnang-y1vpu7": {
+      "price": 4.9,
+      "articleCount": 20,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.9,
+          "count": 16,
+          "floorInfo": "1/18",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 6.5,
+          "count": 4,
+          "floorInfo": "3/21",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/18",
+      "isFirstFloor": true
+    },
+    "dongdaemun-o5tjv1": {
+      "price": 7,
+      "articleCount": 9,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 7,
+          "count": 4,
+          "floorInfo": "저/18",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.5,
+          "count": 5,
+          "floorInfo": "중/18",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/18",
+      "isFirstFloor": false
+    },
+    "seongbuk-op8v5k": {
+      "price": 7.5,
+      "articleCount": 16,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 7.5,
+          "count": 8,
+          "floorInfo": "5/24",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8,
+          "count": 8,
+          "floorInfo": "고/23",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "5/24",
+      "isFirstFloor": false
+    },
+    "guro-w0bkpi": {
+      "price": 5.85,
+      "articleCount": 26,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.85,
+          "count": 10,
+          "floorInfo": "2/22",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.5,
+          "count": 16,
+          "floorInfo": "11/16",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/22",
+      "isFirstFloor": false
+    },
+    "jungnang-iipg76": {
+      "price": 6.7,
+      "articleCount": 4,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 6.7,
+          "count": 4,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/15",
+      "isFirstFloor": false
+    },
+    "yangcheon-1e98c53": {
+      "price": 7.5,
+      "articleCount": 6,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 7.5,
+          "count": 4,
+          "floorInfo": "중/17",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 9.8,
+          "count": 2,
+          "floorInfo": "중/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "중/17",
+      "isFirstFloor": false
+    },
+    "nowon-12gjlr4": {
+      "price": 8.5,
+      "articleCount": 12,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8.5,
+          "count": 12,
+          "floorInfo": "5/10",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "5/10",
+      "isFirstFloor": false
+    },
+    "guro-19pmvk2": {
+      "price": 10.7,
+      "articleCount": 8,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 10.7,
+          "count": 8,
+          "floorInfo": "중/13",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/13",
+      "isFirstFloor": false
+    },
+    "dongdaemun-kvkwze": {
+      "price": 9.95,
+      "articleCount": 6,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.95,
+          "count": 1,
+          "floorInfo": "15/25",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 10.2,
+          "count": 5,
+          "floorInfo": "저/25",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "15/25",
+      "isFirstFloor": false
+    },
+    "dongdaemun-on7k25": {
+      "price": 12,
+      "articleCount": 3,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 12,
+          "count": 3,
+          "floorInfo": "저/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/17",
+      "isFirstFloor": false
+    },
+    "seongdong-1bundw0": {
+      "price": 12,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 12,
+          "count": 1,
+          "floorInfo": "3/24",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/24",
+      "isFirstFloor": false
+    },
+    "jongno-1tvvop2": {
+      "price": 11.6,
+      "articleCount": 12,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 11.6,
+          "count": 12,
+          "floorInfo": "19/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "19/20",
+      "isFirstFloor": false
+    },
+    "dongjak-1ewrmkg": {
+      "price": 12,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 12,
+          "count": 1,
+          "floorInfo": "3/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/17",
+      "isFirstFloor": false
+    },
+    "mapo-q9u7lp": {
+      "price": 12.8,
+      "articleCount": 48,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 12.8,
+          "count": 48,
+          "floorInfo": "4/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "4/20",
+      "isFirstFloor": false
+    },
+    "gangdong-1prrt4u": {
+      "price": 12,
+      "articleCount": 18,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 12,
+          "count": 13,
+          "floorInfo": "저/27",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 14,
+          "count": 5,
+          "floorInfo": "저/27",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/27",
+      "isFirstFloor": false
+    },
+    "seongdong-ylp9tq": {
+      "price": 13.5,
+      "articleCount": 19,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 13.5,
+          "count": 7,
+          "floorInfo": "3/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 15,
+          "count": 12,
+          "floorInfo": "12/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/15",
+      "isFirstFloor": false
+    },
+    "songpa-11mkjpt": {
+      "price": 14,
+      "articleCount": 13,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 14,
+          "count": 13,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "gangdong-1vxfnwt": {
+      "price": 14.8,
+      "articleCount": 60,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 14.8,
+          "count": 60,
+          "floorInfo": "4/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "4/17",
+      "isFirstFloor": false
+    },
+    "dongjak-130565u": {
+      "price": 14.8,
+      "articleCount": 16,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 14.8,
+          "count": 16,
+          "floorInfo": "9/18",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "9/18",
+      "isFirstFloor": false
+    },
+    "seodaemun-ov7ko": {
+      "price": 12.9,
+      "articleCount": 82,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 12.9,
+          "count": 15,
+          "floorInfo": "14/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 14.5,
+          "count": 67,
+          "floorInfo": "고/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "14/15",
+      "isFirstFloor": false
+    },
+    "seongdong-pclie5": {
+      "price": 14.9,
+      "articleCount": 14,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 14.9,
+          "count": 14,
+          "floorInfo": "2/21",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/21",
+      "isFirstFloor": false
+    },
+    "mapo-dqa742": {
+      "price": 15,
+      "articleCount": 10,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 15,
+          "count": 10,
+          "floorInfo": "2/23",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/23",
+      "isFirstFloor": false
+    },
+    "dongjak-1kga8di": {
+      "price": 14.5,
+      "articleCount": 28,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 14.5,
+          "count": 15,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 16.5,
+          "count": 13,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "songpa-1geyvo9": {
+      "price": 14.2,
+      "articleCount": 38,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 14.2,
+          "count": 18,
+          "floorInfo": "고/10",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 15.95,
+          "count": 20,
+          "floorInfo": "저/18",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "고/10",
+      "isFirstFloor": false
+    },
+    "gwangjin-16xmx29": {
+      "price": 15.5,
+      "articleCount": 58,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 15.5,
+          "count": 33,
+          "floorInfo": "14/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 17.8,
+          "count": 25,
+          "floorInfo": "중/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "14/15",
+      "isFirstFloor": false
+    },
+    "mapo-1tqa6af": {
+      "price": 15.2,
+      "articleCount": 5,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 15.2,
+          "count": 1,
+          "floorInfo": "6/16",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 17.5,
+          "count": 4,
+          "floorInfo": "4/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "6/16",
+      "isFirstFloor": false
+    },
+    "mapo-mwzbnj": {
+      "price": 17.5,
+      "articleCount": 16,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 17.5,
+          "count": 5,
+          "floorInfo": "10/28",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 19,
+          "count": 11,
+          "floorInfo": "1/28",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "10/28",
+      "isFirstFloor": false
+    },
+    "gwangjin-1y4bqp8": {
+      "price": 16,
+      "articleCount": 5,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 16,
+          "count": 1,
+          "floorInfo": "고/22",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 18.3,
+          "count": 4,
+          "floorInfo": "1/22",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/22",
+      "isFirstFloor": false
+    },
+    "seongdong-1hcwkvl": {
+      "price": 16.95,
+      "articleCount": 12,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 16.95,
+          "count": 2,
+          "floorInfo": "2/9",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 19.5,
+          "count": 10,
+          "floorInfo": "15/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "2/9",
       "isFirstFloor": false
     }
   }
