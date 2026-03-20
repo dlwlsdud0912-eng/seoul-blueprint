@@ -25,3 +25,12 @@
 ## Export Safety
 - Exports must stay copy/paste-safe and immediately viewable.
 - HTML/PDF exports must never include uncrawled `basePrice` fallback rows.
+
+## Team Mode And Memory
+- This project uses the workspace-level team mode defaults in:
+  - `C:\Users\dlwls\Desktop\first codex\AGENTS.md`
+- For session continuity, keep these files current:
+  - `C:\Users\dlwls\Desktop\first codex\memory.md`
+  - `C:\Users\dlwls\Desktop\first codex\decisions.md`
+  - `C:\Users\dlwls\Desktop\first codex\team_log.md`
+- Important finalized corrections must be synced into canonical source files, not left only in temporary normalization layers.

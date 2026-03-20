@@ -1185,3 +1185,37 @@
   - `npm run build` passed
   - `npm run audit:districts` returned `mismatchCount: 0`, `unresolvedCount: 0`
   - tier-12 HTML regenerated successfully
+
+### [2026-03-20 10:35] Gemini OCR apartment import and subset crawl
+- Type: data expansion | canonical source update
+- Goal:
+  - read apartment-name screenshots from `C:\Users\dlwls\Desktop\새 폴더 (5)`
+  - cross-check against canonical `src/data/apartments.ts`
+  - add only new apartment rows, map only the new rows, crawl only the newly mapped rows
+- Fix:
+  - used Gemini OCR over `15` PNG screenshots and extracted `556` row candidates
+  - compared OCR rows against current `apartments.ts` with conservative district/name normalization
+  - identified `199` new rows and appended them directly into canonical `src/data/apartments.ts`
+  - mapped only those `199` new rows:
+    - success `156`
+    - unmapped `43`
+  - crawled only the newly mapped subset with `5` workers:
+    - mapped subset `156`
+    - subset crawl updated `135` live price entries
+  - removed `9` wrongly matched generic-name rows from live state by clearing their `naverComplexId` and deleting their subset prices:
+    - `ocr-20260131-004`
+    - `ocr-20260131-027`
+    - `ocr-20260131-076`
+    - `ocr-20260131-107`
+    - `ocr-20260131-117`
+    - `ocr-20260131-120`
+    - `ocr-20260131-138`
+    - `ocr-20260131-140`
+    - `ocr-20260131-190`
+  - generated review files:
+    - `tmp_crawl/ocr-additions-20260320.json`
+    - `tmp_crawl/ocr-additions-20260320.txt`
+- Verification:
+  - `npm run audit:districts` returned `mismatchCount: 0`, `unresolvedCount: 0`
+  - `npm run build` passed
+  - newly added exports continue to use only crawled live prices, not base-price fallback

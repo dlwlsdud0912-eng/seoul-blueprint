@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-03-20T00:20:21.198Z",
-  "updatedAtKR": "2026. 03. 20. 09:20",
-  "totalCount": 883,
-  "successCount": 797,
-  "failCount": 86,
+  "updatedAt": "2026-03-20T01:19:11.595Z",
+  "updatedAtKR": "2026. 03. 20. 10:19",
+  "totalCount": 1429,
+  "successCount": 926,
+  "failCount": 503,
   "prices": {
     "seongbuk-jangwi-ipk": {
       "price": 12.6,
@@ -15809,6 +15809,2532 @@
       },
       "ownerVerified": false,
       "floorInfo": "고/12",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-001": {
+      "price": 5.5,
+      "articleCount": 11,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.5,
+          "count": 9,
+          "floorInfo": "3/23",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.8,
+          "count": 2,
+          "floorInfo": "21/21",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/23",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-006": {
+      "price": 4.3,
+      "articleCount": 60,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.3,
+          "count": 30,
+          "floorInfo": "3/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5,
+          "count": 30,
+          "floorInfo": "6/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-011": {
+      "price": 5.1,
+      "articleCount": 8,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5.1,
+          "count": 8,
+          "floorInfo": "2/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-016": {
+      "price": 4.95,
+      "articleCount": 79,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.95,
+          "count": 40,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 6.7,
+          "count": 39,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-021": {
+      "price": 5.7,
+      "articleCount": 14,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.7,
+          "count": 2,
+          "floorInfo": "8/25",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8,
+          "count": 12,
+          "floorInfo": "1/26",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "8/25",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-031": {
+      "price": 1.7,
+      "articleCount": 57,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 1.7,
+          "count": 39,
+          "floorInfo": "24/25",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 2.45,
+          "count": 18,
+          "floorInfo": "3/25",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "24/25",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-036": {
+      "price": 6.8,
+      "articleCount": 4,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.8,
+          "count": 4,
+          "floorInfo": "8/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "8/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-046": {
+      "price": 6.5,
+      "articleCount": 3,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.5,
+          "count": 3,
+          "floorInfo": "9/14",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "9/14",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-051": {
+      "price": 5.1,
+      "articleCount": 5,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.1,
+          "count": 3,
+          "floorInfo": "1/20",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 7.3,
+          "count": 2,
+          "floorInfo": "저/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/20",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-056": {
+      "price": 6.8,
+      "articleCount": 47,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.8,
+          "count": 14,
+          "floorInfo": "중/25",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.5,
+          "count": 33,
+          "floorInfo": "저/21",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/25",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-061": {
+      "price": 7.1,
+      "articleCount": 4,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 7.1,
+          "count": 1,
+          "floorInfo": "중/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.5,
+          "count": 3,
+          "floorInfo": "저/14",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "중/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-066": {
+      "price": 7,
+      "articleCount": 33,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 7,
+          "count": 33,
+          "floorInfo": "1/17",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/17",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-071": {
+      "price": 2.6,
+      "articleCount": 137,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 2.6,
+          "count": 88,
+          "floorInfo": "3/16",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 3.3,
+          "count": 49,
+          "floorInfo": "2/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/16",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-081": {
+      "price": 8.1,
+      "articleCount": 15,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8.1,
+          "count": 15,
+          "floorInfo": "고/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-087": {
+      "price": 8.5,
+      "articleCount": 12,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 8.5,
+          "count": 8,
+          "floorInfo": "5/19",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 9.5,
+          "count": 4,
+          "floorInfo": "2/19",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "5/19",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-092": {
+      "price": 8.7,
+      "articleCount": 4,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 8.7,
+          "count": 2,
+          "floorInfo": "7/13",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 9.4,
+          "count": 2,
+          "floorInfo": "저/12",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "7/13",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-097": {
+      "price": 9,
+      "articleCount": 38,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 9,
+          "count": 38,
+          "floorInfo": "1/24",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/24",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-103": {
+      "price": 9.1,
+      "articleCount": 10,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.1,
+          "count": 4,
+          "floorInfo": "고/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 10.3,
+          "count": 6,
+          "floorInfo": "중/19",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-111": {
+      "price": 11,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 11,
+          "count": 1,
+          "floorInfo": "저/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/17",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-122": {
+      "price": 9.4,
+      "articleCount": 59,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.4,
+          "count": 17,
+          "floorInfo": "12/23",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 12,
+          "count": 42,
+          "floorInfo": "5/22",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "12/23",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-130": {
+      "price": 9.1,
+      "articleCount": 9,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.1,
+          "count": 2,
+          "floorInfo": "중/8",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 10,
+          "count": 7,
+          "floorInfo": "고/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/8",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-142": {
+      "price": 11.5,
+      "articleCount": 17,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 11.5,
+          "count": 15,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 13.2,
+          "count": 2,
+          "floorInfo": "중/13",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-181": {
+      "price": 14.5,
+      "articleCount": 28,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 14.5,
+          "count": 15,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 16.5,
+          "count": 13,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-187": {
+      "price": 17.2,
+      "articleCount": 24,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 17.2,
+          "count": 12,
+          "floorInfo": "중/18",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 19.5,
+          "count": 12,
+          "floorInfo": "저/9",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/18",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-193": {
+      "price": 17.5,
+      "articleCount": 16,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 17.5,
+          "count": 5,
+          "floorInfo": "10/28",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 19,
+          "count": 11,
+          "floorInfo": "1/28",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "10/28",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-198": {
+      "price": 15.9,
+      "articleCount": 34,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 15.9,
+          "count": 21,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 19,
+          "count": 13,
+          "floorInfo": "9/14",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-002": {
+      "price": 4.8,
+      "articleCount": 8,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.8,
+          "count": 4,
+          "floorInfo": "13/22",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6.7,
+          "count": 4,
+          "floorInfo": "10/19",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "13/22",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-007": {
+      "price": 4.9,
+      "articleCount": 17,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.9,
+          "count": 10,
+          "floorInfo": "12/26",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.15,
+          "count": 7,
+          "floorInfo": "5/23",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "12/26",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-012": {
+      "price": 2,
+      "articleCount": 65,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 2,
+          "count": 47,
+          "floorInfo": "1/25",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 2.95,
+          "count": 18,
+          "floorInfo": "1/25",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/25",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-017": {
+      "price": 5.4,
+      "articleCount": 128,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5.4,
+          "count": 128,
+          "floorInfo": "저/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/17",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-022": {
+      "price": 3.8,
+      "articleCount": 27,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 3.8,
+          "count": 15,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 5.05,
+          "count": 12,
+          "floorInfo": "2/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-032": {
+      "price": 4.3,
+      "articleCount": 45,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.3,
+          "count": 23,
+          "floorInfo": "2/22",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6.1,
+          "count": 22,
+          "floorInfo": "3/22",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/22",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-037": {
+      "price": 4.45,
+      "articleCount": 18,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.45,
+          "count": 13,
+          "floorInfo": "2/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5.9,
+          "count": 5,
+          "floorInfo": "3/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "2/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-042": {
+      "price": 6.2,
+      "articleCount": 23,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.2,
+          "count": 14,
+          "floorInfo": "2/14",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.1,
+          "count": 9,
+          "floorInfo": "2/14",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/14",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-047": {
+      "price": 7.55,
+      "articleCount": 5,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 7.55,
+          "count": 5,
+          "floorInfo": "3/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-052": {
+      "price": 6.9,
+      "articleCount": 11,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 6.9,
+          "count": 11,
+          "floorInfo": "2/19",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/19",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-057": {
+      "price": 4.9,
+      "articleCount": 20,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.9,
+          "count": 16,
+          "floorInfo": "1/18",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 6.5,
+          "count": 4,
+          "floorInfo": "3/21",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/18",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-062": {
+      "price": 3.1,
+      "articleCount": 2,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 3.1,
+          "count": 2,
+          "floorInfo": "3/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-067": {
+      "price": 21,
+      "articleCount": 5,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 21,
+          "count": 5,
+          "floorInfo": "13/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "13/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-072": {
+      "price": 7.4,
+      "articleCount": 16,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 7.4,
+          "count": 16,
+          "floorInfo": "1/22",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/22",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-077": {
+      "price": 7.3,
+      "articleCount": 14,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 7.3,
+          "count": 11,
+          "floorInfo": "7/19",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.5,
+          "count": 3,
+          "floorInfo": "저/19",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "7/19",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-083": {
+      "price": 8.2,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8.2,
+          "count": 1,
+          "floorInfo": "중/22",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/22",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-088": {
+      "price": 9.5,
+      "articleCount": 5,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 9.5,
+          "count": 5,
+          "floorInfo": "4/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "4/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-093": {
+      "price": 8.9,
+      "articleCount": 22,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8.9,
+          "count": 22,
+          "floorInfo": "17/23",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "17/23",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-098": {
+      "price": 9.2,
+      "articleCount": 21,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.2,
+          "count": 20,
+          "floorInfo": "19/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 11.5,
+          "count": 1,
+          "floorInfo": "10/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "19/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-104": {
+      "price": 8.3,
+      "articleCount": 62,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8.3,
+          "count": 62,
+          "floorInfo": "저/9",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/9",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-113": {
+      "price": 9.5,
+      "articleCount": 12,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.5,
+          "count": 1,
+          "floorInfo": "6/11",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 11.7,
+          "count": 11,
+          "floorInfo": "중/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "6/11",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-134": {
+      "price": 9.9,
+      "articleCount": 85,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.9,
+          "count": 51,
+          "floorInfo": "9/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 11,
+          "count": 34,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "9/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-154": {
+      "price": 13.8,
+      "articleCount": 132,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 13.8,
+          "count": 111,
+          "floorInfo": "고/35",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 16,
+          "count": 21,
+          "floorInfo": "저/35",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/35",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-182": {
+      "price": 16,
+      "articleCount": 5,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 16,
+          "count": 5,
+          "floorInfo": "3/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/17",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-188": {
+      "price": 14.2,
+      "articleCount": 38,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 14.2,
+          "count": 18,
+          "floorInfo": "고/10",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 16,
+          "count": 20,
+          "floorInfo": "3/18",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "고/10",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-194": {
+      "price": 16,
+      "articleCount": 5,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 16,
+          "count": 1,
+          "floorInfo": "고/22",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 18.3,
+          "count": 4,
+          "floorInfo": "1/22",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/22",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-199": {
+      "price": 18,
+      "articleCount": 14,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 18,
+          "count": 8,
+          "floorInfo": "18/21",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 22,
+          "count": 6,
+          "floorInfo": "중/21",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "18/21",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-003": {
+      "price": 5.15,
+      "articleCount": 134,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.15,
+          "count": 12,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5.8,
+          "count": 122,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-008": {
+      "price": 5.2,
+      "articleCount": 20,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5.2,
+          "count": 20,
+          "floorInfo": "고/19",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/19",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-013": {
+      "price": 5.29,
+      "articleCount": 26,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5.29,
+          "count": 26,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-018": {
+      "price": 5.3,
+      "articleCount": 32,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.3,
+          "count": 21,
+          "floorInfo": "1/18",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 6.5,
+          "count": 11,
+          "floorInfo": "9/13",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/18",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-023": {
+      "price": 5.3,
+      "articleCount": 13,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 5.3,
+          "count": 13,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/15",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-028": {
+      "price": 4.05,
+      "articleCount": 45,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.05,
+          "count": 24,
+          "floorInfo": "2/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5.7,
+          "count": 21,
+          "floorInfo": "2/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-033": {
+      "price": 3.5,
+      "articleCount": 145,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 3.5,
+          "count": 90,
+          "floorInfo": "13/18",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5.4,
+          "count": 55,
+          "floorInfo": "1/18",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "13/18",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-038": {
+      "price": 6.3,
+      "articleCount": 46,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 6.3,
+          "count": 46,
+          "floorInfo": "6/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "6/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-043": {
+      "price": 5,
+      "articleCount": 23,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5,
+          "count": 19,
+          "floorInfo": "1/16",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 6.5,
+          "count": 4,
+          "floorInfo": "12/16",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/16",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-048": {
+      "price": 8,
+      "articleCount": 4,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8,
+          "count": 4,
+          "floorInfo": "중/11",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "중/11",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-053": {
+      "price": 6.7,
+      "articleCount": 49,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 6.7,
+          "count": 49,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-058": {
+      "price": 6.7,
+      "articleCount": 6,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.7,
+          "count": 2,
+          "floorInfo": "1/12",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 8,
+          "count": 4,
+          "floorInfo": "4/12",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/12",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-068": {
+      "price": 6.7,
+      "articleCount": 4,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 6.7,
+          "count": 4,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-073": {
+      "price": 6.6,
+      "articleCount": 3,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.6,
+          "count": 2,
+          "floorInfo": "중/12",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.5,
+          "count": 1,
+          "floorInfo": "1/11",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "중/12",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-078": {
+      "price": 8.3,
+      "articleCount": 93,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8.3,
+          "count": 93,
+          "floorInfo": "2/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-084": {
+      "price": 8.7,
+      "articleCount": 53,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 8.7,
+          "count": 26,
+          "floorInfo": "3/14",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 9.7,
+          "count": 27,
+          "floorInfo": "2/14",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/14",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-089": {
+      "price": 9,
+      "articleCount": 66,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9,
+          "count": 31,
+          "floorInfo": "저/11",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 9.6,
+          "count": 35,
+          "floorInfo": "2/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/11",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-094": {
+      "price": 3.7,
+      "articleCount": 23,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 3.7,
+          "count": 23,
+          "floorInfo": "저/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-099": {
+      "price": 9.2,
+      "articleCount": 9,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.2,
+          "count": 5,
+          "floorInfo": "중/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 9.6,
+          "count": 4,
+          "floorInfo": "1/14",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-106": {
+      "price": 10,
+      "articleCount": 15,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 10,
+          "count": 15,
+          "floorInfo": "15/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "15/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-116": {
+      "price": 9.2,
+      "articleCount": 9,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.2,
+          "count": 5,
+          "floorInfo": "2/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 10.5,
+          "count": 4,
+          "floorInfo": "2/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-126": {
+      "price": 10,
+      "articleCount": 7,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 10,
+          "count": 2,
+          "floorInfo": "3/23",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 12,
+          "count": 5,
+          "floorInfo": "6/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/23",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-136": {
+      "price": 11.3,
+      "articleCount": 22,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 11.3,
+          "count": 22,
+          "floorInfo": "9/21",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "9/21",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-156": {
+      "price": 13.5,
+      "articleCount": 114,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 13.5,
+          "count": 32,
+          "floorInfo": "4/17",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 15,
+          "count": 82,
+          "floorInfo": "17/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "4/17",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-183": {
+      "price": 16,
+      "articleCount": 11,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 16,
+          "count": 4,
+          "floorInfo": "11/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 18.5,
+          "count": 7,
+          "floorInfo": "11/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "11/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-009": {
+      "price": 5.5,
+      "articleCount": 14,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.5,
+          "count": 11,
+          "floorInfo": "18/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.2,
+          "count": 3,
+          "floorInfo": "10/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "18/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-014": {
+      "price": 5.4,
+      "articleCount": 10,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.4,
+          "count": 10,
+          "floorInfo": "8/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "8/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-019": {
+      "price": 24.5,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 24.5,
+          "count": 1,
+          "floorInfo": "8/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "8/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-024": {
+      "price": 5.5,
+      "articleCount": 11,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.5,
+          "count": 9,
+          "floorInfo": "3/23",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.8,
+          "count": 2,
+          "floorInfo": "21/21",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/23",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-029": {
+      "price": 6,
+      "articleCount": 29,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6,
+          "count": 7,
+          "floorInfo": "고/17",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.1,
+          "count": 22,
+          "floorInfo": "3/18",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/17",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-034": {
+      "price": 1.5,
+      "articleCount": 14,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 1.5,
+          "count": 1,
+          "floorInfo": "1/20",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 1.59,
+          "count": 13,
+          "floorInfo": "중/24",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "1/20",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-039": {
+      "price": 8.4,
+      "articleCount": 62,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 8.4,
+          "count": 2,
+          "floorInfo": "중/23",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.9,
+          "count": 60,
+          "floorInfo": "저/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/23",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-044": {
+      "price": 7.5,
+      "articleCount": 4,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 7.5,
+          "count": 2,
+          "floorInfo": "중/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.2,
+          "count": 2,
+          "floorInfo": "3/14",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-049": {
+      "price": 7.4,
+      "articleCount": 26,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 7.4,
+          "count": 3,
+          "floorInfo": "고/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.2,
+          "count": 23,
+          "floorInfo": "9/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-059": {
+      "price": 6.7,
+      "articleCount": 54,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.7,
+          "count": 32,
+          "floorInfo": "1/20",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 7.8,
+          "count": 22,
+          "floorInfo": "저/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/20",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-064": {
+      "price": 6.2,
+      "articleCount": 43,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.2,
+          "count": 12,
+          "floorInfo": "2/19",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.1,
+          "count": 31,
+          "floorInfo": "6/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/19",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-069": {
+      "price": 6.4,
+      "articleCount": 49,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.4,
+          "count": 25,
+          "floorInfo": "4/5",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.3,
+          "count": 24,
+          "floorInfo": "1/5",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "4/5",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-074": {
+      "price": 7.7,
+      "articleCount": 10,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 7.7,
+          "count": 9,
+          "floorInfo": "고/26",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 13,
+          "count": 1,
+          "floorInfo": "고/26",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/26",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-079": {
+      "price": 8.5,
+      "articleCount": 12,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8.5,
+          "count": 12,
+          "floorInfo": "5/10",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "5/10",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-085": {
+      "price": 7.1,
+      "articleCount": 18,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 7.1,
+          "count": 2,
+          "floorInfo": "저/10",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.8,
+          "count": 16,
+          "floorInfo": "3/10",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "저/10",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-090": {
+      "price": 9,
+      "articleCount": 21,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 9,
+          "count": 21,
+          "floorInfo": "7/24",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "7/24",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-095": {
+      "price": 9,
+      "articleCount": 128,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9,
+          "count": 13,
+          "floorInfo": "고/26",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 11,
+          "count": 115,
+          "floorInfo": "3/29",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/26",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-100": {
+      "price": 9.6,
+      "articleCount": 23,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 9.6,
+          "count": 23,
+          "floorInfo": "중/14",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/14",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-127": {
+      "price": 12,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 12,
+          "count": 1,
+          "floorInfo": "3/24",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/24",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-185": {
+      "price": 17.5,
+      "articleCount": 47,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 17.5,
+          "count": 47,
+          "floorInfo": "중/25",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/25",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-191": {
+      "price": 15.2,
+      "articleCount": 5,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 15.2,
+          "count": 1,
+          "floorInfo": "6/16",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 17.5,
+          "count": 4,
+          "floorInfo": "4/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "6/16",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-196": {
+      "price": 19,
+      "articleCount": 24,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 19,
+          "count": 9,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 21,
+          "count": 15,
+          "floorInfo": "중/19",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-005": {
+      "price": 6,
+      "articleCount": 8,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6,
+          "count": 2,
+          "floorInfo": "13/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8,
+          "count": 6,
+          "floorInfo": "10/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "13/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-010": {
+      "price": 5,
+      "articleCount": 23,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5,
+          "count": 15,
+          "floorInfo": "12/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6.3,
+          "count": 8,
+          "floorInfo": "10/24",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "12/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-015": {
+      "price": 52,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 52,
+          "count": 1,
+          "floorInfo": "저/13",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": false,
+      "floorInfo": "저/13",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-020": {
+      "price": 5.6,
+      "articleCount": 25,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.6,
+          "count": 9,
+          "floorInfo": "저/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7,
+          "count": 16,
+          "floorInfo": "2/16",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-025": {
+      "price": 4.5,
+      "articleCount": 40,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 4.5,
+          "count": 20,
+          "floorInfo": "2/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 5.8,
+          "count": 20,
+          "floorInfo": "16/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-030": {
+      "price": 5.8,
+      "articleCount": 58,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 5.8,
+          "count": 45,
+          "floorInfo": "1/18",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 6.3,
+          "count": 13,
+          "floorInfo": "6/22",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/18",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-035": {
+      "price": 6.3,
+      "articleCount": 16,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.3,
+          "count": 8,
+          "floorInfo": "8/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 6.6,
+          "count": 8,
+          "floorInfo": "1/20",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "8/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-040": {
+      "price": 2,
+      "articleCount": 65,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 2,
+          "count": 47,
+          "floorInfo": "1/25",
+          "isFirstFloor": true
+        },
+        "84": {
+          "price": 2.95,
+          "count": 18,
+          "floorInfo": "1/25",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "1/25",
+      "isFirstFloor": true
+    },
+    "ocr-20260131-045": {
+      "price": 8.5,
+      "articleCount": 16,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8.5,
+          "count": 16,
+          "floorInfo": "4/16",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "4/16",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-050": {
+      "price": 6.7,
+      "articleCount": 5,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.7,
+          "count": 2,
+          "floorInfo": "18/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.1,
+          "count": 3,
+          "floorInfo": "2/24",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "18/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-055": {
+      "price": 6.8,
+      "articleCount": 22,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 6.8,
+          "count": 2,
+          "floorInfo": "5/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 7.5,
+          "count": 20,
+          "floorInfo": "8/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "5/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-060": {
+      "price": 0.95,
+      "articleCount": 17,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 0.95,
+          "count": 17,
+          "floorInfo": "6/6",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "6/6",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-065": {
+      "price": 7.5,
+      "articleCount": 91,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 7.5,
+          "count": 67,
+          "floorInfo": "저/38",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 9.5,
+          "count": 24,
+          "floorInfo": "32/39",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/38",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-070": {
+      "price": 8,
+      "articleCount": 1,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8,
+          "count": 1,
+          "floorInfo": "3/6",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "3/6",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-075": {
+      "price": 8.3,
+      "articleCount": 32,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 8.3,
+          "count": 10,
+          "floorInfo": "12/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.7,
+          "count": 22,
+          "floorInfo": "1/15",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "12/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-080": {
+      "price": 8.5,
+      "articleCount": 87,
+      "areaName": "84㎡",
+      "sizes": {
+        "84": {
+          "price": 8.5,
+          "count": 87,
+          "floorInfo": "2/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-086": {
+      "price": 8.8,
+      "articleCount": 83,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 8.8,
+          "count": 12,
+          "floorInfo": "6/10",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 10,
+          "count": 71,
+          "floorInfo": "1/12",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "6/10",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-091": {
+      "price": 8.9,
+      "articleCount": 24,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 8.9,
+          "count": 4,
+          "floorInfo": "중/18",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 10,
+          "count": 20,
+          "floorInfo": "14/16",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/18",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-096": {
+      "price": 9,
+      "articleCount": 42,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9,
+          "count": 7,
+          "floorInfo": "2/11",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 10.9,
+          "count": 35,
+          "floorInfo": "1/20",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "2/11",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-101": {
+      "price": 10,
+      "articleCount": 31,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 10,
+          "count": 10,
+          "floorInfo": "중/13",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 11.5,
+          "count": 21,
+          "floorInfo": "저/17",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/13",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-109": {
+      "price": 9.2,
+      "articleCount": 20,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 9.2,
+          "count": 6,
+          "floorInfo": "저/11",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 10.4,
+          "count": 14,
+          "floorInfo": "고/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "저/11",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-129": {
+      "price": 12,
+      "articleCount": 101,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 12,
+          "count": 28,
+          "floorInfo": "고/12",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 12.5,
+          "count": 73,
+          "floorInfo": "저/12",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/12",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-162": {
+      "price": 16,
+      "articleCount": 93,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 16,
+          "count": 4,
+          "floorInfo": "고/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 16.3,
+          "count": 89,
+          "floorInfo": "저/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-186": {
+      "price": 17.5,
+      "articleCount": 41,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 17.5,
+          "count": 7,
+          "floorInfo": "고/15",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 19.5,
+          "count": 34,
+          "floorInfo": "3/15",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "고/15",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-192": {
+      "price": 18.2,
+      "articleCount": 14,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 18.2,
+          "count": 2,
+          "floorInfo": "중/20",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 18.7,
+          "count": 12,
+          "floorInfo": "1/20",
+          "isFirstFloor": true
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/20",
+      "isFirstFloor": false
+    },
+    "ocr-20260131-197": {
+      "price": 8.4,
+      "articleCount": 63,
+      "areaName": "59㎡",
+      "sizes": {
+        "59": {
+          "price": 8.4,
+          "count": 2,
+          "floorInfo": "중/23",
+          "isFirstFloor": false
+        },
+        "84": {
+          "price": 8.9,
+          "count": 61,
+          "floorInfo": "저/20",
+          "isFirstFloor": false
+        }
+      },
+      "ownerVerified": true,
+      "floorInfo": "중/23",
       "isFirstFloor": false
     }
   }
