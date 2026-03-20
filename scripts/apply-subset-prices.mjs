@@ -103,8 +103,11 @@ function main() {
   fs.writeFileSync(path.resolve(process.cwd(), targetFile), JSON.stringify(target, null, 2), 'utf-8');
 
   try {
-    const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-    execFileSync(npxCommand, ['tsx', 'scripts/generate-premium-tier12-html.mjs'], {
+    const command = process.platform === 'win32' ? 'cmd.exe' : 'npx';
+    const args = process.platform === 'win32'
+      ? ['/c', 'npx', 'tsx', 'scripts/generate-premium-tier12-html.mjs']
+      : ['tsx', 'scripts/generate-premium-tier12-html.mjs'];
+    execFileSync(command, args, {
       cwd: process.cwd(),
       stdio: 'inherit',
     });

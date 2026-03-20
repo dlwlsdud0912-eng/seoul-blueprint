@@ -1155,3 +1155,33 @@
   - `npm run build` passed
   - `npx tsx scripts/generate-premium-tier12-html.mjs` passed
   - `npm run audit:districts` returned `mismatchCount: 0`, `unresolvedCount: 0`
+
+### [2026-03-20 09:20] Raw apartments sync and full recrawl refresh
+- Type: canonical source sync | crawl stability
+- Goal:
+  - stop relying on a display-only correction layer
+  - make `apartments.ts` itself the canonical corrected source
+  - keep full crawl outputs, admin views, and exports synchronized from the same dataset
+- Fix:
+  - synced `src/data/apartments.ts` from the normalized catalog and removed:
+    - `27` district/name override dependencies
+    - `1` hidden alias row
+    - `3` region exclusion rows
+  - simplified `src/data/catalog-apartments.ts` so it now mirrors the raw canonical source
+  - cleared `src/data/region-exclusions.ts` because the non-Seoul/alias rows were removed from the source
+  - added `scripts/sync-catalog-to-apartments.mjs` for repeatable source synchronization when large mapping fixes happen
+  - hardened `scripts/crawl-prices-browser.mjs` with per-apartment timeout recovery so a single stuck page does not freeze a worker
+  - fixed Windows regeneration hooks in:
+    - `scripts/merge-price-results.mjs`
+    - `scripts/apply-subset-prices.mjs`
+    so HTML export regeneration works after crawl/apply
+- Crawl result:
+  - full recrawl executed with `3` workers
+  - source total: `883`
+  - success: `797`
+  - fail/no-listing: `86`
+  - updated `public/prices.json` timestamp: `2026. 03. 20. 09:20`
+- Verification:
+  - `npm run build` passed
+  - `npm run audit:districts` returned `mismatchCount: 0`, `unresolvedCount: 0`
+  - tier-12 HTML regenerated successfully

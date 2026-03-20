@@ -35,6 +35,7 @@ const workerIndex = parsePositiveInt(getArgValue('--worker-index'), 1);
 const delayMs = parsePositiveInt(getArgValue('--delay-ms'), 2000);
 const startupDelayMs = parsePositiveInt(getArgValue('--startup-delay-ms'), 0);
 const maxApartments = parsePositiveInt(getArgValue('--max-apartments'), 0);
+const apartmentTimeoutMs = parsePositiveInt(getArgValue('--apartment-timeout-ms'), 45000);
 const outputArg = getArgValue('--output');
 const idsFileArg = getArgValue('--ids-file');
 
@@ -79,7 +80,7 @@ async function discoverComplexId(query) {
     ],
   });
 
-  const page = await browser.newPage();
+  let page = await createBrowserPage(browser);
 
   // API 응답 인터셉션으로 검색 결과 캡처
   const searchResults = [];
@@ -284,6 +285,21 @@ function isFirstFloorArticle(floorInfo) {
 }
 
 const delay = (ms) => new Promise(r => setTimeout(r, ms));
+
+function withTimeout(promise, ms, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+async function createBrowserPage(browser) {
+  const page = await browser.newPage();
+  page.setDefaultNavigationTimeout(25000);
+  page.setDefaultTimeout(25000);
+  return page;
+}
 
 // ─── API URL 빌더 (가격순 정렬) ───
 function buildArticleApiUrl(complexId, pageNum, areaFilter = null) {
@@ -689,7 +705,7 @@ async function main() {
     withoutComplexId.forEach(a => console.log(`  스킵: ${a.name}`));
   }
   if (workerCount > 1) {
-    console.log(`worker split${workerLabel}: ${apartmentsToProcess.length}/${assignedApartments.length} apartments, delay ${delayMs}ms, startup delay ${startupDelayMs}ms`);
+    console.log(`worker split${workerLabel}: ${apartmentsToProcess.length}/${assignedApartments.length} apartments, delay ${delayMs}ms, startup delay ${startupDelayMs}ms, timeout ${apartmentTimeoutMs}ms`);
   }
   console.log('');
 
@@ -727,7 +743,11 @@ async function main() {
     const idx = `[${i + 1}/${totalCount}]`;
 
     try {
-      const result = await fetchPriceByNavigation(page, apt);
+      const result = await withTimeout(
+        fetchPriceByNavigation(page, apt),
+        apartmentTimeoutMs,
+        `${apt.name}${workerLabel}`
+      );
 
       if (result.error) {
         failCount++;
@@ -756,6 +776,10 @@ async function main() {
       }
     } catch (e) {
       failCount++;
+      try {
+        await page.close();
+      } catch {}
+      page = await createBrowserPage(browser);
       console.log(`${idx} ${apt.name} -> 에러: ${e.message}`);
     }
 
