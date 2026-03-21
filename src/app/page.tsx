@@ -16,6 +16,7 @@ import {
 import { getOverlay, ApartmentOverlay } from '@/lib/apartment-overlay';
 import { CATALOG_APARTMENTS } from '@/data/catalog-apartments';
 import { getListingStatusBadges } from '@/data/listing-status';
+import { getTierKeyForPrice, getTierReferencePrice } from '@/data/tiers';
 import { NOTES } from '@/data/notes';
 import Header from '@/components/Header';
 import TierTabs from '@/components/TierTabs';
@@ -179,27 +180,31 @@ export default function Home() {
   const mergedApartments = useMemo((): Apartment[] => {
     // 1. 기존 아파트에 티어 변경 적용
     const base = CATALOG_APARTMENTS.map((apt) => {
-      const newTier = overlay.tierChanges[apt.id];
-      if (newTier) {
-        return { ...apt, tier: newTier };
-      }
-      return apt;
+      const overrideTier = overlay.tierChanges[apt.id];
+      const livePrice = prices[apt.id];
+      const tierReferencePrice = getTierReferencePrice(livePrice);
+      return {
+        ...apt,
+        tier: overrideTier ?? (tierReferencePrice != null ? getTierKeyForPrice(tierReferencePrice) : apt.tier),
+      };
     });
     // 2. 추가 아파트 병합 (tier 변경도 적용)
     const additions: Apartment[] = overlay.additions.map((add) => {
-      const newTier = overlay.tierChanges[add.id];
+      const overrideTier = overlay.tierChanges[add.id];
+      const livePrice = prices[add.id];
+      const tierReferencePrice = getTierReferencePrice(livePrice);
       return {
         id: add.id,
         name: add.name,
         district: add.district,
         size: add.size,
         basePrice: add.basePrice,
-        tier: newTier || add.tier,
+        tier: overrideTier ?? (tierReferencePrice != null ? getTierKeyForPrice(tierReferencePrice) : add.tier),
         naverComplexId: add.naverComplexId,
       };
     });
     return [...base, ...additions];
-  }, [overlay]);
+  }, [overlay, prices]);
 
   // 오버레이 변경/추가 ID 세트 (DistrictGrid에 전달)
   const overlayChangedIds = useMemo(
@@ -220,7 +225,10 @@ export default function Home() {
     if (isFolderView && activeFolder) {
       return mergedApartments.filter(a => activeFolder.apartmentIds.includes(a.id));
     }
-    return mergedApartments.filter(a => a.tier === activeTier);
+    return mergedApartments.filter((apartment) => {
+      const tierReferencePrice = getTierReferencePrice(prices[apartment.id]);
+      return tierReferencePrice != null && getTierKeyForPrice(tierReferencePrice) === activeTier;
+    });
   }, [isFolderView, activeFolder, activeTier, mergedApartments]);
 
   const filteredNotes = useMemo(() => {
@@ -250,8 +258,10 @@ export default function Home() {
             statusBadges: getListingStatusBadges(apt.id),
           };
         }
+        const tierReferencePrice = getTierReferencePrice(livePrice);
         return {
           ...apt,
+          tier: tierReferencePrice != null ? getTierKeyForPrice(tierReferencePrice) : apt.tier,
           currentPrice: livePrice.price,
           priceChange:
             Math.round((livePrice.price - apt.basePrice) * 10) / 10,
@@ -278,16 +288,18 @@ export default function Home() {
             statusBadges: getListingStatusBadges(apt.id),
           };
         }
-          return {
-            ...apt,
-            currentPrice: livePrice.price,
-            priceChange:
-              Math.round((livePrice.price - apt.basePrice) * 10) / 10,
-            ownerVerified: livePrice.ownerVerified,
-            floorInfo: livePrice.floorInfo,
-            isFirstFloor: livePrice.isFirstFloor,
-            statusBadges: getListingStatusBadges(apt.id, livePrice),
-          };
+        const tierReferencePrice = getTierReferencePrice(livePrice);
+        return {
+          ...apt,
+          tier: tierReferencePrice != null ? getTierKeyForPrice(tierReferencePrice) : apt.tier,
+          currentPrice: livePrice.price,
+          priceChange:
+            Math.round((livePrice.price - apt.basePrice) * 10) / 10,
+          ownerVerified: livePrice.ownerVerified,
+          floorInfo: livePrice.floorInfo,
+          isFirstFloor: livePrice.isFirstFloor,
+          statusBadges: getListingStatusBadges(apt.id, livePrice),
+        };
       }),
     [mergedApartments, prices]
   );

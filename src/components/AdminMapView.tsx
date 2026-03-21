@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Apartment, MemoMap, TierKey } from '@/types';
 import { getComplexCoordinate } from '@/data/complex-coordinates';
+import { getTierLabel } from '@/data/tiers';
 
 declare global {
   interface Window {
@@ -53,6 +54,21 @@ type MapRuntime =
 const DEFAULT_CENTER = { lat: 37.5665, lng: 126.978 };
 const NAVER_CLIENT_ID = process.env.NEXT_PUBLIC_NAVER_MAPS_CLIENT_ID ?? '';
 const NAVER_SCRIPT_ID = 'naver-maps-sdk';
+const TIER_MARKER_COLORS: Record<TierKey, string> = {
+  '10': '#2383e2',
+  '12': '#2b8cff',
+  '14': '#3f88ff',
+  '16': '#6d4dff',
+  '18': '#7c3aed',
+  '20': '#8b5cf6',
+  '22': '#a162f7',
+  '24': '#c084fc',
+  '26': '#d946ef',
+  '28': '#ec4899',
+  '30': '#f97316',
+  '32': '#f59e0b',
+  '50': '#ef4444',
+};
 
 function formatPrice(value?: number) {
   if (typeof value !== 'number') return '--';
@@ -70,20 +86,14 @@ function formatPriceSummary(apartment: MarkerApartment) {
   return `${apartment.areaName || apartment.size} ${formatPrice(apartment.currentPrice)}`;
 }
 
-function getMarkerColor(apartment: MarkerApartment) {
+function getMarkerColor(apartment: MarkerApartment, activeTier: TierKey) {
   if (apartment.statusBadges?.some((badge) => badge.includes('매매 0건'))) {
     return '#a1a8b8';
   }
   if (apartment.ownerVerified === false) {
     return '#f59e0b';
   }
-  if ((apartment.currentPrice ?? Number.POSITIVE_INFINITY) <= 12) {
-    return '#2383e2';
-  }
-  if ((apartment.currentPrice ?? Number.POSITIVE_INFINITY) <= 16) {
-    return '#7c3aed';
-  }
-  return '#0f9d7a';
+  return TIER_MARKER_COLORS[activeTier] ?? '#0f9d7a';
 }
 
 function escapeHtml(value: string) {
@@ -95,8 +105,8 @@ function escapeHtml(value: string) {
     .replaceAll("'", '&#39;');
 }
 
-function createNaverMarkerHtml(apartment: MarkerApartment, selected: boolean) {
-  const color = getMarkerColor(apartment);
+function createNaverMarkerHtml(apartment: MarkerApartment, activeTier: TierKey, selected: boolean) {
+  const color = getMarkerColor(apartment, activeTier);
   const size = selected ? 26 : 20;
   const border = selected ? '#111827' : '#ffffff';
   return `
@@ -345,7 +355,7 @@ export default function AdminMapView({
           radius: apartment.id === selectedApartment?.id ? 9 : 7,
           weight: apartment.id === selectedApartment?.id ? 3 : 2,
           color: apartment.id === selectedApartment?.id ? '#1d1d1f' : '#ffffff',
-          fillColor: getMarkerColor(apartment),
+          fillColor: getMarkerColor(apartment, activeTier),
           fillOpacity: 0.92,
         });
 
@@ -387,7 +397,7 @@ export default function AdminMapView({
         position: new runtime.naver.maps.LatLng(apartment.lat, apartment.lng),
         map: runtime.map,
         icon: {
-          content: createNaverMarkerHtml(apartment, apartment.id === selectedApartment?.id),
+          content: createNaverMarkerHtml(apartment, activeTier, apartment.id === selectedApartment?.id),
           anchor: new runtime.naver.maps.Point(
             apartment.id === selectedApartment?.id ? 13 : 10,
             apartment.id === selectedApartment?.id ? 13 : 10
@@ -502,7 +512,7 @@ export default function AdminMapView({
           <div className="grid grid-cols-2 gap-2 text-xs text-[#4f6857] sm:grid-cols-4">
             <div className="rounded-2xl border border-white/80 bg-white/75 px-3 py-2">
               <div className="text-[11px] text-[#7b8e80]">현재 티어</div>
-              <div className="mt-1 font-semibold text-[#183726]">{activeTier} 티어</div>
+              <div className="mt-1 font-semibold text-[#183726]">{getTierLabel(activeTier)}</div>
             </div>
             <div className="rounded-2xl border border-white/80 bg-white/75 px-3 py-2">
               <div className="text-[11px] text-[#7b8e80]">표시 단지</div>
@@ -675,7 +685,7 @@ export default function AdminMapView({
                         </div>
                         <span
                           className="mt-0.5 h-3 w-3 shrink-0 rounded-full"
-                          style={{ backgroundColor: getMarkerColor(apartment) }}
+                          style={{ backgroundColor: getMarkerColor(apartment, activeTier) }}
                         />
                       </div>
                     </button>

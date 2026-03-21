@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Apartment, TierKey } from '@/types';
-import { TIERS } from '@/data/tiers';
+import { Apartment } from '@/types';
+import { getTierLabel } from '@/data/tiers';
 
 interface SearchBarProps {
   apartments: Apartment[];
@@ -18,7 +18,7 @@ export default function SearchBar({ apartments, onSelectApartment }: SearchBarPr
   // 검색 결과: 이름 부분 매칭, 최대 10개
   const results = query.trim()
     ? apartments
-        .filter((a) => a.name.includes(query.trim()))
+        .filter((a) => a.name.includes(query.trim()) && typeof a.currentPrice === 'number')
         .slice(0, 10)
     : [];
 
@@ -44,11 +44,6 @@ export default function SearchBar({ apartments, onSelectApartment }: SearchBarPr
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
-
-  function getTierLabel(tierKey: TierKey): string {
-    const tier = TIERS.find((t) => t.key === tierKey);
-    return tier ? tier.maxPrice : tierKey;
-  }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     setQuery(e.target.value);
@@ -119,7 +114,7 @@ export default function SearchBar({ apartments, onSelectApartment }: SearchBarPr
       {isOpen && results.length > 0 && (
         <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[340px] overflow-y-auto rounded-md border border-[#e8e5e0] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
           {results.map((apt) => {
-            const price = apt.currentPrice ?? apt.basePrice;
+            const price = apt.currentPrice;
             const change = apt.priceChange;
             return (
               <button

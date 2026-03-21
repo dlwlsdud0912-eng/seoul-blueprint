@@ -25,7 +25,7 @@ export type District =
   | '도봉구'
   | '중랑구';
 
-export type TierKey = '12' | '14' | '16' | '20' | '24' | '28' | '32' | '50';
+export type TierKey = '10' | '12' | '14' | '16' | '18' | '20' | '22' | '24' | '26' | '28' | '30' | '32' | '50';
 
 export interface Tier {
   key: TierKey;

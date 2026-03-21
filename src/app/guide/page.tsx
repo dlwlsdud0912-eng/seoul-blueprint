@@ -37,7 +37,7 @@ export default function GuidePage() {
   district: '강남구',               // 구 이름 (types/index.ts의 District 타입 참조)
   size: '34평',                     // 평형 (24평, 34평, 43평 등)
   basePrice: 15.5,                  // 기준가 (억 단위)
-  tier: '16',                       // 티어 ('12','14','16','20','24','28','32','50')
+  tier: '14',                       // 티어 ('10','12','14','16','18','20','22','24','26','28','30','32','50')
   naverComplexId: '12345',          // 네이버 부동산 단지 ID (필수!)
 }`}</pre>
               <div className="bg-[#fbf3db] border border-[#f1e5bc] rounded-md px-3 py-2 text-[11px] text-[#8b6914]">

@@ -38,7 +38,7 @@ type TierExportOptions = {
 };
 
 const LABEL_TITLE_SUFFIX = '티어 아파트 리스트';
-const LABEL_DESC = '네이버부동산 기준 실시간 최저가 반영';
+const LABEL_DESC = '네이버부동산 기준 실시간 59㎡ 최저가 반영';
 const LABEL_DISTRICT = '구';
 const LABEL_NAME = '아파트명';
 const LABEL_PRICE = '가격';
@@ -67,15 +67,8 @@ function formatPrice(value?: number) {
   return `${value}억`;
 }
 
-function formatSizeLabel(apartment: ExportApartment) {
-  const size59 = apartment.sizes?.['59'];
-  const size84 = apartment.sizes?.['84'];
-
-  if (size59) return '59㎡';
-  if (size84) return '84㎡';
-  if (apartment.areaName) return apartment.areaName;
-  if (apartment.size) return apartment.size;
-  return '--';
+function formatSizeLabel() {
+  return '59㎡';
 }
 
 function formatProximityLabel(apartment: ExportApartment) {
@@ -93,16 +86,25 @@ function formatProximityLabel(apartment: ExportApartment) {
 }
 
 function buildRows(apartments: ExportApartment[], options: TierExportOptions) {
+  type RowWithSortKey = TierExportRow & { effectivePrice: number; proximityLabel: string | undefined };
+
   return apartments
-    .filter((apartment) => typeof apartment.currentPrice === 'number')
-    .map((apartment) => ({
-      district: apartment.district,
-      name: apartment.name,
-      priceLabel: formatPrice(apartment.currentPrice),
-      sizeLabel: formatSizeLabel(apartment),
-      proximityLabel: options.showProximityColumn ? formatProximityLabel(apartment) : undefined,
-      effectivePrice: apartment.currentPrice as number,
-    }))
+    .map((apartment) => {
+      const size59 = apartment.sizes?.['59'];
+      if (!size59 || typeof size59.price !== 'number') {
+        return null;
+      }
+
+      return {
+        district: apartment.district,
+        name: apartment.name,
+        priceLabel: formatPrice(size59.price),
+        sizeLabel: formatSizeLabel(),
+        proximityLabel: options.showProximityColumn ? formatProximityLabel(apartment) : undefined,
+        effectivePrice: size59.price,
+      };
+    })
+    .filter((row): row is RowWithSortKey => row !== null)
     .sort(
       (a, b) =>
         a.effectivePrice - b.effectivePrice ||
@@ -232,19 +234,23 @@ export function buildTierExportPayload(
   options: TierExportOptions = {}
 ): TierExportPayload {
   const tierMeta = TIERS.find((item) => item.key === tier);
-  const tierLabel = tierMeta?.label ?? `${tier}티어`;
+  const tierLabel = tierMeta?.label ?? `${tier} 티어`;
   const title = `${tierLabel} ${LABEL_TITLE_SUFFIX}${options.titleSuffix ? ` ${options.titleSuffix}` : ''}`;
   const subtitle = `${LABEL_DESC} / 업데이트: ${updatedAtKR || '-'}`;
   const rows = buildRows(apartments, options);
   const bodyHtml = buildBodyHtml(title, subtitle, rows.length, rows, !!options.showProximityColumn);
   const documentHtml = buildDocumentHtml(title, bodyHtml);
-  const filenameBase = options.filenamePrefix ? `${options.filenamePrefix}-${tierLabel}` : tierLabel;
-  const safeLabel = slugifyFilename(filenameBase) || `tier-${tier}`;
+  const filenameBase = slugifyFilename(
+    `${options.filenamePrefix ? `${options.filenamePrefix}-` : ''}${title}-${new Date()
+      .toISOString()
+      .slice(0, 10)
+      .replace(/-/g, '')}`
+  );
 
   return {
     title,
     subtitle,
-    filename: `${safeLabel}-아파트-리스트-${(updatedAtKR || '').replace(/[^\d]/g, '').slice(0, 8) || 'latest'}.pdf`,
+    filename: `${filenameBase}.pdf`,
     totalCount: rows.length,
     rows,
     bodyHtml,

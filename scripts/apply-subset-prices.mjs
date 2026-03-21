@@ -22,14 +22,27 @@ function formatNumber(value) {
 }
 
 function tierForPrice(price) {
+  if (price <= 10) return '10';
   if (price <= 12) return '12';
   if (price <= 14) return '14';
   if (price <= 16) return '16';
+  if (price <= 18) return '18';
   if (price <= 20) return '20';
+  if (price <= 22) return '22';
   if (price <= 24) return '24';
+  if (price <= 26) return '26';
   if (price <= 28) return '28';
+  if (price <= 30) return '30';
   if (price <= 32) return '32';
   return '50';
+}
+
+function getCanonicalBasePrice(result) {
+  const size59 = result?.sizes?.['59'];
+  if (size59 && typeof size59.price === 'number') {
+    return size59.price;
+  }
+  return null;
 }
 
 function parseApartmentIdsWithComplexId(content) {
@@ -51,7 +64,7 @@ function parseApartmentIdsWithComplexId(content) {
 
 function updateApartmentObjects(content, priceMap) {
   for (const [id, result] of Object.entries(priceMap)) {
-    const price = result?.price;
+    const price = getCanonicalBasePrice(result);
     if (typeof price !== 'number') continue;
 
     const objectPattern = new RegExp(`(\\{[^}]*id:\\s*'${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'[^}]*basePrice:\\s*)([^,]+)(,\\s*tier:\\s*')([^']+)(')`);

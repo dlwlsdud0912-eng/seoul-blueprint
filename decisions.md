@@ -1252,3 +1252,45 @@
   - `npm run audit:districts` -> `mismatchCount: 0`, `unresolvedCount: 0`
   - `npm run build` passed
   - `public/prices.json` and tier-12 export regenerated from crawled live prices
+
+### [2026-03-20 10:55] Gemini OCR import superseded prior intermediate note
+- Type: data expansion | canonical append
+- Final verified local result:
+  - Gemini OCR source: `C:\Users\dlwls\Desktop\새 폴더 (5)` PNG `15장`
+  - OCR rows extracted: `556`
+  - OCR unique rows after de-duplication: `444`
+  - existing cross-check matches: `217`
+  - canonical additions appended to `src/data/apartments.ts`: `227`
+  - mapped among additions: `149`
+  - non-Seoul/off-city mappings removed again: `17`
+  - valid subset crawl targets: `132`
+  - subset crawl success: `126`
+  - subset crawl no-listing: `6`
+  - additions still unmapped: `78`
+- Files:
+  - OCR payload: `C:\Users\dlwls\Desktop\first codex\_ocr_tmp\gemini-ocr.json`
+  - additions export: `exports/ocr-added-apartments-20260320.tsv`
+  - crawl output: `run_logs/ocr-added-single-20260320.json`
+- Verification:
+  - `npm run build` passed
+  - `public/prices.json` updated to `2026. 03. 20. 10:46`
+
+### [2026-03-21 22:53] Full crawl completed with 5 workers and 59㎡ tier lock
+- Type: crawl run | tiering rule
+- Decision:
+  - full crawl was executed in `5-worker` parallel mode and merged back into canonical `public/prices.json`
+  - `apartments.ts` base price/tier sync should now use `59㎡` live price only, not representative `currentPrice`
+  - customer-facing tier/export/search flows must not fall back to `basePrice` when live crawl data or `59㎡` data is missing
+- Why:
+  - the user explicitly changed tier policy to `2억 단위 매매가 구간 + 59㎡ 기준`
+  - fallback values and representative-price drift were causing trust issues in exports and UI
+- Impact:
+  - crawl output merged from `run_logs/parallel-direct-20260321130530/*.json`
+  - merged totals: `1224 total / 1110 success / 114 fail or no-listing`
+  - `public/prices.json` updated to `2026. 03. 21. 22:52`
+  - `scripts/apply-subset-prices.mjs` now syncs canonical `basePrice/tier` from live `59㎡` price only
+  - tier labels now use `10 / 12 / 14 / ... / 32 / 50`
+  - home tier filtering, admin map/export/mindmap, and search no longer rely on `basePrice` fallback for customer-visible tiering
+- Verification:
+  - `npm run build` passed
+  - `npm run audit:districts` returned `mismatchCount: 0`, `unresolvedCount: 0`

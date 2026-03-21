@@ -6,7 +6,9 @@ interface StatsBarProps {
 
 export default function StatsBar({ apartments }: StatsBarProps) {
   const districts = new Set(apartments.map((a) => a.district));
-  const prices = apartments.map((a) => a.currentPrice ?? a.basePrice);
+  const prices = apartments
+    .map((a) => a.currentPrice)
+    .filter((price): price is number => typeof price === 'number');
   const minPrice = prices.length ? Math.min(...prices) : 0;
   const maxPrice = prices.length ? Math.max(...prices) : 0;
 

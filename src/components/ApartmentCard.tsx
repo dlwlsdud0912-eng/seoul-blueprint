@@ -4,8 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Apartment, TierKey, FolderMap } from '@/types';
 import { saveTierChange, removeTierChange, removeAddition } from '@/lib/apartment-overlay';
 import { checkPriceProximity } from '@/lib/price-proximity';
-
-const TIERS: TierKey[] = ['12','14','16','20','24','28','32','50'];
+import { TIERS as TIER_OPTIONS } from '@/data/tiers';
 
 interface ApartmentCardProps {
   apartment: Apartment & {
@@ -169,17 +168,17 @@ export default function ApartmentCard({
       {/* 티어 선택 드롭다운 */}
       {showTierSelect && isManageMode && (
         <div className="flex items-center gap-0.5 shrink-0">
-          {TIERS.map((t) => (
+          {TIER_OPTIONS.map((tier) => (
             <button
-              key={t}
-              onClick={() => handleTierChange(t)}
+              key={tier.key}
+              onClick={() => handleTierChange(tier.key)}
               className={`text-[10px] px-1.5 py-0.5 rounded transition-colors ${
-                t === apartment.tier
+                tier.key === apartment.tier
                   ? 'bg-[#2383e2] text-white'
                   : 'bg-[#f1f1ef] text-[#787774] hover:bg-[#e8e5e0]'
               }`}
             >
-              {t}
+              {tier.label}
             </button>
           ))}
         </div>

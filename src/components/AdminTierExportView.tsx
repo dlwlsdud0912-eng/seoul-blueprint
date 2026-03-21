@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import type { TierKey } from '@/types';
 import { buildTierExportPayload } from '@/lib/tier-export';
 import { checkPriceProximity } from '@/lib/price-proximity';
+import { getTierLabel } from '@/data/tiers';
 
 type ExportApartment = {
   id: string;
@@ -31,7 +32,11 @@ export default function AdminTierExportView({
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [pdfLoading, setPdfLoading] = useState(false);
   const liveApartments = useMemo(
-    () => apartments.filter((apartment) => typeof apartment.currentPrice === 'number'),
+    () =>
+      apartments.filter((apartment) => {
+        const size59 = apartment.sizes?.['59'];
+        return !!size59 && typeof size59.price === 'number';
+      }),
     [apartments]
   );
 
@@ -130,7 +135,7 @@ export default function AdminTierExportView({
           <div className="grid grid-cols-2 gap-2 text-xs text-[#55657d] sm:grid-cols-3">
             <div className="rounded-2xl border border-white/80 bg-white/80 px-3 py-2">
               <div className="text-[11px] text-[#7b8aa0]">현재 티어</div>
-              <div className="mt-1 font-semibold text-[#1b2b40]">{activeTier} 티어</div>
+              <div className="mt-1 font-semibold text-[#1b2b40]">{getTierLabel(activeTier)}</div>
             </div>
             <div className="rounded-2xl border border-white/80 bg-white/80 px-3 py-2">
               <div className="text-[11px] text-[#7b8aa0]">대상 단지</div>
@@ -155,7 +160,7 @@ export default function AdminTierExportView({
                   : 'border-[#d9e3ef] bg-white text-[#5d7088] hover:bg-[#f6f9fc]'
               }`}
             >
-              전체 {apartments.length}개
+              전체 {liveApartments.length}개
             </button>
             <button
               data-testid="export-mode-proximity"
