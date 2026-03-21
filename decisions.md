@@ -1294,3 +1294,10 @@
 - Verification:
   - `npm run build` passed
   - `npm run audit:districts` returned `mismatchCount: 0`, `unresolvedCount: 0`
+
+## [2026-03-21 23:18] Canonical duplicate merge completed
+- Merged same-`naverComplexId` duplicate rows in `src/data/apartments.ts`.
+- Final result: `1429 -> 1175` rows, `202 -> 0` same-complex duplicate groups.
+- `public/prices.json` synchronized to canonical IDs: `totalCount 1175 / successCount 880 / failCount 295`.
+- Representative merges: `강촌 / 강촌아파트`, `화곡대림 / 화곡동화곡대림`, `래미안강동팰리스 / 강동역래미안팰리스`.
+- Build and district audit both passed after merge.
