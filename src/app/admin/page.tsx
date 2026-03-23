@@ -6,7 +6,6 @@ import ApartmentCard from '@/components/ApartmentCard';
 import AdminMapView from '@/components/AdminMapView';
 import AdminMemoBoardView from '@/components/AdminMemoBoardView';
 import AdminTierExportView from '@/components/AdminTierExportView';
-import MindMapView from '@/components/MindMapView';
 import {
   isAdminAuthenticated,
   setAdminAuthenticated,
@@ -392,7 +391,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 // DSR 계산기 (인증 후 메인)
 // ─────────────────────────────────────────────────────────────────────────────
 
-type AdminTab = 'dsr' | 'funding' | 'mindmap' | 'map' | 'export' | 'memo';
+type AdminTab = 'dsr' | 'funding' | 'map' | 'export' | 'memo';
 
 function TierStickyBar({
   title,
@@ -726,7 +725,6 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                   { key: 'dsr' as AdminTab, label: 'DSR 계산기' },
                   { key: 'funding' as AdminTab, label: '자금조달' },
                   { key: 'map' as AdminTab, label: '지도' },
-                  { key: 'mindmap' as AdminTab, label: '마인드맵' },
                   { key: 'export' as AdminTab, label: '자료내보내기' },
                 { key: 'memo' as AdminTab, label: '관리자체계도' },
               ]).map((tab) => (
@@ -817,24 +815,6 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             subtitle="카드는 메인 체계도처럼 작게 유지하고, 펼치면 비교 단지·학교·장단점·추가 메모를 함께 볼 수 있습니다."
             onSaveMemo={handleSaveMemo}
             onDeleteMemo={handleDeleteMemo}
-          />
-        </div>
-      ) : activeTab === 'mindmap' ? (
-        <div className="space-y-4 pb-28 md:pb-0">
-          <TierStickyBar
-            title="관리자 마인드맵"
-            description="홈에서는 숨기고, 관리자 안에서만 보는 전용 뷰입니다."
-            activeTier={mindMapTier}
-            totalCount={mindMapApartments.length}
-            accent="purple"
-            onSelect={setMindMapTier}
-          />
-          <MindMapView
-            apartments={mindMapApartments}
-            memos={memos}
-            activeTier={mindMapTier}
-            title={`${mindMapTierMeta?.label ?? mindMapTier} 관리자 마인드맵`}
-            subtitle={`${mindMapTierMeta?.maxPrice ?? mindMapTier} 기준 단지를 관리자 전용 탐색 뷰로 정리`}
           />
         </div>
       ) : activeTab === 'funding' ? (
