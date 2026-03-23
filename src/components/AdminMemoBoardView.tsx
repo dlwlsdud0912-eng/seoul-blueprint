@@ -12,6 +12,7 @@ import type { Apartment, MemoMap, PriceMap, TierKey } from '@/types';
 
 interface AdminMemoBoardViewProps {
   apartments: Apartment[];
+  allApartments: Apartment[];
   prices: PriceMap;
   memos: MemoMap;
   activeTier: TierKey;
@@ -23,14 +24,20 @@ interface AdminMemoBoardViewProps {
 
 function getSchoolRows(research?: ApartmentFeatureResearch) {
   return [
-    research?.schools?.elementary ? `초: ${research.schools.elementary}` : null,
-    research?.schools?.middle ? `중: ${research.schools.middle}` : null,
-    research?.schools?.high ? `고: ${research.schools.high}` : null,
+    research?.schools?.elementary ? `초등학교: ${research.schools.elementary}` : null,
+    research?.schools?.middle ? `중학교: ${research.schools.middle}` : null,
+    research?.schools?.high ? `고등학교: ${research.schools.high}` : null,
   ].filter(Boolean) as string[];
+}
+
+function shouldKeepExpanded(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  return !!target.closest('a, button, input, textarea, select, label');
 }
 
 export default function AdminMemoBoardView({
   apartments,
+  allApartments,
   prices,
   memos,
   activeTier,
@@ -44,16 +51,18 @@ export default function AdminMemoBoardView({
   const [showOnlyProximity, setShowOnlyProximity] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
 
+  const searchableApartments = query.trim() ? allApartments : apartments;
+
   const filteredApartments = useMemo(() => {
     const lowered = query.trim().toLowerCase();
 
-    return apartments.filter((apartment) => {
+    return searchableApartments.filter((apartment) => {
       const research = APARTMENT_FEATURE_RESEARCH_MAP[apartment.id];
       const priceEntry = prices[apartment.id];
-      if (!research) return false;
+      if (!research || !priceEntry) return false;
       if (districtFilter !== '전체' && apartment.district !== districtFilter) return false;
 
-      const proximity = checkPriceProximity(priceEntry?.sizes);
+      const proximity = checkPriceProximity(priceEntry.sizes);
       if (showOnlyProximity && !proximity.hasProximity) return false;
 
       if (!lowered) return true;
@@ -73,7 +82,7 @@ export default function AdminMemoBoardView({
         .filter(Boolean)
         .some((text) => String(text).toLowerCase().includes(lowered));
     });
-  }, [apartments, districtFilter, memos, prices, query, showOnlyProximity]);
+  }, [districtFilter, memos, prices, query, searchableApartments, showOnlyProximity]);
 
   const districts = useMemo(() => {
     const set = new Set(filteredApartments.map((item) => item.district));
@@ -101,7 +110,9 @@ export default function AdminMemoBoardView({
   const orderedDistricts = useMemo(() => Object.keys(grouped), [grouped]);
 
   const proximityCount = useMemo(
-    () => filteredApartments.filter((apartment) => checkPriceProximity(prices[apartment.id]?.sizes).hasProximity).length,
+    () =>
+      filteredApartments.filter((apartment) => checkPriceProximity(prices[apartment.id]?.sizes).hasProximity)
+        .length,
     [filteredApartments, prices]
   );
 
@@ -123,7 +134,7 @@ export default function AdminMemoBoardView({
                 티어 {activeTier}
               </span>
               <span className="rounded-full border border-[#e8e5e0] bg-[#f7f7f5] px-3 py-1.5">
-                메모 {filteredApartments.length}개
+                관리자체계도 {filteredApartments.length}개
               </span>
               <span className="rounded-full border border-[#f5c6c6] bg-[#fbe4e4] px-3 py-1.5 text-[#eb5757]">
                 가격근접 {proximityCount}개
@@ -174,9 +185,15 @@ export default function AdminMemoBoardView({
         </div>
       </div>
 
+      {query.trim() ? (
+        <div className="rounded-[18px] border border-[#d9e3ef] bg-[#f7fbff] px-4 py-3 text-sm text-[#4b647f]">
+          검색 중에는 현재 티어와 무관하게 전체 아파트 목록에서 결과를 보여줍니다.
+        </div>
+      ) : null}
+
       {orderedDistricts.length === 0 ? (
         <div className="flex items-center justify-center rounded-xl border border-[#e8e5e0] bg-white py-20 text-sm text-[#b4b4b0]">
-          조건에 맞는 메모 데이터가 없습니다.
+          조건에 맞는 관리자체계도 데이터가 없습니다.
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -226,8 +243,8 @@ export default function AdminMemoBoardView({
                               className="flex w-full items-center justify-between text-left text-[11px] text-[#c4a03a] transition-colors hover:text-[#8b6914]"
                             >
                               <span className="flex items-center gap-1.5">
-                                <span>📝</span>
-                                <span>메모</span>
+                                <span>✎</span>
+                                <span>관리자체계도 메모</span>
                               </span>
                               <span className="text-[10px]">{expanded ? '접기' : '펼치기'}</span>
                             </button>
@@ -235,7 +252,13 @@ export default function AdminMemoBoardView({
                         </div>
 
                         {expanded ? (
-                          <div className="mt-1 rounded-lg border border-[#f1e5bc] bg-[#fffaf0] px-3 py-3 text-[12px] leading-6 text-[#6a5634]">
+                          <div
+                            className="mt-1 rounded-lg border border-[#f1e5bc] bg-[#fffaf0] px-3 py-3 text-[12px] leading-6 text-[#6a5634]"
+                            onClick={(event) => {
+                              if (shouldKeepExpanded(event.target)) return;
+                              toggleExpanded(apartment.id);
+                            }}
+                          >
                             {proximity.hasProximity ? (
                               <div className="mb-3 flex flex-wrap gap-1.5">
                                 {proximity.pairs.map((pair) => (
@@ -251,7 +274,7 @@ export default function AdminMemoBoardView({
 
                             {research.comparedWith.length > 0 ? (
                               <div className="mb-3">
-                                <div className="mb-1 text-[10px] font-semibold text-[#8b6914]">비교군</div>
+                                <div className="mb-1 text-[10px] font-semibold text-[#8b6914]">비교 아파트</div>
                                 <div className="flex flex-wrap gap-1">
                                   {research.comparedWith.map((item) => (
                                     <span
@@ -275,7 +298,7 @@ export default function AdminMemoBoardView({
 
                             {schoolRows.length > 0 ? (
                               <div className="mt-3">
-                                <div className="mb-1 text-[10px] font-semibold text-[#8b6914]">학교</div>
+                                <div className="mb-1 text-[10px] font-semibold text-[#8b6914]">배정 학교</div>
                                 <div className="space-y-1">
                                   {schoolRows.map((row) => (
                                     <p key={`${apartment.id}-${row}`}>{row}</p>
@@ -308,8 +331,11 @@ export default function AdminMemoBoardView({
                               </div>
                             </div>
 
-                            <div className="mt-3 border-t border-dashed border-[#ead9ab] pt-3">
-                              <div className="mb-1 text-[10px] font-semibold text-[#8b6914]">관리자 메모</div>
+                            <div
+                              className="mt-3 border-t border-dashed border-[#ead9ab] pt-3"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              <div className="mb-1 text-[10px] font-semibold text-[#8b6914]">관리자 추가 메모</div>
                               <MemoEditor
                                 apartmentId={apartment.id}
                                 initialMemo={memos[apartment.id]}

@@ -418,7 +418,7 @@ function TierStickyBar({
     <>
       <div
         data-testid="tier-sticky-bar"
-        className="sticky top-[106px] z-[9] hidden md:block"
+        className="sticky top-[72px] z-[9] hidden md:block"
       >
         <div className="-mx-1 rounded-[18px] border border-white/85 bg-[rgba(255,255,255,0.94)] px-3 py-2 shadow-[0_14px_32px_rgba(55,64,76,0.08)] backdrop-blur md:px-4">
           <div className="flex items-center gap-3">
@@ -638,6 +638,28 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
     [mindMapTier, prices]
   );
 
+  const adminBoardSearchApartments = useMemo(
+    () =>
+      CATALOG_APARTMENTS.filter((apt) => !!prices[apt.id]).map((apt) => {
+        const livePrice = prices[apt.id];
+        const tierReferencePrice = getTierReferencePrice(livePrice);
+        return {
+          ...apt,
+          tier: tierReferencePrice != null ? getTierKeyForPrice(tierReferencePrice) : apt.tier,
+          currentPrice: livePrice?.price,
+          priceChange: livePrice ? Math.round((livePrice.price - apt.basePrice) * 10) / 10 : 0,
+          articleCount: livePrice?.articleCount,
+          areaName: livePrice?.areaName,
+          sizes: livePrice?.sizes,
+          ownerVerified: livePrice?.ownerVerified,
+          floorInfo: livePrice?.floorInfo,
+          isFirstFloor: livePrice?.isFirstFloor,
+          statusBadges: getListingStatusBadges(apt.id, livePrice),
+        };
+      }),
+    [prices]
+  );
+
   // 구별 그룹핑
   const grouped = useMemo(() => {
     const map = new Map<string, typeof affordableApartments>();
@@ -669,39 +691,42 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
 
       {/* 헤더 */}
       <header className="bg-white border-b border-[#e8e5e0] sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link href="/" className="text-xs sm:text-sm text-[#787774] hover:text-[#37352f] shrink-0">
               ← 메인
             </Link>
             <span className="text-[#e8e5e0]">|</span>
             <span className="text-sm sm:text-base font-semibold text-[#37352f] truncate">관리자</span>
           </div>
+
+          <div className="-mx-1 flex-1 overflow-x-auto px-1">
+            <div className="flex min-w-max gap-1 sm:gap-2">
+              {([
+                { key: 'dsr' as AdminTab, label: 'DSR 계산기' },
+                { key: 'funding' as AdminTab, label: '자금조달' },
+                { key: 'guide' as AdminTab, label: '가이드' },
+                { key: 'map' as AdminTab, label: '지도' },
+                { key: 'mindmap' as AdminTab, label: '마인드맵' },
+                { key: 'export' as AdminTab, label: '자료내보내기' },
+                { key: 'memo' as AdminTab, label: '관리자체계도' },
+              ]).map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
+                    activeTab === tab.key
+                      ? 'border-[#2383e2] bg-[#eef6ff] text-[#2383e2]'
+                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            <button
-              onClick={() => setActiveTab('map')}
-              className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#cfe4d7] rounded-md text-[#1f8f5f] bg-[#eef8f0] hover:bg-[#e4f3e8] transition-colors"
-            >
-              지도
-            </button>
-            <button
-              onClick={() => setActiveTab('mindmap')}
-              className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#d9cff8] rounded-md text-[#6d4dff] bg-[#f5f1ff] hover:bg-[#efe9ff] transition-colors"
-            >
-              마인드맵
-            </button>
-            <button
-              onClick={() => setActiveTab('export')}
-              className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#d6dff8] rounded-md text-[#2f6feb] bg-[#f3f7ff] hover:bg-[#ebf2ff] transition-colors"
-            >
-              자료내보내기
-            </button>
-            <button
-              onClick={() => setActiveTab('memo')}
-              className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#cfe7df] rounded-md text-[#217a58] bg-[#eef9f4] hover:bg-[#e4f5ec] transition-colors"
-            >
-              메모
-            </button>
             <button
               onClick={() => setShowPasswordModal(true)}
               className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
@@ -715,29 +740,6 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
               로그아웃
             </button>
           </div>
-        </div>
-        {/* 탭 */}
-        <div className="max-w-6xl mx-auto px-4 flex gap-0 overflow-x-auto">
-          {([
-            { key: 'dsr' as AdminTab, label: 'DSR 계산기' },
-            { key: 'funding' as AdminTab, label: '자금조달' },
-            { key: 'guide' as AdminTab, label: '가이드' },
-            { key: 'map' as AdminTab, label: '지도' },
-            { key: 'mindmap' as AdminTab, label: '마인드맵' },
-            { key: 'export' as AdminTab, label: '자료내보내기' },
-          ]).map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
-                activeTab === tab.key
-                  ? 'border-[#2383e2] text-[#2383e2]'
-                  : 'border-transparent text-[#787774] hover:text-[#37352f]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
         </div>
       </header>
 
@@ -778,11 +780,11 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             updatedAtKR={pricesUpdatedAtKR}
           />
         </div>
-      ) : activeTab === 'memo' ? (
+        ) : activeTab === 'memo' ? (
         <div className="space-y-4 pb-28 md:pb-0">
           <TierStickyBar
-            title="??? ???"
-            description="?? ??? ??? ??? ?? ?? ??????. ??? ?? ??? ?? ??? ??? ?? ?????."
+            title="관리자체계도"
+            description="가격은 현재 티어 기준으로 보고, 검색은 전체 크롤링 아파트 기준으로 바로 찾는 관리자 전용 체계도입니다."
             activeTier={mindMapTier}
             totalCount={mindMapApartments.length}
             accent="green"
@@ -790,11 +792,12 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
           />
           <AdminMemoBoardView
             apartments={mindMapApartments}
+            allApartments={adminBoardSearchApartments}
             prices={prices}
             memos={memos}
             activeTier={mindMapTier}
-            title={`${mindMapTierMeta?.label ?? mindMapTier} 메모 체계도`}
-            subtitle="실제 크롤링 단지와 늘 동기화되는 관리자 전용 메모 보드입니다. 비교 단지, 학교, 장단점, 대장/준대장 맥락을 바로 보고 추가 메모도 함께 관리합니다."
+            title={`${mindMapTierMeta?.label ?? mindMapTier} 관리자체계도`}
+            subtitle="카드는 메인 체계도처럼 작게 유지하고, 펼치면 비교 단지·학교·장단점·추가 메모를 함께 볼 수 있습니다."
             onSaveMemo={handleSaveMemo}
             onDeleteMemo={handleDeleteMemo}
           />
