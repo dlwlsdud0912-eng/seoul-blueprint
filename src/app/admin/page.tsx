@@ -450,19 +450,11 @@ function TierStickyBar({
         </div>
       </div>
       <div className="md:hidden">
-        <div className="mb-3 rounded-[20px] border border-[#e8e5e0] bg-white px-4 py-3 shadow-[0_16px_34px_rgba(55,64,76,0.06)]">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="text-sm font-semibold text-[#37352f]">{title}</div>
-              <div className="mt-0.5 text-[11px] text-[#787774]">{description}</div>
-            </div>
-            <div className="shrink-0 rounded-full bg-[#f7f7f5] px-2.5 py-1 text-[11px] text-[#787774]">
-              {totalCount}개
-            </div>
-          </div>
-        </div>
-        <div data-testid="tier-mobile-bar" className="pointer-events-none fixed inset-x-3 bottom-3 z-[12]">
-          <div className="pointer-events-auto rounded-[24px] border border-white/90 bg-[rgba(255,255,255,0.96)] px-3 py-2 shadow-[0_22px_50px_rgba(44,53,68,0.18)] backdrop-blur">
+        <div
+          data-testid="tier-mobile-bar"
+          className="sticky top-[116px] z-[9] mb-3"
+        >
+          <div className="rounded-[20px] border border-white/90 bg-[rgba(255,255,255,0.97)] px-3 py-3 shadow-[0_18px_36px_rgba(44,53,68,0.10)] backdrop-blur">
             <div className="mb-2 flex items-center justify-between gap-3">
               <div className="text-[11px] font-semibold text-[#37352f]">티어 빠른 전환</div>
               <div className="rounded-full bg-[#f7f7f5] px-2 py-1 text-[10px] text-[#787774]">
@@ -486,6 +478,17 @@ function TierStickyBar({
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+        <div className="mb-3 rounded-[20px] border border-[#e8e5e0] bg-white px-4 py-3 shadow-[0_16px_34px_rgba(55,64,76,0.06)]">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-sm font-semibold text-[#37352f]">{title}</div>
+              <div className="mt-0.5 text-[11px] text-[#787774]">{description}</div>
+            </div>
+            <div className="shrink-0 rounded-full bg-[#f7f7f5] px-2.5 py-1 text-[11px] text-[#787774]">
+              {totalCount}개
             </div>
           </div>
         </div>
@@ -691,8 +694,9 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
 
       {/* 헤더 */}
       <header className="bg-white border-b border-[#e8e5e0] sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex items-center justify-between gap-3 sm:flex-none">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link href="/" className="text-xs sm:text-sm text-[#787774] hover:text-[#37352f] shrink-0">
               ← 메인
             </Link>
@@ -700,8 +704,24 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             <span className="text-sm sm:text-base font-semibold text-[#37352f] truncate">관리자</span>
           </div>
 
-          <div className="-mx-1 flex-1 overflow-x-auto px-1">
-              <div className="flex min-w-max gap-1 sm:gap-2">
+            <div className="flex items-center gap-1 sm:hidden shrink-0">
+              <button
+                onClick={() => setShowPasswordModal(true)}
+                className="px-2 py-1.5 text-xs border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
+              >
+                비번변경
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-2 py-1.5 text-xs border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
+              >
+                로그아웃
+              </button>
+            </div>
+          </div>
+
+          <div className="-mx-1 w-full overflow-x-auto px-1 sm:flex-1">
+              <div className="flex min-w-max gap-2 sm:gap-2">
                 {([
                   { key: 'dsr' as AdminTab, label: 'DSR 계산기' },
                   { key: 'funding' as AdminTab, label: '자금조달' },
@@ -713,10 +733,10 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
-                    activeTab === tab.key
-                      ? 'border-[#2383e2] bg-[#eef6ff] text-[#2383e2]'
-                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                    className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                      activeTab === tab.key
+                        ? 'border-[#2383e2] bg-[#eef6ff] text-[#2383e2]'
+                        : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
                   }`}
                 >
                   {tab.label}
@@ -725,7 +745,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div className="hidden sm:flex items-center gap-1 sm:gap-2 shrink-0">
             <button
               onClick={() => setShowPasswordModal(true)}
               className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
