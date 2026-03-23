@@ -8408,12 +8408,7 @@
       "high": "경문고등학교"
     },
     "leaderContext": "입지 대비 저평가된 단지로 꼽히며, 실거주자들 사이에서 만족도가 매우 높은 단지입니다.",
-    "sources": [
-      {
-        "title": "부동산 커뮤니티 실거주 후기",
-        "url": ""
-      }
-    ]
+    "sources": []
   },
   {
     "apartmentId": "dongjak-7aftcw",
@@ -27864,10 +27859,6 @@
     },
     "leaderContext": "구로구의 노후 단지 중 입지 조건이 가장 뛰어난 곳 중 하나로 재건축 진행 상황 주시 필요",
     "sources": [
-      {
-        "title": "재건축 추진위원회 소식지",
-        "url": ""
-      },
       {
         "title": "구로구 부동산 블로그",
         "url": "https://blog.naver.com/guro-real"

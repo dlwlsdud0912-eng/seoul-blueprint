@@ -392,7 +392,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 // DSR 계산기 (인증 후 메인)
 // ─────────────────────────────────────────────────────────────────────────────
 
-type AdminTab = 'dsr' | 'funding' | 'guide' | 'mindmap' | 'map' | 'export' | 'memo';
+type AdminTab = 'dsr' | 'funding' | 'mindmap' | 'map' | 'export' | 'memo';
 
 function TierStickyBar({
   title,
@@ -701,14 +701,13 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
           </div>
 
           <div className="-mx-1 flex-1 overflow-x-auto px-1">
-            <div className="flex min-w-max gap-1 sm:gap-2">
-              {([
-                { key: 'dsr' as AdminTab, label: 'DSR 계산기' },
-                { key: 'funding' as AdminTab, label: '자금조달' },
-                { key: 'guide' as AdminTab, label: '가이드' },
-                { key: 'map' as AdminTab, label: '지도' },
-                { key: 'mindmap' as AdminTab, label: '마인드맵' },
-                { key: 'export' as AdminTab, label: '자료내보내기' },
+              <div className="flex min-w-max gap-1 sm:gap-2">
+                {([
+                  { key: 'dsr' as AdminTab, label: 'DSR 계산기' },
+                  { key: 'funding' as AdminTab, label: '자금조달' },
+                  { key: 'map' as AdminTab, label: '지도' },
+                  { key: 'mindmap' as AdminTab, label: '마인드맵' },
+                  { key: 'export' as AdminTab, label: '자료내보내기' },
                 { key: 'memo' as AdminTab, label: '관리자체계도' },
               ]).map((tab) => (
                 <button
@@ -744,9 +743,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-6">
-      {activeTab === 'guide' ? (
-        <GuideContent />
-      ) : activeTab === 'map' ? (
+      {activeTab === 'map' ? (
         <div className="space-y-4 pb-28 md:pb-0">
           <TierStickyBar
             title="관리자 지도"
