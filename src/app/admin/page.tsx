@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import ApartmentCard from '@/components/ApartmentCard';
 import AdminMapView from '@/components/AdminMapView';
+import AdminMemoBoardView from '@/components/AdminMemoBoardView';
 import AdminTierExportView from '@/components/AdminTierExportView';
 import MindMapView from '@/components/MindMapView';
 import {
@@ -12,7 +13,7 @@ import {
   adminLogout,
   verifyPassword,
 } from '@/lib/admin-auth';
-import { getMemos } from '@/lib/memo-storage';
+import { getMemos, saveMemo, deleteMemo } from '@/lib/memo-storage';
 import {
   calculateDsr,
   type DsrInput,
@@ -391,7 +392,7 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
 // DSR 계산기 (인증 후 메인)
 // ─────────────────────────────────────────────────────────────────────────────
 
-type AdminTab = 'dsr' | 'funding' | 'guide' | 'mindmap' | 'map' | 'export';
+type AdminTab = 'dsr' | 'funding' | 'guide' | 'mindmap' | 'map' | 'export' | 'memo';
 
 function TierStickyBar({
   title,
@@ -528,6 +529,16 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
       saveInputs(next);
       return next;
     });
+  }, []);
+
+  const handleSaveMemo = useCallback((apartmentId: string, content: string) => {
+    saveMemo(apartmentId, content);
+    setMemos(getMemos());
+  }, []);
+
+  const handleDeleteMemo = useCallback((apartmentId: string) => {
+    deleteMemo(apartmentId);
+    setMemos(getMemos());
   }, []);
 
   const handleCalculate = () => {
@@ -686,6 +697,12 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
               자료내보내기
             </button>
             <button
+              onClick={() => setActiveTab('memo')}
+              className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#cfe7df] rounded-md text-[#217a58] bg-[#eef9f4] hover:bg-[#e4f5ec] transition-colors"
+            >
+              메모
+            </button>
+            <button
               onClick={() => setShowPasswordModal(true)}
               className="px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm border border-[#e8e5e0] rounded-md text-[#787774] hover:bg-[#f7f7f5] transition-colors"
             >
@@ -759,6 +776,27 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             apartments={mindMapApartments}
             activeTier={mindMapTier}
             updatedAtKR={pricesUpdatedAtKR}
+          />
+        </div>
+      ) : activeTab === 'memo' ? (
+        <div className="space-y-4 pb-28 md:pb-0">
+          <TierStickyBar
+            title="??? ???"
+            description="?? ??? ??? ??? ?? ?? ??????. ??? ?? ??? ?? ??? ??? ?? ?????."
+            activeTier={mindMapTier}
+            totalCount={mindMapApartments.length}
+            accent="green"
+            onSelect={setMindMapTier}
+          />
+          <AdminMemoBoardView
+            apartments={mindMapApartments}
+            prices={prices}
+            memos={memos}
+            activeTier={mindMapTier}
+            title={`${mindMapTierMeta?.label ?? mindMapTier} 메모 체계도`}
+            subtitle="실제 크롤링 단지와 늘 동기화되는 관리자 전용 메모 보드입니다. 비교 단지, 학교, 장단점, 대장/준대장 맥락을 바로 보고 추가 메모도 함께 관리합니다."
+            onSaveMemo={handleSaveMemo}
+            onDeleteMemo={handleDeleteMemo}
           />
         </div>
       ) : activeTab === 'mindmap' ? (
