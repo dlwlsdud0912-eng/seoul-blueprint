@@ -142,7 +142,7 @@ export default function AdminMemoBoardView({
             </div>
           </div>
 
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto]">
+          <div className="space-y-3">
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
@@ -150,36 +150,40 @@ export default function AdminMemoBoardView({
               className="h-12 rounded-xl border border-[#e8e5e0] bg-white px-4 text-sm text-[#37352f] outline-none transition focus:border-[#2383e2] focus:ring-4 focus:ring-[#e8f2ff]"
             />
 
-            <button
-              type="button"
-              onClick={() => setShowOnlyProximity((prev) => !prev)}
-              className={`rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors ${
-                showOnlyProximity
-                  ? 'border-[#eb5757] bg-[#fbe4e4] text-[#eb5757]'
-                  : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
-              }`}
-            >
-              {showOnlyProximity ? '가격근접 ON만' : '전체 보기'}
-            </button>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+              <button
+                type="button"
+                onClick={() => setShowOnlyProximity((prev) => !prev)}
+                className={`w-full shrink-0 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors sm:w-auto sm:min-w-[170px] ${
+                  showOnlyProximity
+                    ? 'border-[#eb5757] bg-[#fbe4e4] text-[#eb5757]'
+                    : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                }`}
+              >
+                {showOnlyProximity ? '가격근접 ON만' : '전체 보기'}
+              </button>
 
-            <div className="flex gap-2 overflow-x-auto pb-1 lg:justify-end">
-              {districts.map((district) => {
-                const active = districtFilter === district;
-                return (
-                  <button
-                    key={district}
-                    type="button"
-                    onClick={() => setDistrictFilter(district)}
-                    className={`shrink-0 rounded-full border px-3 py-2 text-sm transition-colors ${
-                      active
-                        ? 'border-[#2383e2] bg-[#f0f7ff] text-[#2383e2]'
-                        : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
-                    }`}
-                  >
-                    {district}
-                  </button>
-                );
-              })}
+              <div className="min-w-0 flex-1 overflow-x-auto pb-1">
+                <div className="flex min-w-max gap-2">
+                  {districts.map((district) => {
+                    const active = districtFilter === district;
+                    return (
+                      <button
+                        key={district}
+                        type="button"
+                        onClick={() => setDistrictFilter(district)}
+                        className={`shrink-0 rounded-full border px-3 py-2 text-sm transition-colors ${
+                          active
+                            ? 'border-[#2383e2] bg-[#f0f7ff] text-[#2383e2]'
+                            : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                        }`}
+                      >
+                        {district}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         </div>
