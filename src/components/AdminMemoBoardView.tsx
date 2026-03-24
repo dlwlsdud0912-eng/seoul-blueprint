@@ -30,11 +30,6 @@ function getSchoolRows(research?: ApartmentFeatureResearch) {
   ].filter(Boolean) as string[];
 }
 
-function shouldKeepExpanded(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) return false;
-  return !!target.closest('a, button, input, textarea, select, label');
-}
-
 export default function AdminMemoBoardView({
   apartments,
   allApartments,
@@ -244,25 +239,21 @@ export default function AdminMemoBoardView({
                             <button
                               type="button"
                               onClick={() => toggleExpanded(apartment.id)}
-                              className="flex w-full items-center justify-between text-left text-[11px] text-[#c4a03a] transition-colors hover:text-[#8b6914]"
+                              className="flex w-full items-center justify-between rounded-md px-1 py-2 text-left text-[12px] text-[#c4a03a] transition-colors hover:bg-[#fff7db] hover:text-[#8b6914]"
                             >
                               <span className="flex items-center gap-1.5">
                                 <span>✎</span>
                                 <span>관리자체계도 메모</span>
                               </span>
-                              <span className="text-[10px]">{expanded ? '접기' : '펼치기'}</span>
+                              <span className="rounded-full border border-[#ead9ab] bg-white px-3 py-1 text-[11px] font-medium text-[#8b6914]">
+                                {expanded ? '접기' : '펼치기'}
+                              </span>
                             </button>
                           </div>
                         </div>
 
                         {expanded ? (
-                          <div
-                            className="mt-1 rounded-lg border border-[#f1e5bc] bg-[#fffaf0] px-3 py-3 text-[12px] leading-6 text-[#6a5634]"
-                            onClick={(event) => {
-                              if (shouldKeepExpanded(event.target)) return;
-                              toggleExpanded(apartment.id);
-                            }}
-                          >
+                          <div className="mt-1 rounded-lg border border-[#f1e5bc] bg-[#fffaf0] px-3 py-3 text-[12px] leading-6 text-[#6a5634]">
                             {proximity.hasProximity ? (
                               <div className="mb-3 flex flex-wrap gap-1.5">
                                 {proximity.pairs.map((pair) => (
@@ -335,10 +326,7 @@ export default function AdminMemoBoardView({
                               </div>
                             </div>
 
-                            <div
-                              className="mt-3 border-t border-dashed border-[#ead9ab] pt-3"
-                              onClick={(event) => event.stopPropagation()}
-                            >
+                            <div className="mt-3 border-t border-dashed border-[#ead9ab] pt-3">
                               <div className="mb-1 text-[10px] font-semibold text-[#8b6914]">관리자 추가 메모</div>
                               <MemoEditor
                                 apartmentId={apartment.id}
