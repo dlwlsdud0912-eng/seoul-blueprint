@@ -155,7 +155,7 @@ export default function AdminMemoBoardView({
                     : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
                 }`}
               >
-                {showOnlyProximity ? '가격근접 ON만' : '전체 보기'}
+                {showOnlyProximity ? '전체 아파트 보기' : '가격근접만 보기'}
               </button>
 
               <div className="min-w-0 flex-1 overflow-x-auto pb-1">
