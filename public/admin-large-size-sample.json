@@ -1,0 +1,150 @@
+{
+  "updatedAt": "2026-03-24T12:50:29.191Z",
+  "updatedAtKR": "2026. 03. 24. 21:50",
+  "exclusiveRange": {
+    "min": 96,
+    "max": 118
+  },
+  "sampleIds": [
+    "gangnam-e381rf",
+    "seocho-1wqyjxk",
+    "gangnam-cheongdam-zai",
+    "yongsan-oygx09",
+    "songpa-1eudn04",
+    "gangnam-daechi-samsung1",
+    "gangnam-sangnoksu",
+    "gangnam-raemian-blestij",
+    "seongdong-xr5i65",
+    "seocho-s9im68"
+  ],
+  "data": {
+    "gangnam-raemian-blestij": {
+      "apartmentId": "gangnam-raemian-blestij",
+      "apartmentName": "래미안블레스티지",
+      "district": "강남구",
+      "complexId": "112228",
+      "articleCount": 71,
+      "ownerVerified": true,
+      "sizes": {
+        "99": {
+          "price": 37,
+          "count": 40,
+          "floorInfo": "저/29",
+          "isFirstFloor": false,
+          "ownerVerified": true
+        },
+        "113": {
+          "price": 40,
+          "count": 31,
+          "floorInfo": "5/34",
+          "isFirstFloor": false,
+          "ownerVerified": true
+        }
+      }
+    },
+    "gangnam-cheongdam-zai": {
+      "apartmentId": "gangnam-cheongdam-zai",
+      "apartmentName": "청담자이",
+      "district": "강남구",
+      "complexId": "1081",
+      "articleCount": 0,
+      "ownerVerified": false,
+      "sizes": {}
+    },
+    "gangnam-daechi-samsung1": {
+      "apartmentId": "gangnam-daechi-samsung1",
+      "apartmentName": "대치삼성1차",
+      "district": "강남구",
+      "complexId": "135",
+      "articleCount": 0,
+      "ownerVerified": false,
+      "sizes": {}
+    },
+    "gangnam-sangnoksu": {
+      "apartmentId": "gangnam-sangnoksu",
+      "apartmentName": "상록수아파트",
+      "district": "강남구",
+      "complexId": "868",
+      "articleCount": 0,
+      "ownerVerified": false,
+      "sizes": {}
+    },
+    "songpa-1eudn04": {
+      "apartmentId": "songpa-1eudn04",
+      "apartmentName": "잠실주공5단지(재건축)",
+      "district": "송파구",
+      "complexId": "639",
+      "articleCount": 0,
+      "ownerVerified": false,
+      "sizes": {}
+    },
+    "yongsan-oygx09": {
+      "apartmentId": "yongsan-oygx09",
+      "apartmentName": "신동아",
+      "district": "용산구",
+      "complexId": "756",
+      "articleCount": 0,
+      "ownerVerified": false,
+      "sizes": {}
+    },
+    "gangnam-e381rf": {
+      "apartmentId": "gangnam-e381rf",
+      "apartmentName": "압구정현대14차",
+      "district": "강남구",
+      "complexId": "514",
+      "articleCount": 0,
+      "ownerVerified": false,
+      "sizes": {}
+    },
+    "seocho-s9im68": {
+      "apartmentId": "seocho-s9im68",
+      "apartmentName": "래미안신반포리오센트",
+      "district": "서초구",
+      "complexId": "114533",
+      "articleCount": 3,
+      "ownerVerified": false,
+      "sizes": {
+        "108": {
+          "price": 49,
+          "count": 3,
+          "floorInfo": "고/25",
+          "isFirstFloor": false,
+          "ownerVerified": false
+        }
+      }
+    },
+    "seocho-1wqyjxk": {
+      "apartmentId": "seocho-1wqyjxk",
+      "apartmentName": "래미안원베일리",
+      "district": "서초구",
+      "complexId": "142155",
+      "articleCount": 93,
+      "ownerVerified": true,
+      "sizes": {
+        "101": {
+          "price": 70.5,
+          "count": 82,
+          "floorInfo": "1/34",
+          "isFirstFloor": true,
+          "ownerVerified": true
+        },
+        "116": {
+          "price": 80,
+          "count": 11,
+          "floorInfo": "저/35",
+          "isFirstFloor": false,
+          "ownerVerified": true
+        }
+      }
+    },
+    "seongdong-xr5i65": {
+      "apartmentId": "seongdong-xr5i65",
+      "apartmentName": "청구강변",
+      "district": "성동구",
+      "complexId": "559",
+      "articleCount": 0,
+      "ownerVerified": false,
+      "sizes": {}
+    }
+  }
+}

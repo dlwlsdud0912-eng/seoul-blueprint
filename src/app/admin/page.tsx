@@ -35,7 +35,7 @@ import {
 import { CATALOG_APARTMENTS } from '@/data/catalog-apartments';
 import { getListingStatusBadges } from '@/data/listing-status';
 import { TIERS, getTierKeyForPrice, getTierReferencePrice } from '@/data/tiers';
-import type { PriceMap, MemoMap, TierKey } from '@/types';
+import type { LargeSizeSampleMap, PriceMap, MemoMap, TierKey } from '@/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 상수
@@ -503,6 +503,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
   const [dsrResult, setDsrResult] = useState<DsrResult | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [prices, setPrices] = useState<PriceMap>({});
+  const [largeSizeSampleData, setLargeSizeSampleData] = useState<LargeSizeSampleMap>({});
   const [pricesUpdatedAtKR, setPricesUpdatedAtKR] = useState('');
   const [memos, setMemos] = useState<MemoMap>({});
   const hasCalculated = useRef(false);
@@ -523,6 +524,38 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
         if (data?.updatedAtKR) setPricesUpdatedAtKR(data.updatedAtKR);
       })
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadLargeSizes = async () => {
+      try {
+        const primary = await fetch('/admin-large-sizes.json');
+        if (primary.ok) {
+          const data = await primary.json();
+          if (!cancelled && data?.data) {
+            setLargeSizeSampleData(data.data);
+            return;
+          }
+        }
+      } catch {}
+
+      try {
+        const fallback = await fetch('/admin-large-size-sample.json');
+        if (fallback.ok) {
+          const data = await fallback.json();
+          if (!cancelled && data?.data) {
+            setLargeSizeSampleData(data.data);
+          }
+        }
+      } catch {}
+    };
+
+    loadLargeSizes();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const updateField = useCallback(<K extends keyof StoredInputs>(key: K, value: StoredInputs[K]) => {
@@ -809,6 +842,7 @@ function DsrCalculator({ onLogout }: { onLogout: () => void }) {
             apartments={mindMapApartments}
             allApartments={adminBoardSearchApartments}
             prices={prices}
+            largeSizeSampleData={largeSizeSampleData}
             memos={memos}
             activeTier={mindMapTier}
             title={`${mindMapTierMeta?.label ?? mindMapTier} 관리자체계도`}

@@ -23,10 +23,18 @@ interface ApartmentCardProps {
   onOverlayChange?: () => void;
   isHighlighted?: boolean;
   showProximity?: boolean;
+  extraSizeEntries?: Array<{
+    key: string;
+    price: number;
+    count: number;
+    floorInfo?: string;
+    isFirstFloor?: boolean;
+    ownerVerified?: boolean;
+  }>;
 }
 
 export default function ApartmentCard({
-  apartment, folderSlot, folders, onQuickToggleFolder, isManageMode, isOverlayChanged, isCustomAdded, onOverlayChange, isHighlighted, showProximity,
+  apartment, folderSlot, folders, onQuickToggleFolder, isManageMode, isOverlayChanged, isCustomAdded, onOverlayChange, isHighlighted, showProximity, extraSizeEntries = [],
 }: ApartmentCardProps) {
   const [showTierSelect, setShowTierSelect] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -252,6 +260,16 @@ export default function ApartmentCard({
           })}
         </div>
         {/* 근접 상세 정보 */}
+        {extraSizeEntries.length > 0 && (
+          <div className="mt-1 flex items-baseline gap-2 flex-wrap">
+            {extraSizeEntries.map((entry) => (
+              <span key={entry.key} className="flex items-baseline gap-0.5">
+                <span className="text-[10px] text-[#b4b4b0]">{entry.key}&#13217;</span>
+                <span className="text-[12px] font-semibold text-[#4f46e5]">{entry.price}억</span>
+              </span>
+            ))}
+          </div>
+        )}
         {hasProximity && showProximity && proximity && (
           <div className="flex items-center gap-1 mt-0.5 flex-wrap">
             {proximity.pairs.map((pair, i) => (

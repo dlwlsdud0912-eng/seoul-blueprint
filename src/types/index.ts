@@ -82,6 +82,29 @@ export interface PriceMap {
 
 export type MemoMap = Record<string, string>;
 
+export interface LargeSizeSampleEntry {
+  price: number;
+  count: number;
+  floorInfo?: string;
+  isFirstFloor?: boolean;
+  ownerVerified?: boolean;
+}
+
+export interface LargeSizeSampleResult {
+  apartmentId: string;
+  apartmentName: string;
+  district: string;
+  complexId: string;
+  articleCount: number;
+  ownerVerified: boolean;
+  sizes: Record<string, LargeSizeSampleEntry>;
+  error?: string;
+}
+
+export interface LargeSizeSampleMap {
+  [apartmentId: string]: LargeSizeSampleResult;
+}
+
 // 즐겨찾기 폴더
 export interface Folder {
   id: string;

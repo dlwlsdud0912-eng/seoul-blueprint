@@ -8,12 +8,13 @@ import {
   APARTMENT_FEATURE_RESEARCH_MAP,
   type ApartmentFeatureResearch,
 } from '@/data/apartment-feature-research';
-import type { Apartment, MemoMap, PriceMap, TierKey } from '@/types';
+import type { Apartment, LargeSizeSampleMap, MemoMap, PriceMap, TierKey } from '@/types';
 
 interface AdminMemoBoardViewProps {
   apartments: Apartment[];
   allApartments: Apartment[];
   prices: PriceMap;
+  largeSizeSampleData?: LargeSizeSampleMap;
   memos: MemoMap;
   activeTier: TierKey;
   title: string;
@@ -34,6 +35,7 @@ export default function AdminMemoBoardView({
   apartments,
   allApartments,
   prices,
+  largeSizeSampleData = {},
   memos,
   activeTier,
   title,
@@ -259,11 +261,27 @@ export default function AdminMemoBoardView({
                       statusBadges: apartment.statusBadges,
                       isFirstFloor: priceEntry?.isFirstFloor ?? apartment.isFirstFloor,
                     };
+                    const largeSizeEntries = Object.entries(
+                      largeSizeSampleData[apartment.id]?.sizes ?? {}
+                    )
+                      .map(([key, value]) => ({
+                        key,
+                        price: value.price,
+                        count: value.count,
+                        floorInfo: value.floorInfo,
+                        isFirstFloor: value.isFirstFloor,
+                        ownerVerified: value.ownerVerified,
+                      }))
+                      .sort((a, b) => Number(a.key) - Number(b.key));
 
                     return (
                       <div key={apartment.id}>
                         <div className="rounded-lg border border-[#e8e5e0] bg-white">
-                          <ApartmentCard apartment={apartmentForCard} showProximity />
+                          <ApartmentCard
+                            apartment={apartmentForCard}
+                            showProximity
+                            extraSizeEntries={largeSizeEntries}
+                          />
                           <div className="border-t border-dashed border-[#e8e5e0] bg-[#fffdfa] px-2.5 py-1.5">
                             <button
                               type="button"
