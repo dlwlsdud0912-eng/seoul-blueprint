@@ -497,7 +497,7 @@ function TierStickyBar({
 }
 
 function DsrCalculator({ onLogout }: { onLogout: () => void }) {
-  const [activeTab, setActiveTab] = useState<AdminTab>('dsr');
+  const [activeTab, setActiveTab] = useState<AdminTab>('memo');
   const [mindMapTier, setMindMapTier] = useState<TierKey>('12');
   const [inputs, setInputs] = useState<StoredInputs>(DEFAULT_INPUTS);
   const [dsrResult, setDsrResult] = useState<DsrResult | null>(null);
