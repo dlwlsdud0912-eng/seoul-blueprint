@@ -30,6 +30,8 @@ interface ApartmentCardProps {
     floorInfo?: string;
     isFirstFloor?: boolean;
     ownerVerified?: boolean;
+    areaName?: string;
+    specialTags?: string[];
   }>;
 }
 
@@ -266,6 +268,14 @@ export default function ApartmentCard({
               <span key={entry.key} className="flex items-baseline gap-0.5">
                 <span className="text-[10px] text-[#b4b4b0]">{entry.key}&#13217;</span>
                 <span className="text-[12px] font-semibold text-[#4f46e5]">{entry.price}억</span>
+                {entry.specialTags?.map((tag) => (
+                  <span
+                    key={`${entry.key}-${tag}`}
+                    className="ml-1 rounded bg-[#f1ecff] px-1.5 py-px text-[9px] font-medium text-[#5b49c6]"
+                  >
+                    {tag}
+                  </span>
+                ))}
               </span>
             ))}
           </div>

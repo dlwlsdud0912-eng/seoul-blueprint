@@ -59,6 +59,24 @@ function formatAreaKey(value) {
   return rounded.toFixed(1).replace(/\.0$/, '');
 }
 
+function deriveSpecialTags(article) {
+  const tags = new Set();
+  const areaName = String(article.areaName || '').toUpperCase();
+  const tagList = Array.isArray(article.tagList) ? article.tagList.map((tag) => String(tag)) : [];
+
+  if (areaName.endsWith('T') || tagList.some((tag) => tag.includes('테라스'))) {
+    tags.add('테라스');
+  }
+  if (areaName.includes('PH') || tagList.some((tag) => tag.includes('펜트'))) {
+    tags.add('펜트');
+  }
+  if (tagList.some((tag) => tag.includes('복층'))) {
+    tags.add('복층');
+  }
+
+  return Array.from(tags);
+}
+
 function formatUpdatedAtKR(date) {
   const parts = new Intl.DateTimeFormat('ko-KR', {
     timeZone: 'Asia/Seoul',
@@ -228,6 +246,8 @@ function summarizeArticles(articles) {
     let minPrice = null;
     let floorInfo;
     let isFirstFloor = false;
+    let representativeAreaName;
+    let representativeSpecialTags = [];
 
     for (const article of candidateArticles) {
       const dealPrice = article.dealPrc != null ? article.dealPrc : article.dealOrWarrantPrc;
@@ -238,6 +258,8 @@ function summarizeArticles(articles) {
         minPrice = rounded;
         floorInfo = article.floorInfo;
         isFirstFloor = isFirstFloorArticle(article.floorInfo);
+        representativeAreaName = article.areaName;
+        representativeSpecialTags = deriveSpecialTags(article);
       }
     }
 
@@ -249,6 +271,8 @@ function summarizeArticles(articles) {
       floorInfo,
       isFirstFloor,
       ownerVerified: ownerArticles.length > 0,
+      areaName: representativeAreaName,
+      specialTags: representativeSpecialTags,
     };
     articleCount += candidateArticles.length;
     ownerVerifiedAny = ownerVerifiedAny || ownerArticles.length > 0;

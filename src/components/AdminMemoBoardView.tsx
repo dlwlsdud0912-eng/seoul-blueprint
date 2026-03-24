@@ -296,6 +296,8 @@ export default function AdminMemoBoardView({
                         floorInfo: value.floorInfo,
                         isFirstFloor: value.isFirstFloor,
                         ownerVerified: value.ownerVerified,
+                        areaName: value.areaName,
+                        specialTags: value.specialTags,
                       }))
                       .sort((a, b) => Number(a.key) - Number(b.key));
 

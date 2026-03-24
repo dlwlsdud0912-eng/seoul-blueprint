@@ -6849,14 +6849,20 @@
           "count": 2,
           "floorInfo": "2/4",
           "isFirstFloor": false,
-          "ownerVerified": true
+          "ownerVerified": true,
+          "areaName": "144T",
+          "specialTags": [
+            "???"
+          ]
         },
         "114": {
           "price": 13.3,
           "count": 16,
           "floorInfo": "6/18",
           "isFirstFloor": false,
-          "ownerVerified": true
+          "ownerVerified": true,
+          "areaName": "140A",
+          "specialTags": []
         }
       }
     },
@@ -11751,7 +11757,9 @@
           "count": 30,
           "floorInfo": "1/16",
           "isFirstFloor": true,
-          "ownerVerified": true
+          "ownerVerified": true,
+          "areaName": "140B",
+          "specialTags": []
         }
       }
     },

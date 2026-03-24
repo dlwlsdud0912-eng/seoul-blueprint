@@ -88,6 +88,8 @@ export interface LargeSizeSampleEntry {
   floorInfo?: string;
   isFirstFloor?: boolean;
   ownerVerified?: boolean;
+  areaName?: string;
+  specialTags?: string[];
 }
 
 export interface LargeSizeSampleResult {
