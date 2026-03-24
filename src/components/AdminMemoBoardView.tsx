@@ -49,14 +49,13 @@ export default function AdminMemoBoardView({
 
   const searchableApartments = query.trim() ? allApartments : apartments;
 
-  const filteredApartments = useMemo(() => {
+  const baseFilteredApartments = useMemo(() => {
     const lowered = query.trim().toLowerCase();
 
     return searchableApartments.filter((apartment) => {
       const research = APARTMENT_FEATURE_RESEARCH_MAP[apartment.id];
       const priceEntry = prices[apartment.id];
       if (!research || !priceEntry) return false;
-      if (districtFilter !== '전체' && apartment.district !== districtFilter) return false;
 
       const proximity = checkPriceProximity(priceEntry.sizes);
       if (showOnlyProximity && !proximity.hasProximity) return false;
@@ -79,12 +78,19 @@ export default function AdminMemoBoardView({
         .filter(Boolean)
         .some((text) => String(text).toLowerCase().includes(lowered));
     });
-  }, [districtFilter, memos, prices, query, searchableApartments, showOnlyFirstFloor, showOnlyProximity]);
+  }, [memos, prices, query, searchableApartments, showOnlyFirstFloor, showOnlyProximity]);
+
+  const filteredApartments = useMemo(() => {
+    if (districtFilter === '전체') {
+      return baseFilteredApartments;
+    }
+    return baseFilteredApartments.filter((apartment) => apartment.district === districtFilter);
+  }, [baseFilteredApartments, districtFilter]);
 
   const districts = useMemo(() => {
-    const set = new Set(filteredApartments.map((item) => item.district));
+    const set = new Set(baseFilteredApartments.map((item) => item.district));
     return ['전체', ...Array.from(set).sort((a, b) => a.localeCompare(b, 'ko'))];
-  }, [filteredApartments]);
+  }, [baseFilteredApartments]);
 
   const grouped = useMemo(() => {
     const map = filteredApartments.reduce<Record<string, Apartment[]>>((acc, apartment) => {
