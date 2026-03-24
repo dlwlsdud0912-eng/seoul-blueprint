@@ -13,6 +13,13 @@
   - owner verification fallback badge
   - no listings / missing size-range badges
   - first-floor lowest-price badge
+- In this repo, the default meaning of `크롤링시작` is the bundled crawl pipeline:
+  - main live price crawl -> `public/prices.json`
+  - admin-only 96~118㎡ large-size crawl -> `public/admin-large-sizes.json`
+  - build validation
+  - memo data preserved
+- Preferred command for the bundled pipeline:
+  - `npm run crawl:full`
 
 ## District Validation
 - The normalized catalog in `src/data/catalog-apartments.ts` is the source of truth for visible apartments.

@@ -11,6 +11,7 @@
     "crawl:browser": "node scripts/crawl-prices-browser.mjs",
     "crawl:search": "node scripts/crawl-prices-browser.mjs --search",
     "crawl:parallel": "node scripts/crawl-prices-parallel.mjs",
+    "crawl:full": "node scripts/crawl-standard-pipeline.mjs",
     "crawl:merge": "node scripts/merge-price-results.mjs",
     "crawl:apply-subset": "node scripts/apply-subset-prices.mjs",
     "apartments:import-excel": "node scripts/import-excel-additions.mjs",
