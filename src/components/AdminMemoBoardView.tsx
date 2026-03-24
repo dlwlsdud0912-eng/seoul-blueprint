@@ -47,6 +47,7 @@ export default function AdminMemoBoardView({
   const [districtFilter, setDistrictFilter] = useState<string>('전체');
   const [showOnlyProximity, setShowOnlyProximity] = useState(false);
   const [showOnlyFirstFloor, setShowOnlyFirstFloor] = useState(false);
+  const [showOnlyLargeSize, setShowOnlyLargeSize] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
 
   const searchableApartments = query.trim() ? allApartments : apartments;
@@ -60,8 +61,10 @@ export default function AdminMemoBoardView({
       if (!research || !priceEntry) return false;
 
       const proximity = checkPriceProximity(priceEntry.sizes);
+      const hasLargeSizes = Object.keys(largeSizeSampleData[apartment.id]?.sizes ?? {}).length > 0;
       if (showOnlyProximity && !proximity.hasProximity) return false;
       if (showOnlyFirstFloor && priceEntry.isFirstFloor !== true) return false;
+      if (showOnlyLargeSize && !hasLargeSizes) return false;
 
       if (!lowered) return true;
 
@@ -80,7 +83,7 @@ export default function AdminMemoBoardView({
         .filter(Boolean)
         .some((text) => String(text).toLowerCase().includes(lowered));
     });
-  }, [memos, prices, query, searchableApartments, showOnlyFirstFloor, showOnlyProximity]);
+  }, [largeSizeSampleData, memos, prices, query, searchableApartments, showOnlyFirstFloor, showOnlyLargeSize, showOnlyProximity]);
 
   const filteredApartments = useMemo(() => {
     if (districtFilter === '전체') {
@@ -126,6 +129,14 @@ export default function AdminMemoBoardView({
     [filteredApartments, prices]
   );
 
+  const largeSizeCount = useMemo(
+    () =>
+      filteredApartments.filter(
+        (apartment) => Object.keys(largeSizeSampleData[apartment.id]?.sizes ?? {}).length > 0
+      ).length,
+    [filteredApartments, largeSizeSampleData]
+  );
+
   const toggleExpanded = (apartmentId: string) => {
     setExpandedIds((prev) => ({ ...prev, [apartmentId]: !prev[apartmentId] }));
   };
@@ -151,6 +162,9 @@ export default function AdminMemoBoardView({
               </span>
               <span className="rounded-full border border-[#f6c58f] bg-[#fff1e5] px-3 py-1.5 text-[#b86a00]">
                 1층 {firstFloorCount}개
+              </span>
+              <span className="rounded-full border border-[#ddd4ff] bg-[#f5f2ff] px-3 py-1.5 text-[#5b49c6]">
+                대형평형 {largeSizeCount}개
               </span>
             </div>
           </div>
@@ -186,6 +200,17 @@ export default function AdminMemoBoardView({
                   }`}
                 >
                   {showOnlyFirstFloor ? '전체 층 보기' : '1층만 보기'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowOnlyLargeSize((prev) => !prev)}
+                  className={`w-full shrink-0 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors sm:w-auto sm:min-w-[170px] ${
+                    showOnlyLargeSize
+                      ? 'border-[#7c6cff] bg-[#f5f2ff] text-[#5b49c6]'
+                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                  }`}
+                >
+                  {showOnlyLargeSize ? '전체 아파트 보기' : '대형평형만 보기'}
                 </button>
               </div>
 
