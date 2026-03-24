@@ -44,6 +44,7 @@ export default function AdminMemoBoardView({
   const [query, setQuery] = useState('');
   const [districtFilter, setDistrictFilter] = useState<string>('전체');
   const [showOnlyProximity, setShowOnlyProximity] = useState(false);
+  const [showOnlyFirstFloor, setShowOnlyFirstFloor] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
 
   const searchableApartments = query.trim() ? allApartments : apartments;
@@ -59,6 +60,7 @@ export default function AdminMemoBoardView({
 
       const proximity = checkPriceProximity(priceEntry.sizes);
       if (showOnlyProximity && !proximity.hasProximity) return false;
+      if (showOnlyFirstFloor && priceEntry.isFirstFloor !== true) return false;
 
       if (!lowered) return true;
 
@@ -77,7 +79,7 @@ export default function AdminMemoBoardView({
         .filter(Boolean)
         .some((text) => String(text).toLowerCase().includes(lowered));
     });
-  }, [districtFilter, memos, prices, query, searchableApartments, showOnlyProximity]);
+  }, [districtFilter, memos, prices, query, searchableApartments, showOnlyFirstFloor, showOnlyProximity]);
 
   const districts = useMemo(() => {
     const set = new Set(filteredApartments.map((item) => item.district));
@@ -111,6 +113,11 @@ export default function AdminMemoBoardView({
     [filteredApartments, prices]
   );
 
+  const firstFloorCount = useMemo(
+    () => filteredApartments.filter((apartment) => prices[apartment.id]?.isFirstFloor === true).length,
+    [filteredApartments, prices]
+  );
+
   const toggleExpanded = (apartmentId: string) => {
     setExpandedIds((prev) => ({ ...prev, [apartmentId]: !prev[apartmentId] }));
   };
@@ -134,6 +141,9 @@ export default function AdminMemoBoardView({
               <span className="rounded-full border border-[#f5c6c6] bg-[#fbe4e4] px-3 py-1.5 text-[#eb5757]">
                 가격근접 {proximityCount}개
               </span>
+              <span className="rounded-full border border-[#f6c58f] bg-[#fff1e5] px-3 py-1.5 text-[#b86a00]">
+                1층 {firstFloorCount}개
+              </span>
             </div>
           </div>
 
@@ -146,17 +156,30 @@ export default function AdminMemoBoardView({
             />
 
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-              <button
-                type="button"
-                onClick={() => setShowOnlyProximity((prev) => !prev)}
-                className={`w-full shrink-0 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors sm:w-auto sm:min-w-[170px] ${
-                  showOnlyProximity
-                    ? 'border-[#eb5757] bg-[#fbe4e4] text-[#eb5757]'
-                    : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
-                }`}
-              >
-                {showOnlyProximity ? '전체 아파트 보기' : '가격근접만 보기'}
-              </button>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setShowOnlyProximity((prev) => !prev)}
+                  className={`w-full shrink-0 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors sm:w-auto sm:min-w-[170px] ${
+                    showOnlyProximity
+                      ? 'border-[#eb5757] bg-[#fbe4e4] text-[#eb5757]'
+                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                  }`}
+                >
+                  {showOnlyProximity ? '전체 아파트 보기' : '가격근접만 보기'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowOnlyFirstFloor((prev) => !prev)}
+                  className={`w-full shrink-0 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors sm:w-auto sm:min-w-[150px] ${
+                    showOnlyFirstFloor
+                      ? 'border-[#f6c58f] bg-[#fff1e5] text-[#b86a00]'
+                      : 'border-[#e8e5e0] bg-white text-[#787774] hover:bg-[#f7f7f5]'
+                  }`}
+                >
+                  {showOnlyFirstFloor ? '전체 층 보기' : '1층만 보기'}
+                </button>
+              </div>
 
               <div className="min-w-0 flex-1 overflow-x-auto pb-1">
                 <div className="flex min-w-max gap-2">
